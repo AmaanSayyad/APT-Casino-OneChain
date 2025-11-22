@@ -1,11 +1,20 @@
 /**
  * Pyth Entropy Service
  * Handles random number generation using Pyth Network Entropy via API
+ * This service operates independently on Arbitrum Sepolia
  */
 
 import { ethers, BrowserProvider, JsonRpcProvider, Contract, AbiCoder, Wallet } from 'ethers';
 import PYTH_ENTROPY_CONFIG from '../config/pythEntropy.js';
 import { ARBITRUM_TREASURY_CONFIG } from '../config/arbitrumTreasury.js';
+import {
+  ServiceError,
+  ErrorType,
+  ErrorSeverity,
+  retryWithBackoff,
+  withErrorHandling,
+  createIsolatedErrorHandler
+} from '../utils/errorHandling.js';
 
 class PythEntropyService {
   constructor() {
@@ -14,6 +23,9 @@ class PythEntropyService {
     this.contract = null;
     this.isInitialized = false;
     this.network = PYTH_ENTROPY_CONFIG.DEFAULT_NETWORK;
+    
+    // Isolated error handler to ensure independence from other services
+    this.errorHandler = createIsolatedErrorHandler('PythEntropyService');
     
     // Contract ABI for Pyth Entropy V2 (Official interface)
     this.contractABI = [
@@ -101,95 +113,139 @@ class PythEntropyService {
 
   /**
    * Generate a random number using Pyth Entropy via API
+   * This service operates independently on Arbitrum Sepolia
+   * Errors here do NOT affect One Chain service
    * @param {string} gameType - Type of game (MINES, PLINKO, ROULETTE, WHEEL)
    * @param {Object} gameConfig - Game configuration
    * @returns {Promise<Object>} Random number result with proof
    */
   async generateRandom(gameType, gameConfig = {}) {
-    try {
-      console.log(`🎲 PYTH ENTROPY: Generating random for ${gameType} via API...`);
-      
-      // Call the API endpoint to generate entropy using hardhat script
-      const response = await fetch('/api/generate-entropy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+    return withErrorHandling(
+      async () => {
+        console.log(`🎲 PYTH ENTROPY: Generating random for ${gameType} via API...`);
+        
+        // Call the API endpoint with retry logic
+        const result = await retryWithBackoff(
+          async () => {
+            const response = await fetch('/api/generate-entropy', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                gameType: gameType,
+                gameConfig: gameConfig
+              }),
+              signal: AbortSignal.timeout(15000) // 15 second timeout
+            });
+            
+            if (!response.ok) {
+              const errorText = await response.text();
+              console.error('❌ PYTH ENTROPY: HTTP error:', response.status, errorText);
+              throw new ServiceError(
+                `HTTP ${response.status}: ${errorText}`,
+                ErrorType.RPC,
+                ErrorSeverity.MEDIUM,
+                null,
+                { gameType, status: response.status }
+              );
+            }
+            
+            const data = await response.json();
+            
+            if (!data.success) {
+              console.error('❌ PYTH ENTROPY: API call failed:', data.error);
+              throw new ServiceError(
+                data.error || 'Failed to generate entropy via API',
+                ErrorType.CONTRACT,
+                ErrorSeverity.MEDIUM,
+                null,
+                { gameType }
+              );
+            }
+            
+            return data;
+          },
+          {
+            maxRetries: 2,
+            baseDelay: 1000,
+            onRetry: (attempt, maxRetries, delay) => {
+              console.log(`🔄 PYTH ENTROPY: Retry ${attempt}/${maxRetries} after ${delay}ms...`);
+            }
+          }
+        );
+        
+        console.log('✅ PYTH ENTROPY: Random value generated via API');
+        console.log('🔗 Transaction:', result.entropyProof.transactionHash);
+        console.log('🎲 Random value:', result.randomValue);
+        
+        return {
+          randomValue: result.randomValue,
+          entropyProof: result.entropyProof,
+          success: true,
           gameType: gameType,
-          gameConfig: gameConfig
-        })
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ PYTH ENTROPY: HTTP error:', response.status, errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-      
-      const result = await response.json();
-      
-      if (!result.success) {
-        console.error('❌ PYTH ENTROPY: API call failed:', result.error);
-        throw new Error(result.error || 'Failed to generate entropy via API');
-      }
-      
-      console.log('✅ PYTH ENTROPY: Random value generated via API');
-      console.log('🔗 Transaction:', result.entropyProof.transactionHash);
-      console.log('🎲 Random value:', result.randomValue);
-      
-      return {
-        randomValue: result.randomValue,
-        entropyProof: result.entropyProof,
-        success: true,
-        gameType: gameType,
-        gameConfig: gameConfig,
-        metadata: {
-          source: 'Pyth Entropy (API)',
-          network: 'arbitrum-sepolia',
-          algorithm: 'pyth-entropy-hardhat',
-          generatedAt: new Date().toISOString()
+          gameConfig: gameConfig,
+          metadata: {
+            source: 'Pyth Entropy (API)',
+            network: 'arbitrum-sepolia',
+            algorithm: 'pyth-entropy-hardhat',
+            generatedAt: new Date().toISOString()
+          }
+        };
+      },
+      {
+        context: 'Pyth Entropy Generation',
+        fallback: this._createFallbackEntropy(gameType, gameConfig),
+        onError: (error) => {
+          // Log error but don't propagate to other services
+          this.errorHandler(error, 'generateRandom');
+          console.warn('⚠️ PYTH ENTROPY: Using fallback entropy due to error');
         }
-      };
-      
-    } catch (error) {
-      console.error('❌ PYTH ENTROPY: Error generating random via API:', error);
-      
-      // Return fallback result if API fails
-      const fallbackRequestId = ethers.keccak256(
-        ethers.AbiCoder.defaultAbiCoder().encode(
-          ['string', 'uint256'],
-          [gameType, Date.now()]
-        )
-      );
-      
-      const fallbackSequenceNumber = (Date.now() + Math.floor(Math.random() * 1000)).toString();
-      
-      return {
+      }
+    );
+  }
+
+  /**
+   * Create fallback entropy when API fails
+   * @param {string} gameType - Game type
+   * @param {Object} gameConfig - Game configuration
+   * @returns {Object} Fallback entropy result
+   * @private
+   */
+  _createFallbackEntropy(gameType, gameConfig) {
+    const fallbackRequestId = ethers.keccak256(
+      ethers.AbiCoder.defaultAbiCoder().encode(
+        ['string', 'uint256'],
+        [gameType, Date.now()]
+      )
+    );
+    
+    const fallbackSequenceNumber = (Date.now() + Math.floor(Math.random() * 1000)).toString();
+    
+    return {
+      randomValue: Math.floor(Math.random() * 1000000),
+      entropyProof: {
+        requestId: fallbackRequestId,
+        sequenceNumber: fallbackSequenceNumber,
+        transactionHash: 'fallback_no_tx',
+        blockNumber: null,
         randomValue: Math.floor(Math.random() * 1000000),
-        entropyProof: {
-          requestId: fallbackRequestId,
-          sequenceNumber: fallbackSequenceNumber,
-          transactionHash: 'fallback_no_tx',
-          blockNumber: null,
-          randomValue: Math.floor(Math.random() * 1000000),
-          network: 'arbitrum-sepolia',
-          explorerUrl: 'https://entropy-explorer.pyth.network/?chain=arbitrum-sepolia',
-          arbitrumSepoliaExplorerUrl: 'https://sepolia.arbiscan.io/',
-          timestamp: Date.now(),
-          source: 'Pyth Entropy (API Fallback)'
-        },
-        success: true,
-        gameType: gameType,
-        gameConfig: gameConfig,
-        metadata: {
-          source: 'Pyth Entropy (Fallback)',
-          network: 'arbitrum-sepolia',
-          algorithm: 'fallback',
-          generatedAt: new Date().toISOString()
-        }
-      };
-    }
+        network: 'arbitrum-sepolia',
+        explorerUrl: 'https://entropy-explorer.pyth.network/?chain=arbitrum-sepolia',
+        arbitrumSepoliaExplorerUrl: 'https://sepolia.arbiscan.io/',
+        timestamp: Date.now(),
+        source: 'Pyth Entropy (API Fallback)'
+      },
+      success: true,
+      gameType: gameType,
+      gameConfig: gameConfig,
+      metadata: {
+        source: 'Pyth Entropy (Fallback)',
+        network: 'arbitrum-sepolia',
+        algorithm: 'fallback',
+        generatedAt: new Date().toISOString()
+      }
+    };
   }
 
   /**

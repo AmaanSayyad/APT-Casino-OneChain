@@ -2,11 +2,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import oneChainClientService from '../services/OneChainClientService.js';
+import {
+  ServiceError,
+  ErrorType,
+  getUserFriendlyMessage,
+  executeIndependently
+} from '../utils/errorHandling.js';
 
 /**
  * useOneChainCasino Hook
  * React hook for One Chain casino operations
  * Integrates with OneChainClientService for blockchain interactions
+ * Ensures service independence between One Chain and Arbitrum Sepolia
  */
 export const useOneChainCasino = () => {
   const { address: account, isConnected: connected } = useAccount();
@@ -25,17 +32,21 @@ export const useOneChainCasino = () => {
 
   /**
    * Update balance from One Chain
+   * Errors here don't affect other services
    */
   const updateBalance = useCallback(async () => {
     if (!account) return;
     
     try {
       setLoading(true);
+      setError(null);
       const balanceWei = await getAccountBalance(account);
       const formattedBalance = formatOCTAmount(balanceWei);
       setBalance(formattedBalance);
     } catch (error) {
       console.error('Error fetching balance:', error);
+      const userMessage = getUserFriendlyMessage(error, 'Balance Update');
+      setError(userMessage);
       setBalance('0');
     } finally {
       setLoading(false);
@@ -59,6 +70,7 @@ export const useOneChainCasino = () => {
 
   /**
    * Place a roulette bet on One Chain
+   * Errors in One Chain don't affect Arbitrum Sepolia entropy service
    * @param {string} betType - Type of bet (straight, split, etc.)
    * @param {number} betValue - Value being bet on
    * @param {string} amount - Bet amount in OCT
@@ -71,7 +83,13 @@ export const useOneChainCasino = () => {
    */
   const placeRouletteBet = useCallback(async (betType, betValue, amount, numbers = [], entropyValue, entropyTxHash = '', resultData = {}, payoutAmount = '0') => {
     if (!connected || !account) {
-      throw new Error('Wallet not connected');
+      const error = new ServiceError(
+        'Wallet not connected',
+        ErrorType.CONNECTION,
+        'HIGH'
+      );
+      setError(getUserFriendlyMessage(error));
+      throw error;
     }
 
     try {
@@ -105,6 +123,7 @@ export const useOneChainCasino = () => {
       console.log('🎰 ONE CHAIN: Logging roulette game result...', gameData);
 
       // Log game result to One Chain
+      // This operation is isolated - errors here don't affect entropy service
       const txHash = await oneChainClientService.logGameResult(gameData);
       
       console.log('⏳ ONE CHAIN: Waiting for transaction confirmation...');
@@ -115,13 +134,17 @@ export const useOneChainCasino = () => {
       console.log('✅ ONE CHAIN: Roulette game logged successfully');
       console.log('📋 Transaction receipt:', receipt);
       
-      // Update balance after transaction
-      await updateBalance();
+      // Update balance after transaction (independent operation)
+      // Balance update failure doesn't fail the game
+      updateBalance().catch(err => {
+        console.warn('⚠️ Balance update failed after game:', err);
+      });
       
       return txHash;
     } catch (error) {
       console.error('❌ Roulette bet failed:', error);
-      setError(error.message);
+      const userMessage = getUserFriendlyMessage(error, 'Roulette Bet');
+      setError(userMessage);
       throw error;
     } finally {
       setLoading(false);

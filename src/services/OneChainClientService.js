@@ -5,6 +5,15 @@
  */
 
 import { ONECHAIN_TESTNET_CONFIG, ONECHAIN_TESTNET_TOKENS } from '../config/onechainTestnetConfig.js';
+import {
+  ServiceError,
+  ErrorType,
+  ErrorSeverity,
+  retryWithBackoff,
+  withErrorHandling,
+  createIsolatedErrorHandler,
+  CircuitBreaker
+} from '../utils/errorHandling.js';
 
 class OneChainClientService {
   constructor(config = ONECHAIN_TESTNET_CONFIG) {
@@ -14,6 +23,13 @@ class OneChainClientService {
     this.isConnected = false;
     this.provider = null;
     this.currentAddress = null;
+    
+    // Error handling
+    this.errorHandler = createIsolatedErrorHandler('OneChainClientService');
+    this.circuitBreaker = new CircuitBreaker({
+      failureThreshold: 5,
+      resetTimeout: 60000 // 1 minute
+    });
     
     console.log('🔗 ONE CHAIN: Initializing client service...');
     console.log(`🌐 Network: ${config.name}`);
@@ -25,25 +41,44 @@ class OneChainClientService {
    * @returns {Promise<boolean>} Connection success status
    */
   async connect() {
-    try {
-      console.log('🔗 ONE CHAIN: Connecting to network...');
-      
-      // Test connection by making a simple RPC call
-      const response = await this._makeRpcCall('sui_getChainIdentifier', []);
-      
-      if (response) {
-        this.isConnected = true;
-        console.log('✅ ONE CHAIN: Connected successfully');
-        console.log(`🆔 Chain Identifier: ${response}`);
-        return true;
+    return withErrorHandling(
+      async () => {
+        console.log('🔗 ONE CHAIN: Connecting to network...');
+        
+        // Test connection by making a simple RPC call with retry
+        const response = await retryWithBackoff(
+          () => this._makeRpcCall('sui_getChainIdentifier', []),
+          {
+            maxRetries: 3,
+            baseDelay: 1000,
+            onRetry: (attempt, maxRetries, delay) => {
+              console.log(`🔄 ONE CHAIN: Connection retry ${attempt}/${maxRetries} after ${delay}ms...`);
+            }
+          }
+        );
+        
+        if (response) {
+          this.isConnected = true;
+          this.circuitBreaker.reset();
+          console.log('✅ ONE CHAIN: Connected successfully');
+          console.log(`🆔 Chain Identifier: ${response}`);
+          return true;
+        }
+        
+        throw new ServiceError(
+          'Failed to get chain identifier',
+          ErrorType.CONNECTION,
+          ErrorSeverity.HIGH
+        );
+      },
+      {
+        context: 'One Chain Connection',
+        onError: (error) => {
+          this.isConnected = false;
+          this.errorHandler(error, 'connect');
+        }
       }
-      
-      throw new Error('Failed to get chain identifier');
-    } catch (error) {
-      console.error('❌ ONE CHAIN: Connection failed:', error);
-      this.isConnected = false;
-      throw error;
-    }
+    );
   }
 
   /**
@@ -71,46 +106,56 @@ class OneChainClientService {
    * @returns {Promise<string>} Balance in wei (smallest unit)
    */
   async getBalance(address) {
-    try {
-      console.log(`💰 ONE CHAIN: Getting balance for ${address}...`);
-      
-      if (!address) {
-        throw new Error('Address is required');
-      }
+    return withErrorHandling(
+      async () => {
+        console.log(`💰 ONE CHAIN: Getting balance for ${address}...`);
+        
+        if (!address) {
+          throw new ServiceError(
+            'Address is required',
+            ErrorType.VALIDATION,
+            ErrorSeverity.LOW
+          );
+        }
 
-      // Get all coin objects owned by the address
-      const coins = await this._makeRpcCall('suix_getCoins', [
-        address,
-        '0x2::oct::OCT', // OCT coin type
-        null, // cursor
-        null  // limit
-      ]);
+        // Get all coin objects owned by the address with retry
+        const coins = await retryWithBackoff(
+          () => this._makeRpcCall('suix_getCoins', [
+            address,
+            '0x2::oct::OCT', // OCT coin type
+            null, // cursor
+            null  // limit
+          ]),
+          {
+            maxRetries: 2,
+            baseDelay: 500
+          }
+        );
 
-      if (!coins || !coins.data) {
-        console.log('💰 ONE CHAIN: No coins found, balance is 0');
-        return '0';
-      }
+        if (!coins || !coins.data) {
+          console.log('💰 ONE CHAIN: No coins found, balance is 0');
+          return '0';
+        }
 
-      // Sum up all coin balances
-      let totalBalance = BigInt(0);
-      for (const coin of coins.data) {
-        totalBalance += BigInt(coin.balance);
-      }
+        // Sum up all coin balances
+        let totalBalance = BigInt(0);
+        for (const coin of coins.data) {
+          totalBalance += BigInt(coin.balance);
+        }
 
-      const balanceStr = totalBalance.toString();
-      console.log(`✅ ONE CHAIN: Balance retrieved: ${balanceStr} wei`);
-      
-      return balanceStr;
-    } catch (error) {
-      console.error('❌ ONE CHAIN: Error getting balance:', error);
-      
-      // Return 0 for account not found or other errors
-      if (error.message && error.message.includes('not found')) {
-        return '0';
+        const balanceStr = totalBalance.toString();
+        console.log(`✅ ONE CHAIN: Balance retrieved: ${balanceStr} wei`);
+        
+        return balanceStr;
+      },
+      {
+        context: 'Get Balance',
+        fallback: '0', // Return 0 on error instead of throwing
+        onError: (error) => {
+          this.errorHandler(error, 'getBalance');
+        }
       }
-      
-      throw error;
-    }
+    );
   }
 
   /**
@@ -166,42 +211,70 @@ class OneChainClientService {
    * @returns {Promise<string>} Transaction hash
    */
   async submitTransaction(transaction) {
-    try {
-      console.log('📤 ONE CHAIN: Submitting transaction...');
-      
-      if (!transaction) {
-        throw new Error('Transaction is required');
+    return withErrorHandling(
+      async () => {
+        console.log('📤 ONE CHAIN: Submitting transaction...');
+        
+        if (!transaction) {
+          throw new ServiceError(
+            'Transaction is required',
+            ErrorType.VALIDATION,
+            ErrorSeverity.MEDIUM
+          );
+        }
+
+        if (!this.isConnected) {
+          throw new ServiceError(
+            'Not connected to One Chain network',
+            ErrorType.CONNECTION,
+            ErrorSeverity.HIGH
+          );
+        }
+
+        // Execute transaction using circuit breaker pattern
+        const result = await this.circuitBreaker.execute(async () => {
+          return await retryWithBackoff(
+            () => this._makeRpcCall('sui_executeTransactionBlock', [
+              transaction.txBytes,
+              [transaction.signature],
+              {
+                showInput: false,
+                showRawInput: false,
+                showEffects: true,
+                showEvents: true,
+                showObjectChanges: true,
+                showBalanceChanges: true
+              },
+              'WaitForLocalExecution'
+            ]),
+            {
+              maxRetries: 2,
+              baseDelay: 1000,
+              onRetry: (attempt, maxRetries, delay) => {
+                console.log(`🔄 ONE CHAIN: Transaction retry ${attempt}/${maxRetries} after ${delay}ms...`);
+              }
+            }
+          );
+        });
+
+        if (!result || !result.digest) {
+          throw new ServiceError(
+            'Transaction submission failed - no digest returned',
+            ErrorType.TRANSACTION,
+            ErrorSeverity.HIGH
+          );
+        }
+
+        console.log(`✅ ONE CHAIN: Transaction submitted: ${result.digest}`);
+        return result.digest;
+      },
+      {
+        context: 'Submit Transaction',
+        onError: (error) => {
+          this.errorHandler(error, 'submitTransaction');
+        }
       }
-
-      if (!this.isConnected) {
-        throw new Error('Not connected to One Chain network');
-      }
-
-      // Execute transaction using sui_executeTransactionBlock
-      const result = await this._makeRpcCall('sui_executeTransactionBlock', [
-        transaction.txBytes,
-        [transaction.signature],
-        {
-          showInput: false,
-          showRawInput: false,
-          showEffects: true,
-          showEvents: true,
-          showObjectChanges: true,
-          showBalanceChanges: true
-        },
-        'WaitForLocalExecution'
-      ]);
-
-      if (!result || !result.digest) {
-        throw new Error('Transaction submission failed - no digest returned');
-      }
-
-      console.log(`✅ ONE CHAIN: Transaction submitted: ${result.digest}`);
-      return result.digest;
-    } catch (error) {
-      console.error('❌ ONE CHAIN: Transaction submission failed:', error);
-      throw error;
-    }
+    );
   }
 
   /**
@@ -211,47 +284,59 @@ class OneChainClientService {
    * @returns {Promise<Object>} Transaction receipt
    */
   async waitForTransaction(txHash, timeout = 30000) {
-    try {
-      console.log(`⏳ ONE CHAIN: Waiting for transaction ${txHash}...`);
-      
-      const startTime = Date.now();
-      const checkInterval = 1000; // Check every second
+    return withErrorHandling(
+      async () => {
+        console.log(`⏳ ONE CHAIN: Waiting for transaction ${txHash}...`);
+        
+        const startTime = Date.now();
+        const checkInterval = 1000; // Check every second
 
-      while (Date.now() - startTime < timeout) {
-        try {
-          const receipt = await this._makeRpcCall('sui_getTransactionBlock', [
-            txHash,
-            {
-              showInput: true,
-              showRawInput: false,
-              showEffects: true,
-              showEvents: true,
-              showObjectChanges: true,
-              showBalanceChanges: true
+        while (Date.now() - startTime < timeout) {
+          try {
+            const receipt = await this._makeRpcCall('sui_getTransactionBlock', [
+              txHash,
+              {
+                showInput: true,
+                showRawInput: false,
+                showEffects: true,
+                showEvents: true,
+                showObjectChanges: true,
+                showBalanceChanges: true
+              }
+            ]);
+
+            if (receipt && receipt.effects) {
+              console.log(`✅ ONE CHAIN: Transaction confirmed: ${txHash}`);
+              console.log(`📊 Status: ${receipt.effects.status.status}`);
+              return receipt;
             }
-          ]);
+          } catch (error) {
+            // Transaction not found yet, continue waiting
+            if (!error.message || !error.message.includes('not found')) {
+              // Log but don't throw - might be temporary RPC issue
+              console.warn(`⚠️ ONE CHAIN: Error checking transaction status:`, error.message);
+            }
+          }
 
-          if (receipt && receipt.effects) {
-            console.log(`✅ ONE CHAIN: Transaction confirmed: ${txHash}`);
-            console.log(`📊 Status: ${receipt.effects.status.status}`);
-            return receipt;
-          }
-        } catch (error) {
-          // Transaction not found yet, continue waiting
-          if (!error.message || !error.message.includes('not found')) {
-            throw error;
-          }
+          // Wait before next check
+          await new Promise(resolve => setTimeout(resolve, checkInterval));
         }
 
-        // Wait before next check
-        await new Promise(resolve => setTimeout(resolve, checkInterval));
+        throw new ServiceError(
+          `Transaction confirmation timeout after ${timeout}ms. Transaction may still be processing.`,
+          ErrorType.TIMEOUT,
+          ErrorSeverity.MEDIUM,
+          null,
+          { txHash, timeout }
+        );
+      },
+      {
+        context: 'Wait for Transaction',
+        onError: (error) => {
+          this.errorHandler(error, 'waitForTransaction');
+        }
       }
-
-      throw new Error(`Transaction confirmation timeout after ${timeout}ms`);
-    } catch (error) {
-      console.error('❌ ONE CHAIN: Error waiting for transaction:', error);
-      throw error;
-    }
+    );
   }
 
   /**
@@ -520,21 +605,57 @@ class OneChainClientService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
+        signal: AbortSignal.timeout(10000) // 10 second timeout
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const errorType = response.status >= 500 ? ErrorType.RPC : ErrorType.NETWORK;
+        throw new ServiceError(
+          `HTTP ${response.status}: ${response.statusText}`,
+          errorType,
+          ErrorSeverity.MEDIUM,
+          null,
+          { method, status: response.status }
+        );
       }
 
       const data = await response.json();
 
       if (data.error) {
-        throw new Error(data.error.message || 'RPC call failed');
+        throw new ServiceError(
+          data.error.message || 'RPC call failed',
+          ErrorType.RPC,
+          ErrorSeverity.MEDIUM,
+          null,
+          { method, rpcError: data.error }
+        );
       }
 
       return data.result;
     } catch (error) {
+      // Handle timeout errors
+      if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+        throw new ServiceError(
+          'RPC request timeout',
+          ErrorType.TIMEOUT,
+          ErrorSeverity.MEDIUM,
+          error,
+          { method }
+        );
+      }
+      
+      // Handle network errors
+      if (error.message && error.message.includes('fetch')) {
+        throw new ServiceError(
+          'Network error during RPC call',
+          ErrorType.NETWORK,
+          ErrorSeverity.HIGH,
+          error,
+          { method }
+        );
+      }
+      
       console.error(`❌ ONE CHAIN: RPC call failed (${method}):`, error);
       throw error;
     }
