@@ -5,7 +5,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
+onedocs
+.kiro
 # Next.js
 .next/
 out/
