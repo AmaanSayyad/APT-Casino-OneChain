@@ -8,18 +8,10 @@ import { WalletStatusProvider } from '@/hooks/useWalletStatus';
 import { NotificationProvider } from '@/components/NotificationSystem';
 import WalletConnectionGuard from '@/components/WalletConnectionGuard';
 import { ThemeProvider } from 'next-themes';
-import { WagmiProvider, createConfig, http } from 'wagmi';
-import { monadTestnet } from '@/config/chains';
-import { RainbowKitProvider, getDefaultConfig, connectorsForWallets } from '@rainbow-me/rainbowkit';
-import { 
-  metaMaskWallet,
-  walletConnectWallet,
-  injectedWallet,
-  rainbowWallet,
-  coinbaseWallet,
-  trustWallet
-} from '@rainbow-me/rainbowkit/wallets';
-import '@rainbow-me/rainbowkit/styles.css';
+import { createNetworkConfig, SuiClientProvider, WalletProvider } from '@mysten/dapp-kit';
+import { getFullnodeUrl } from '@mysten/sui/client';
+import { ONECHAIN_TESTNET_CONFIG } from '@/config/onechainTestnetConfig';
+import '@mysten/dapp-kit/dist/index.css';
 import { createTheme, ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
@@ -82,6 +74,13 @@ const muiTheme = createTheme({
   },
 });
 
+// Configure Sui network for One Chain Testnet
+const { networkConfig } = createNetworkConfig({
+  'onechain-testnet': {
+    url: ONECHAIN_TESTNET_CONFIG.rpcUrls.default.http[0],
+  },
+});
+
 export default function Providers({ children }) {
   const [mounted, setMounted] = React.useState(false);
 
@@ -105,68 +104,14 @@ export default function Providers({ children }) {
   }
 
   // Debug logging
-  console.log('🔧 Providers mounting...');
-  console.log('🔧 Project ID: 226b43b703188d269fb70d02c107c34e');
-
-  // RainbowKit configuration for Monad Testnet
-  let config;
-  
-  try {
-    config = getDefaultConfig({
-      appName: 'APT Casino Monad',
-      projectId: '226b43b703188d269fb70d02c107c34e',
-      chains: [monadTestnet],
-      ssr: true,
-    });
-    console.log('🔧 Config created with getDefaultConfig:', config);
-  } catch (error) {
-    console.error('❌ Error creating config with getDefaultConfig:', error);
-    
-    // Fallback to manual config with MetaMask Smart Accounts support
-    const connectors = connectorsForWallets([
-      {
-        groupName: 'Recommended',
-        wallets: [
-          metaMaskWallet({
-            projectId: '226b43b703188d269fb70d02c107c34e',
-            // Enable Smart Accounts support
-            options: {
-              enableSmartAccounts: true,
-            }
-          }),
-          walletConnectWallet,
-          injectedWallet,
-        ],
-      },
-      {
-        groupName: 'Other',
-        wallets: [
-          rainbowWallet,
-          coinbaseWallet,
-          trustWallet,
-        ],
-      },
-    ], {
-      appName: 'APT Casino Monad',
-      projectId: '226b43b703188d269fb70d02c107c34e',
-    });
-
-    config = createConfig({
-      connectors,
-      chains: [monadTestnet],
-      transports: {
-        [monadTestnet.id]: http(),
-      },
-      ssr: true,
-    });
-    console.log('🔧 Config created with manual setup:', config);
-  }
+  console.log('🔧 Providers mounting with Sui Wallet...');
+  console.log('🔧 One Chain Testnet RPC:', ONECHAIN_TESTNET_CONFIG.rpcUrls.default.http[0]);
 
   return (
     <Provider store={store}>
-      <WagmiProvider config={config}>
-        <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider>
+      <QueryClientProvider client={queryClient}>
+        <SuiClientProvider networks={networkConfig} defaultNetwork="onechain-testnet">
+          <WalletProvider autoConnect>
             <NotificationProvider>
               <WalletStatusProvider>
                 <WalletConnectionGuard>
@@ -179,9 +124,9 @@ export default function Providers({ children }) {
                 </WalletConnectionGuard>
               </WalletStatusProvider>
             </NotificationProvider>
-          </RainbowKitProvider>
-        </QueryClientProvider>
-      </WagmiProvider>
+          </WalletProvider>
+        </SuiClientProvider>
+      </QueryClientProvider>
     </Provider>
   );
 }

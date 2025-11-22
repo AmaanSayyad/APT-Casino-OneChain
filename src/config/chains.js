@@ -1,36 +1,11 @@
 /**
- * Custom Chain Definitions
- * Defines custom chains not included in wagmi/chains
+ * Chain Definitions
+ * Note: One Chain is Sui-based, not EVM-based
+ * Chain configuration is now handled by @mysten/dapp-kit
+ * See src/config/onechainTestnetConfig.js for One Chain configuration
  */
 
-import { defineChain } from 'viem';
+// Legacy EVM chain definitions (kept for reference only)
+// One Chain uses Sui wallet standard, not wagmi/viem
 
-// Monad Testnet Chain Definition
-export const monadTestnet = defineChain({
-  id: 10143,
-  name: 'Monad Testnet',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Monad',
-    symbol: 'MON',
-  },
-  rpcUrls: {
-    default: {
-      http: ['https://testnet-rpc.monad.xyz'],
-    },
-    public: {
-      http: ['https://testnet-rpc.monad.xyz'],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Monad Testnet Explorer',
-      url: 'https://testnet.monadexplorer.com',
-    },
-  },
-  testnet: true,
-});
-
-export default {
-  monadTestnet,
-};
+export default {};

@@ -4,10 +4,9 @@ import React, { useState } from 'react';
 import { AppBar, Toolbar, Container, Box, Button, Typography } from '@mui/material';
 import { Zap } from 'lucide-react';
 import NetworkSwitcher from './NetworkSwitcher';
-import { useAccount } from 'wagmi';
+import OneChainWalletButton from './OneChainWalletButton';
 
 const Navbar = () => {
-  const { address, isConnected } = useAccount();
   const [showVRFModal] = useState(false); // Placeholder retained to avoid layout changes
 
   return (
@@ -17,12 +16,12 @@ const Navbar = () => {
           <Toolbar disableGutters>
             <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
               <Typography variant="h6" component="div" sx={{ color: 'white', fontWeight: 'bold' }}>
-                APT Casino
+                APT Casino - One Chain
               </Typography>
             </Box>
             
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              {/* VRF button temporarily disabled until modal component is available */}
+              <OneChainWalletButton />
               <NetworkSwitcher />
             </Box>
           </Toolbar>

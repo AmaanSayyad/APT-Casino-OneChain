@@ -5,17 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { useAccount, useChainId, useWalletClient } from 'wagmi';
 import { useSelector, useDispatch } from 'react-redux';
 import { setBalance, setLoading, loadBalanceFromStorage } from '@/store/balanceSlice';
-import { useSmartAccount } from '@/hooks/useSmartAccount';
-import { formatSmartAccountAddress } from '@/utils/smartAccountUtils';
-import EthereumConnectWalletButton from "./EthereumConnectWalletButton";
-import WithdrawModal from "./WithdrawModal";
+import { useOneChainWallet } from '@/hooks/useOneChainWallet';
+import OneChainWalletButton from "./OneChainWalletButton";
 import LiveChat from "./LiveChat";
 import SmartAccountInfo from "./SmartAccountInfo";
 import SmartAccountModal from "./SmartAccountModal";
-import { useGlobalWalletPersistence } from '../hooks/useGlobalWalletPersistence';
 
 
 import { useNotification } from './NotificationSystem';
@@ -129,23 +125,16 @@ export default function Navbar() {
   const [showLiveChat, setShowLiveChat] = useState(false);
 
 
-  // Wallet connection with persistence
-  const { isConnected, address } = useAccount();
-  const chainId = useChainId();
-  const { data: walletClient } = useWalletClient();
-  const isWalletReady = isConnected && address;
-  
-  // Smart Account hook
+  // One Chain Wallet connection
   const { 
-    isSmartAccount, 
-    smartAccountInfo, 
-    capabilities, 
-    hasSmartAccountSupport,
-    supportedFeatures 
-  } = useSmartAccount();
-  
-  // Use global wallet persistence hook
-  useGlobalWalletPersistence();
+    isConnected, 
+    address, 
+    balance: walletBalance,
+    formatOCTAmount,
+    parseOCTAmount,
+    fetchBalance 
+  } = useOneChainWallet();
+  const isWalletReady = isConnected && address;
 
   // Debug wallet connection
   useEffect(() => {
@@ -995,7 +984,7 @@ export default function Navbar() {
                   <div className="flex items-center space-x-2">
                     <span className="text-xs text-gray-300">Balance:</span>
                     <span className="text-sm text-green-300 font-medium">
-                      {isLoadingBalance ? 'Loading...' : `${parseFloat(userBalance || '0').toFixed(5)} MON`}
+                      {isLoadingBalance ? 'Loading...' : `${parseFloat(userBalance || '0').toFixed(5)} OCT`}
                     </span>
                     <button
                       onClick={() => setShowBalanceModal(true)}
@@ -1008,16 +997,8 @@ export default function Navbar() {
               </div>
             )}
             
-            {/* Smart Account Status */}
-            {isConnected && (
-              <button
-                onClick={() => setShowSmartAccountModal(true)}
-                className={`px-3 py-2 bg-gradient-to-r border font-medium rounded-lg flex items-center gap-2 hover:opacity-80 transition-opacity ${
-                  isSmartAccount 
-                    ? 'from-blue-500/20 to-cyan-600/20 border-blue-500/30 text-blue-300' 
-                    : 'from-green-500/20 to-emerald-600/20 border-green-500/30 text-green-300'
-                }`}
-              >
+            {/* One Chain Wallet Button */}
+            <OneChainWalletButton />
                 {isSmartAccount ? (
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -1161,13 +1142,13 @@ export default function Navbar() {
               <div className="mb-4 p-3 bg-gradient-to-r from-green-900/20 to-green-800/10 rounded-lg border border-green-800/30">
                 <span className="text-sm text-gray-300">Current Balance:</span>
                 <div className="text-lg text-green-300 font-bold">
-                  {isLoadingBalance ? 'Loading...' : `${parseFloat(userBalance || '0').toFixed(5)} MON`}
+                  {isLoadingBalance ? 'Loading...' : `${parseFloat(userBalance || '0').toFixed(5)} OCT`}
                 </div>
               </div>
               
               {/* Deposit Section */}
               <div className="mb-6">
-                <h4 className="text-sm font-medium text-white mb-2">Deposit MON to Casino Treasury</h4>
+                <h4 className="text-sm font-medium text-white mb-2">Deposit OCT to Casino Treasury</h4>
                 <div className="text-xs text-gray-400 mb-2">
                   Treasury: {TREASURY_CONFIG.ADDRESS.slice(0, 10)}...{TREASURY_CONFIG.ADDRESS.slice(-8)}
                 </div>
@@ -1176,7 +1157,7 @@ export default function Navbar() {
                     type="number"
                     value={depositAmount}
                     onChange={(e) => setDepositAmount(e.target.value)}
-                    placeholder="Enter MON amount"
+                    placeholder="Enter OCT amount"
                     className="flex-1 px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded text-white placeholder-gray-400 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/25"
                     min="0"
                     step="0.00000001"
@@ -1203,7 +1184,7 @@ export default function Navbar() {
                   </button>
                 </div>
                 <p className="text-xs text-gray-400 mt-1">
-                  Transfer MON from your wallet to house balance for gaming
+                  Transfer OCT from your wallet to house balance for gaming
                 </p>
                 {/* Quick Deposit Buttons */}
                 <div className="flex gap-1 mt-2">
@@ -1214,7 +1195,7 @@ export default function Navbar() {
                       className="flex-1 px-2 py-1 text-xs bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 rounded transition-colors"
                       disabled={isDepositing}
                     >
-                      {amount} MON
+                      {amount} OCT
                     </button>
                   ))}
                 </div>
@@ -1223,7 +1204,7 @@ export default function Navbar() {
 
               {/* Withdraw Section */}
               <div className="mb-4">
-                <h4 className="text-sm font-medium text-white mb-2">Withdraw MON</h4>
+                <h4 className="text-sm font-medium text-white mb-2">Withdraw OCT</h4>
                 <button
                   onClick={handleWithdraw}
                   disabled={!isConnected || parseFloat(userBalance || '0') <= 0 || isWithdrawing}
@@ -1235,7 +1216,7 @@ export default function Navbar() {
                       Processing...
                     </>
                   ) : isConnected ? (
-                    parseFloat(userBalance || '0') > 0 ? 'Withdraw All MON' : 'No Balance'
+                    parseFloat(userBalance || '0') > 0 ? 'Withdraw All OCT' : 'No Balance'
                   ) : 'Connect Wallet'}
                   {isConnected && parseFloat(userBalance || '0') > 0 && !isWithdrawing && (
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1245,7 +1226,7 @@ export default function Navbar() {
                 </button>
                 {isConnected && parseFloat(userBalance || '0') > 0 && (
                   <p className="text-xs text-gray-400 mt-1 text-center">
-                    Withdraw {parseFloat(userBalance || '0').toFixed(5)} MON to your wallet
+                    Withdraw {parseFloat(userBalance || '0').toFixed(5)} OCT to your wallet
                   </p>
                 )}
               </div>
