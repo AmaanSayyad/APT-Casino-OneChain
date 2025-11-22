@@ -6,7 +6,7 @@ import { FaNetworkWired, FaCheckCircle, FaExclamationTriangle, FaSpinner } from 
 import { GiMineExplosion } from 'react-icons/gi';
 import usePythEntropy from '../hooks/usePythEntropy.js';
 
-const PythEntropyStatus = ({ network = 'flow-testnet' }) => {
+const PythEntropyStatus = ({ network = 'arbitrum-sepolia' }) => {
   const {
     isInitialized,
     isLoading,
@@ -123,7 +123,7 @@ const PythEntropyStatus = ({ network = 'flow-testnet' }) => {
               size="small"
             />
             <Chip
-              label="Flow VRF"
+              label="Pyth Entropy"
               color="primary"
               size="small"
             />

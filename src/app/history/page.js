@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { useFlowWallet } from '@/hooks/useFlowWallet';
+import { useAccount } from 'wagmi';
 import GameHistoryList from '@/components/GameHistory/GameHistoryList';
 
 /**
@@ -8,7 +8,7 @@ import GameHistoryList from '@/components/GameHistory/GameHistoryList';
  * Shows user's complete gaming history with VRF verification
  */
 const HistoryPage = () => {
-  const { address, isConnected } = useFlowWallet();
+  const { address, isConnected } = useAccount();
 
   return (
     <div className="min-h-screen bg-gray-50">

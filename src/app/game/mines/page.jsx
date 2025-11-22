@@ -17,15 +17,14 @@ import { GiMining, GiDiamonds, GiCardRandom, GiMineExplosion, GiCrystalGrowth, G
 import { HiLightningBolt, HiOutlineTrendingUp, HiOutlineChartBar } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
-import { useFlowWallet } from '@/hooks/useFlowWallet';
-import FlowConnectWalletButton from '@/components/FlowConnectWalletButton';
+import useWalletStatus from '@/hooks/useWalletStatus';
+import EthereumConnectWalletButton from '@/components/EthereumConnectWalletButton';
 import Image from "next/image";
 import "./mines.css";
 import GameDetail from "@/components/GameDetail";
 import AIAutoBetting from "./components/AIAutoBetting";
 import AISettingsModal from "./components/AISettingsModal";
-// Flow VRF service imported below
-import { flowVRFService } from '@/services/FlowVRFService';
+import pythEntropyService from '@/services/PythEntropyService';
 
 export default function Mines() {
   // Game State
@@ -61,8 +60,8 @@ export default function Mines() {
     }
   });
   
-  // Flow wallet connection
-  const { isConnected, address, executeTreasuryTransaction } = useFlowWallet();
+  // Wallet connection
+  const { isConnected, address } = useWalletStatus();
   
   // Theme
   const { theme } = useTheme();
@@ -112,17 +111,21 @@ export default function Mines() {
   // Handle form submission
   const handleFormSubmit = async (formData) => {
     try {
-      console.log('🔮 FLOW VRF: Initializing Mines game session...');
-      console.log('🔗 Network: Flow Testnet | Token: FLOW | Protocol: Flow VRF');
+      console.log('🔮 PYTH ENTROPY: Initializing Mines game session...');
+      console.log('🔗 Network: Monad Network | Token: MON | Protocol: Pyth Entropy');
       
-      // Flow VRF is ready
-      console.log('✅ FLOW VRF: Ready for Mines game');
-      console.log(`🎮 Game Config: ${formData.mines || 3} mines | ${formData.betAmount || 100} FLOW bet`);
+      // Initialize Pyth Entropy
+      console.log('🔮 PYTH ENTROPY: Initializing...');
+      await pythEntropyService.initialize();
+      console.log('✅ PYTH ENTROPY: Initialized successfully');
+      
+      console.log('✅ PYTH ENTROPY: Mines game session created successfully');
+      console.log(`🎮 Game Config: ${formData.mines || 3} mines | ${formData.betAmount || '0.01'} MON bet`);
       
     } catch (error) {
-      console.error('❌ FLOW VRF: Connection failed:', error);
-      console.warn('⚠️  Falling back to demo mode without Flow VRF');
-      alert('❌ Flow VRF connection failed. Running in demo mode.');
+      console.error('❌ PYTH ENTROPY: Connection failed:', error);
+      console.warn('⚠️  Falling back to demo mode without Pyth Entropy');
+      alert('❌ Pyth Entropy connection failed. Running in demo mode.');
     }
     
     console.log('Form submitted with data:', formData);
@@ -189,50 +192,42 @@ export default function Mines() {
   const handleGameComplete = async (result) => {
     console.log('Game completed with result:', result);
     
-    // Use treasury transaction for Mines game
-    let flowVRF = null;
+    // Generate Pyth Entropy for Mines game
+    let entropyProof = null;
     try {
-      console.log('🏦 Executing treasury-sponsored Mines transaction...');
-      const transactionResult = await executeTreasuryTransaction('mines', {
-        betAmount: result.betAmount,
-        mineCount: result.mines || 3,
-        revealedTiles: result.revealedTiles || [],
-        cashOut: result.won || false
+      console.log('🔮 PYTH ENTROPY: Generating randomness for Mines game...');
+      const entropyResult = await pythEntropyService.generateRandom('MINES', {
+        purpose: 'mines_game_result',
+        gameType: 'MINES',
+        mines: result.mines || 0,
+        won: result.won || false
       });
       
-      console.log('🎲 Flow Transaction: Mines result received:', transactionResult);
-      
-      // Parse game events from transaction result
-      const gameResultData = transactionResult.events?.find(event => 
-        event.type?.includes('GamePlayed')
-      )?.data;
-      
-      flowVRF = {
-        transactionId: transactionResult.id || transactionResult.transactionId,
-        blockHeight: transactionResult.blockId,
-        randomSeed: gameResultData?.randomSeed || Math.floor(Math.random() * 1000000000),
-        explorerUrl: `https://testnet.flowscan.io/tx/${transactionResult.id || transactionResult.transactionId}`,
-        timestamp: Date.now(),
-        source: 'Flow Blockchain',
-        hitMine: gameResultData?.result?.hitMine === 'true',
-        minePositions: gameResultData?.result?.minePositions ? JSON.parse(gameResultData.result.minePositions) : [],
-        payout: parseFloat(gameResultData?.payout || result.payout || '0')
+      entropyProof = {
+        requestId: entropyResult.entropyProof?.requestId,
+        sequenceNumber: entropyResult.entropyProof?.sequenceNumber,
+        randomValue: entropyResult.randomValue,
+        transactionHash: entropyResult.entropyProof?.transactionHash,
+        arbiscanUrl: entropyResult.entropyProof?.arbiscanUrl,
+        explorerUrl: entropyResult.entropyProof?.explorerUrl,
+        timestamp: entropyResult.entropyProof?.timestamp,
+        source: 'Pyth Entropy'
       };
       
-      console.log('✅ Treasury transaction: Mines game completed:', flowVRF);
+      console.log('✅ PYTH ENTROPY: Mines randomness generated:', entropyProof);
     } catch (error) {
-      console.error('❌ Error using treasury transaction for Mines game:', error);
+      console.error('❌ Error using Pyth Entropy for Mines game:', error);
     }
     
     const newHistoryItem = {
       id: Date.now(),
       mines: result.mines || 0,
-      bet: `${result.betAmount || '0'} FLOW`,
+      bet: `${result.betAmount || '0.00000'} MON`,
       outcome: result.won ? 'win' : 'loss',
-      payout: result.won ? `${result.payout || '0.00000'} FLOW` : '0.00000 FLOW',
+      payout: result.won ? `${result.payout || '0.00000'} MON` : '0.00000 MON',
       multiplier: result.won ? `${result.multiplier || '0.00'}x` : '0.00x',
       time: 'Just now',
-      flowVRF: flowVRF
+      entropyProof: entropyProof
     };
     
     setGameHistory(prev => [newHistoryItem, ...prev].slice(0, 50));
@@ -243,11 +238,11 @@ export default function Mines() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          sessionId: flowVRF?.transactionId || `mines_${Date.now()}`,
+          sessionId: result.entropyProof?.requestId || `mines_${Date.now()}`,
           gameType: 'MINES',
-          requestId: flowVRF?.transactionId || `mines_request_${Date.now()}`,
-          valueEth: 0,
-          flowVRF: flowVRF
+          requestId: result.entropyProof?.requestId || `mines_request_${Date.now()}`,
+          valueMon: 0,
+          entropyProof: result.entropyProof
         })
       }).catch(() => {});
     } catch {}

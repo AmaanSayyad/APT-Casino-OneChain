@@ -70,7 +70,7 @@ export const saveGameResult = async (gameData) => {
 
 /**
  * Get user's game history
- * @param {string} userAddress - User's Flow address
+ * @param {string} userAddress - User's Ethereum address
  * @param {Object} options - Query options
  * @returns {Promise<Object>} Game history data
  */
@@ -309,9 +309,9 @@ export const exportGameHistoryCSV = (games, userAddress) => {
       'Game Type': game.gameType,
       'Result': formattedResult.primary,
       'Details': formattedResult.secondary,
-      'Bet Amount (FLOW)': (parseFloat(game.betAmount || 0) / 1e18).toFixed(6),
-      'Payout (FLOW)': (parseFloat(game.payoutAmount || 0) / 1e18).toFixed(6),
-      'Profit/Loss (FLOW)': (parseFloat(game.profitLoss || 0) / 1e18).toFixed(6),
+      'Bet Amount (ETH)': (parseFloat(game.betAmount || 0) / 1e18).toFixed(6),
+      'Payout (ETH)': (parseFloat(game.payoutAmount || 0) / 1e18).toFixed(6),
+      'Profit/Loss (ETH)': (parseFloat(game.profitLoss || 0) / 1e18).toFixed(6),
       'Multiplier': game.multiplier?.toFixed(2) || '0.00',
       'Win/Loss': game.isWin ? 'WIN' : 'LOSS',
       'VRF Transaction': game.vrfDetails?.transactionHash || 'N/A',
@@ -355,30 +355,30 @@ export const exportGameHistoryCSV = (games, userAddress) => {
 /**
  * Get Etherscan URL for transaction
  * @param {string} transactionHash - Transaction hash
- * @param {string} network - Network name (default: testnet)
+ * @param {string} network - Network name (default: sepolia)
  * @returns {string} Etherscan URL
  */
-export const getEtherscanUrl = (transactionHash, network = 'testnet') => {
+export const getEtherscanUrl = (transactionHash, network = 'sepolia') => {
   const baseUrls = {
     mainnet: 'https://etherscan.io',
-    testnet: 'https://testnet.etherscan.io',
+    sepolia: 'https://sepolia.etherscan.io',
     goerli: 'https://goerli.etherscan.io'
   };
 
-  const baseUrl = baseUrls[network] || baseUrls.testnet;
+  const baseUrl = baseUrls[network] || baseUrls.sepolia;
   return `${baseUrl}/tx/${transactionHash}`;
 };
 
 /**
- * Format FLOW amount for display
+ * Format MON amount for display
  * @param {string|number} amount - Amount in wei
  * @param {number} decimals - Number of decimal places
  * @returns {string} Formatted amount
  */
 export const formatEthAmount = (amount, decimals = 6) => {
   if (!amount) return '0';
-  const flow = parseFloat(amount) / 1e18;
-  return flow.toFixed(decimals);
+  const eth = parseFloat(amount) / 1e18;
+  return eth.toFixed(decimals);
 };
 
 /**

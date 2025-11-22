@@ -10,7 +10,7 @@ import useWindowSize from 'react-use/lib/useWindowSize';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useDispatch, useSelector } from 'react-redux';
-import { setBalance, setFlowBalance } from '@/store/balanceSlice';
+import { setBalance } from '@/store/balanceSlice';
 import useWalletStatus from '@/hooks/useWalletStatus';
 
 const GRID_SIZES = {
@@ -40,12 +40,12 @@ const SOUNDS = {
 const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
   // Redux integration
   const dispatch = useDispatch();
-  const { userBalance, userFlowBalance } = useSelector((state) => state.balance);
+  const { userBalance } = useSelector((state) => state.balance);
   const { isConnected } = useWalletStatus();
 
   // Game Settings
   const defaultSettings = {
-    betAmount: 100, // Default to 100 FLOW
+    betAmount: 0.001, // Default to 0.001 MON
     mines: 5,
     isAutoBetting: false,
     tilesToReveal: 5,
@@ -332,35 +332,35 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
         // Check if wallet is connected first
         console.log('🔌 Mines Bet - Wallet Status:', { isConnected, userBalance });
         if (!isConnected) {
-          toast.error('Please connect your Flow wallet first to play Mines!');
+          toast.error('Please connect your Ethereum wallet first to play Mines!');
           return;
         }
         
-        // Check Redux Flow balance (balance is already in FLOW)
-        const currentBalance = parseFloat(userFlowBalance || '0');
+        // Check Redux balance MON)
+        const currentBalance = parseFloat(userBalance || '0');
         
         if (currentBalance < parseFloat(settings.betAmount)) {
-          toast.error(`Insufficient balance. You have ${currentBalance.toFixed(5)} FLOW but need ${parseFloat(settings.betAmount).toFixed(5)} FLOW`);
+          toast.error(`Insufficient balance. You have ${currentBalance.toFixed(5)} MON but need ${parseFloat(settings.betAmount)} MON`);
           return;
         }
 
         try {
-          // Deduct bet amount from Redux Flow balance
-          const newBalance = (parseFloat(userFlowBalance || '0') - parseFloat(settings.betAmount)).toString();
-          dispatch(setFlowBalance(newBalance));
+          // Deduct bet amount from Redux balance
+          const newBalance = (parseFloat(userBalance || '0') - parseFloat(settings.betAmount)).toString();
+          dispatch(setBalance(newBalance));
           
           console.log('=== STARTING MINES BET WITH REDUX BALANCE ===');
-          console.log('Bet amount (FLOW):', settings.betAmount);
-          console.log('Current balance (FLOW):', currentBalance);
+          console.log('Bet amount (ETH):', settings.betAmount);
+          console.log('Current balance (ETH):', currentBalance);
           console.log('Mines count:', settings.mines);
-          console.log('Balance deducted. New balance:', parseFloat(newBalance).toFixed(5), 'FLOW');
+          console.log('balance MON');
           
           // Start the game immediately
           setIsPlaying(true);
           setHasPlacedBet(true);
           playSound('bet');
           
-          toast.success(`Bet placed! ${parseFloat(settings.betAmount).toFixed(5)} FLOW deducted from balance`);
+          toast.success(`Bet placed! ${parseFloat(settings.betAmount).toFixed(5)} MON deducted from balance`);
           toast.info(`Game starting...`);
           
           // Special message if AI-assisted auto betting
@@ -370,7 +370,7 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
           } else if (settings.isAutoBetting) {
             toast.info(`Auto betting mode: Will reveal ${settings.tilesToReveal || 5} tiles`);
           } else {
-            toast.info(`Bet placed: ${parseFloat(settings.betAmount).toFixed(5)} FLOW, ${settings.mines} mines`);
+            toast.info(`Bet placed: ${parseFloat(settings.betAmount).toFixed(5)} MON, ${settings.mines} mines`);
           }
           
           // If auto-betting is enabled, automatically reveal tiles with minimal delay
@@ -385,8 +385,8 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
           console.error('Error placing bet:', error);
           toast.error(`Bet placement failed: ${error.message}`);
           
-          // Refund the deducted Flow balance on error
-          dispatch(setFlowBalance(userFlowBalance));
+          // Refund the deducted balance on error
+          dispatch(setBalance(userBalance));
         }
       };
       
@@ -657,11 +657,11 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
       
       // Cashout is just a local operation - no blockchain transaction needed
       // The actual payout was already handled in the initial bet transaction
-              toast.success(`Cashed out: ${payout.toFixed(5)} FLOW (${multiplier.toFixed(2)}x)`);
+              toast.success(`Cashed out: ${payout.toFixed(5)} MON (${multiplier.toFixed(2)}x)`);
       playSound('cashout');
       
-      // Update user Flow balance in Redux store (add payout to current balance)
-      const currentBalance = parseFloat(userFlowBalance || '0');
+      // Update user balance in Redux store (add payout to current balance)
+      const currentBalance = parseFloat(userBalance || '0');
       const newBalance = currentBalance + payout;
       
       console.log('Balance update:', {
@@ -670,7 +670,7 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
         newBalance: newBalance.toFixed(5)
       });
       
-      dispatch(setFlowBalance(newBalance.toString()));
+      dispatch(setBalance(newBalance.toString()));
       
       // Show confetti on any profitable cashout
       if (payout > 0) {
@@ -981,7 +981,7 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
               } rounded-lg text-white font-bold shadow-lg transition-all flex items-center justify-center gap-2`}
             >
               <FaCoins className="text-yellow-300" />
-              <span>CASH OUT ({calculatePayout()} FLOW)</span>
+              <span>CASH OUT ({calculatePayout()} MON)</span>
             </button>
           </div>
         )}
@@ -991,7 +991,7 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
           <div className="text-center py-3 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg text-white font-bold">
             <span>🎉 CONGRATULATIONS! YOU WON! 🎉</span>
             <div className="mt-2 text-sm opacity-90">
-              Winnings: {calculatePayout()} FLOW ({multiplier.toFixed(2)}x)
+              Winnings: {calculatePayout()} MON ({multiplier.toFixed(2)}x)
             </div>
           </div>
         )}

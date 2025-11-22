@@ -1,56 +1,41 @@
 /**
- * Pyth Entropy Configuration
+ * Pyth Entropy Configuration for Monad Testnet
  * Configuration for Pyth Network Entropy random number generation
  */
 
 export const PYTH_ENTROPY_CONFIG = {
-  // Supported networks
+  // Primary network - Monad Testnet
+  NETWORK: {
+    chainId: 10143,
+    name: 'Monad Testnet',
+    rpcUrl: process.env.NEXT_PUBLIC_MONAD_TESTNET_RPC || 'https://testnet-rpc.monad.xyz',
+    entropyContract: process.env.NEXT_PUBLIC_MONAD_PYTH_ENTROPY_CONTRACT || '0x36825bf3fbdf5a29e2d5148bfe7dcf7b5639e320',
+    entropyProvider: process.env.NEXT_PUBLIC_MONAD_PYTH_ENTROPY_PROVIDER || '0x6CC14824Ea2918f5De5C2f75A9Da968ad4BD6344',
+    explorerUrl: process.env.NEXT_PUBLIC_MONAD_TESTNET_EXPLORER || 'https://testnet.monadexplorer.com',
+    entropyExplorerUrl: 'https://entropy-explorer.pyth.network/?chain=monad-testnet&search=',
+    currency: 'MON',
+    currencySymbol: 'MON',
+    currencyDecimals: 18
+  },
+
+  // Supported networks (for backward compatibility)
   NETWORKS: {
-    'flow-testnet': {
-      chainId: 421614,
-      name: 'Flow Testnet',
-      rpcUrl: process.env.NEXT_PUBLIC_ARBITRUM_SEPOLIA_RPC || 'https://testnet-rollup.flow.io/rpc',
-      entropyContract: process.env.NEXT_PUBLIC_PYTH_ENTROPY_CONTRACT || '0x549ebba8036ab746611b4ffa1423eb0a4df61440', // Official Pyth Entropy contract
-      entropyProvider: process.env.NEXT_PUBLIC_PYTH_ENTROPY_PROVIDER || '0x6CC14824Ea2918f5De5C2f75A9Da968ad4BD6344', // Official Pyth Entropy provider
-      explorerUrl: process.env.NEXT_PUBLIC_ARBITRUM_SEPOLIA_EXPLORER || 'https://testnet.arbiscan.io',
-      entropyExplorerUrl: 'https://entropy-explorer.pyth.network'
-    },
-    'flow-one': {
-      chainId: 42161,
-      name: 'Flow One',
-      rpcUrl: process.env.NEXT_PUBLIC_ARBITRUM_ONE_RPC || 'https://arb1.flow.io/rpc',
-      entropyContract: '0x0000000000000000000000000000000000000000', // Will be updated with actual contract
-      explorerUrl: 'https://arbiscan.io',
-      entropyExplorerUrl: 'https://entropy-explorer.pyth.network'
-    },
-    'base-testnet': {
-      chainId: 84532,
-      name: 'Base Testnet',
-      rpcUrl: process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC || 'https://testnet.base.org',
-      entropyContract: '0x0000000000000000000000000000000000000000', // Will be updated with actual contract
-      explorerUrl: 'https://testnet.basescan.org',
-      entropyExplorerUrl: 'https://entropy-explorer.pyth.network'
-    },
-    'base': {
-      chainId: 8453,
-      name: 'Base',
-      rpcUrl: process.env.NEXT_PUBLIC_BASE_RPC || 'https://mainnet.base.org',
-      entropyContract: '0x0000000000000000000000000000000000000000', // Will be updated with actual contract
-      explorerUrl: 'https://basescan.org',
-      entropyExplorerUrl: 'https://entropy-explorer.pyth.network'
-    },
-    'blast': {
-      chainId: 81457,
-      name: 'Blast',
-      rpcUrl: process.env.NEXT_PUBLIC_BLAST_RPC || 'https://rpc.blast.io',
-      entropyContract: '0x0000000000000000000000000000000000000000', // Will be updated with actual contract
-      explorerUrl: 'https://blastscan.io',
-      entropyExplorerUrl: 'https://entropy-explorer.pyth.network'
+    'monad-testnet': {
+      chainId: 10143,
+      name: 'Monad Testnet',
+      rpcUrl: process.env.NEXT_PUBLIC_MONAD_TESTNET_RPC || 'https://testnet-rpc.monad.xyz',
+      entropyContract: process.env.NEXT_PUBLIC_MONAD_PYTH_ENTROPY_CONTRACT || '0x36825bf3fbdf5a29e2d5148bfe7dcf7b5639e320',
+      entropyProvider: process.env.NEXT_PUBLIC_MONAD_PYTH_ENTROPY_PROVIDER || '0x6CC14824Ea2918f5De5C2f75A9Da968ad4BD6344',
+      explorerUrl: process.env.NEXT_PUBLIC_MONAD_TESTNET_EXPLORER || 'https://testnet.monadexplorer.com',
+      entropyExplorerUrl: 'https://entropy-explorer.pyth.network/?chain=monad-testnet&search=',
+      currency: 'MON',
+      currencySymbol: 'MON',
+      currencyDecimals: 18
     }
   },
 
   // Default network
-  DEFAULT_NETWORK: 'flow-testnet',
+  DEFAULT_NETWORK: 'monad-testnet',
 
   // Game types supported
   GAME_TYPES: {
@@ -77,9 +62,11 @@ export const PYTH_ENTROPY_CONFIG = {
   EXPLORER_CONFIG: {
     baseUrl: 'https://entropy-explorer.pyth.network',
     // Supported chains for explorer
-    supportedChains: ['flow-testnet', 'flow-one', 'base-testnet', 'base', 'blast'],
+    supportedChains: ['monad-testnet'],
     // Transaction link format
-    transactionLinkFormat: 'https://entropy-explorer.pyth.network/tx/{txHash}'
+    transactionLinkFormat: 'https://entropy-explorer.pyth.network/tx/{txHash}',
+    // Monad Testnet specific explorer
+    monadTestnetUrl: 'https://entropy-explorer.pyth.network/?chain=monad-testnet&search='
   },
 
   /**
@@ -88,11 +75,15 @@ export const PYTH_ENTROPY_CONFIG = {
    * @returns {Object} Network configuration
    */
   getNetworkConfig(network) {
-    if (typeof network === 'number') {
-      const networkEntry = Object.entries(this.NETWORKS).find(([_, config]) => config.chainId === network);
-      return networkEntry ? networkEntry[1] : null;
+    // Always return Monad Testnet configuration
+    if (typeof network === 'number' && network === 10143) {
+      return this.NETWORK;
     }
-    return this.NETWORKS[network] || this.NETWORKS[this.DEFAULT_NETWORK];
+    if (network === 'monad-testnet' || !network) {
+      return this.NETWORK;
+    }
+    // Fallback to primary network
+    return this.NETWORK;
   },
 
   /**
@@ -101,8 +92,18 @@ export const PYTH_ENTROPY_CONFIG = {
    * @returns {string} Contract address
    */
   getEntropyContract(network) {
-    const config = this.getNetworkConfig(network);
-    return config?.entropyContract || '0x0000000000000000000000000000000000000000';
+    // Always return Monad Testnet entropy contract
+    return this.NETWORK.entropyContract;
+  },
+
+  /**
+   * Get entropy provider address for network
+   * @param {string} network - Network name
+   * @returns {string} Provider address
+   */
+  getEntropyProvider(network) {
+    // Always return Monad Testnet entropy provider
+    return this.NETWORK.entropyProvider;
   },
 
   /**
@@ -122,16 +123,22 @@ export const PYTH_ENTROPY_CONFIG = {
    * @returns {string} Entropy Explorer URL
    */
   getEntropyExplorerUrl(txHash) {
-    return `https://entropy-explorer.pyth.network/tx/${txHash}`;
+    if (txHash) {
+      return `https://entropy-explorer.pyth.network/?chain=monad-testnet&search=${txHash}`;
+    }
+    return this.NETWORK.entropyExplorerUrl;
   },
 
   /**
    * Validate network support
-   * @param {string} network - Network name
+   * @param {string|number} network - Network name or chain ID
    * @returns {boolean} True if supported
    */
   isNetworkSupported(network) {
-    return network in this.NETWORKS;
+    if (typeof network === 'number') {
+      return network === 10143; // Monad Testnet chain ID
+    }
+    return network === 'monad-testnet' || !network;
   },
 
   /**
@@ -139,7 +146,23 @@ export const PYTH_ENTROPY_CONFIG = {
    * @returns {Array} Array of network names
    */
   getSupportedNetworks() {
-    return Object.keys(this.NETWORKS);
+    return ['monad-testnet'];
+  },
+
+  /**
+   * Get current network configuration
+   * @returns {Object} Current network configuration
+   */
+  getCurrentNetwork() {
+    return this.NETWORK;
+  },
+
+  /**
+   * Check if current network is Monad Testnet
+   * @returns {boolean} True if Monad Testnet
+   */
+  isMonadTestnet() {
+    return true; // Always true since we only support Monad Testnet
   }
 };
 

@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import GradientBorderButton from './GradientBorderButton';
-import FlowConnectWalletButton from './FlowConnectWalletButton';
+import EthereumConnectWalletButton from './EthereumConnectWalletButton';
 
 const HowItWorksSection = () => {
   const [activeStep, setActiveStep] = useState(1);
@@ -29,8 +29,8 @@ const HowItWorksSection = () => {
     },
     {
       id: 2,
-      title: 'Get FLOW Tokens',
-      description: 'Power your gameplay with FLOW tokens on Flow Testnet.',
+      title: 'Get MON tokens',
+      description: 'Power your gameplay with MON tokens of Monad Network.',
       emoji: '💰'
     },
     {
@@ -42,7 +42,7 @@ const HowItWorksSection = () => {
     {
       id: 4,
       title: 'Earn Rewards',
-      description: 'Win FLOW tokens and unlock exclusive perks through our multi-tiered loyalty program. Earn cashback on losses and gain access to tournaments.',
+      description: 'Win MON tokens and unlock exclusive perks through our multi-tiered loyalty program. Earn cashback on losses and gain access to tournaments.',
       emoji: '🏆'
     },
   ];
@@ -109,10 +109,10 @@ const HowItWorksSection = () => {
               
               <div className="mt-6 flex justify-center lg:justify-start">
                 {activeStep === 1 ? (
-                  <FlowConnectWalletButton />
+                  <EthereumConnectWalletButton />
                 ) : (
                   <GradientBorderButton className="transform hover:scale-105 transition-transform">
-                    {activeStep === 2 ? 'Get FLOW Tokens' : 
+                    {activeStep === 2 ? 'Get MON tokens' : 
                      activeStep === 3 ? 'Browse Games' : 'View Rewards'}
                   </GradientBorderButton>
                 )}

@@ -1,26 +1,26 @@
-// Flow Network Configuration
+// Arbitrum Network Configuration
 export const ARBITRUM_NETWORKS = {
-  SEPOLIA: 'flow-testnet',
-  MAINNET: 'flow-one',
-  DEVNET: 'flow-devnet'
+  SEPOLIA: 'arbitrum-sepolia',
+  MAINNET: 'arbitrum-one',
+  DEVNET: 'arbitrum-devnet'
 };
 
-// Flow Network URLs
+// Arbitrum Network URLs
 export const ARBITRUM_NETWORK_URLS = {
-  [ARBITRUM_NETWORKS.SEPOLIA]: "https://testnet-rollup.flow.io/rpc",
-  [ARBITRUM_NETWORKS.MAINNET]: "https://arb1.flow.io/rpc",
+  [ARBITRUM_NETWORKS.SEPOLIA]: "https://sepolia-rollup.arbitrum.io/rpc",
+  [ARBITRUM_NETWORKS.MAINNET]: "https://arb1.arbitrum.io/rpc",
   [ARBITRUM_NETWORKS.DEVNET]: "http://localhost:8545"
 };
 
-// Flow Faucet URLs
+// Arbitrum Faucet URLs
 export const ARBITRUM_FAUCET_URLS = {
-  [ARBITRUM_NETWORKS.SEPOLIA]: "https://faucet.triangleplatform.com/flow/testnet",
+  [ARBITRUM_NETWORKS.SEPOLIA]: "https://faucet.triangleplatform.com/arbitrum/sepolia",
   [ARBITRUM_NETWORKS.DEVNET]: "http://localhost:8545"
 };
 
-// Flow Explorer URLs
+// Arbitrum Explorer URLs
 export const ARBITRUM_EXPLORER_URLS = {
-  [ARBITRUM_NETWORKS.SEPOLIA]: "https://testnet.arbiscan.io",
+  [ARBITRUM_NETWORKS.SEPOLIA]: "https://sepolia.arbiscan.io",
   [ARBITRUM_NETWORKS.MAINNET]: "https://arbiscan.io",
   [ARBITRUM_NETWORKS.DEVNET]: "http://localhost:8545"
 };
@@ -53,39 +53,39 @@ export const CASINO_MODULE_CONFIG = {
   }
 };
 
-// Token Configuration for Flow
+// Token Configuration for Arbitrum
 export const TOKEN_CONFIG = {
   ARB: {
-    name: "Flow FLOW",
+    name: "Arbitrum ETH",
     symbol: "ARB",
     decimals: 18,
     type: "native"
   },
   ARB_ETH: {
-    name: "Flow FLOW",
+    name: "Arbitrum ETH",
     symbol: "ARB",
     decimals: 18,
     type: "native"
   }
 };
 
-// Network Information for Flow
+// Network Information for Arbitrum
 export const NETWORK_INFO = {
   [ARBITRUM_NETWORKS.SEPOLIA]: {
-    name: "Flow Testnet",
+    name: "Arbitrum Sepolia",
     chainId: 421614,
     nativeCurrency: TOKEN_CONFIG.ARB,
     explorer: ARBITRUM_EXPLORER_URLS[ARBITRUM_NETWORKS.SEPOLIA],
     faucet: ARBITRUM_FAUCET_URLS[ARBITRUM_NETWORKS.SEPOLIA]
   },
   [ARBITRUM_NETWORKS.MAINNET]: {
-    name: "Flow One",
+    name: "Arbitrum One",
     chainId: 42161,
     nativeCurrency: TOKEN_CONFIG.ARB,
     explorer: ARBITRUM_EXPLORER_URLS[ARBITRUM_NETWORKS.MAINNET]
   },
   [ARBITRUM_NETWORKS.DEVNET]: {
-    name: "Flow Devnet",
+    name: "Arbitrum Devnet",
     chainId: 1337,
     nativeCurrency: TOKEN_CONFIG.ARB,
     explorer: ARBITRUM_EXPLORER_URLS[ARBITRUM_NETWORKS.DEVNET],

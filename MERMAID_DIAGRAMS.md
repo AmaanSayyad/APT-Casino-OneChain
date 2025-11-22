@@ -1,4 +1,4 @@
-# APT Casino - Mermaid Architecture Diagrams
+# APT Casino Monad - Mermaid Architecture Diagrams
 
 ## 🏗️ System Architecture Overview
 
@@ -8,22 +8,31 @@ graph TB
         A[Next.js App] --> B[React Components]
         B --> C[Three.js Games]
         B --> D[Material-UI]
-        B --> E[RainbowKit Wallet]
+        B --> E[RainbowKit + MetaMask Smart Accounts]
+        E --> SA[Smart Account Detection]
     end
     
     subgraph State["State Management"]
         F[Redux Store] --> G[React Query]
         G --> H[Local State]
+        H --> SAH[Smart Account Hook]
     end
     
     subgraph API["API Layer"]
         I[Next.js API Routes] --> J[Pyth Entropy Endpoints]
-        I --> K[Deposit/Withdraw]
+        I --> K[Deposit/Withdraw MON]
         I --> L[Game Logic]
+        I --> SAA[Smart Account API]
     end
     
-    subgraph Blockchain["Blockchain Layer"]
-        M[Flow Testnet] --> N[CasinoEntropyConsumer]
+    subgraph Gaming["Gaming Network - Monad Testnet"]
+        MT[Monad Testnet] --> MON[MON Token]
+        MT --> DEP[Deposits/Withdrawals]
+        MT --> SA_BATCH[Batch Transactions]
+    end
+    
+    subgraph Entropy["Entropy Network - Arbitrum Sepolia"]
+        AS[Arbitrum Sepolia] --> N[CasinoEntropyConsumer]
         N --> O[Pyth Entropy]
         O --> P[Pyth Network]
     end
@@ -32,14 +41,17 @@ graph TB
         Q[PostgreSQL] --> R[User Data]
         S[Redis Cache] --> T[Session Data]
         S --> U[Game State]
+        S --> SAC[Smart Account Cache]
     end
     
     A --> F
     B --> I
-    I --> M
+    I --> MT
+    I --> AS
     I --> Q
     I --> S
     N --> I
+    SA --> SAA
 ```
 
 ## 🔄 Application Bootstrap Flow
@@ -64,37 +76,139 @@ sequenceDiagram
     B->>U: Display UI
 ```
 
-## 🔗 Wallet Connection Flow
+## 🔗 Wallet Connection & Smart Account Flow
 
 ```mermaid
 flowchart TD
     A[User Clicks Connect] --> B{Wallet Available?}
     B -->|Yes| C[RainbowKit Modal]
-    B -->|No| D[Install Wallet Prompt]
+    B -->|No| D[Install MetaMask Prompt]
     
     C --> E[Select Wallet Type]
-    E --> F[MetaMask]
+    E --> F[MetaMask with Smart Accounts]
     E --> G[WalletConnect]
     E --> H[Coinbase Wallet]
-    E --> I[Trust Wallet]
-    E --> J[Other Wallets]
+    E --> I[Other Wallets]
     
     F --> K[Request Connection]
     G --> K
     H --> K
     I --> K
-    J --> K
     
     K --> L{Network Check}
-    L -->|Flow Testnet| M[Connection Success]
-    L -->|Wrong Network| N[Switch Network]
+    L -->|Monad Testnet| M[Connection Success]
+    L -->|Wrong Network| N[Switch to Monad Testnet]
     
     N --> O{User Approves?}
     O -->|Yes| M
     O -->|No| P[Connection Failed]
     
-    M --> Q[Update App State]
-    Q --> R[Enable Game Features]
+    M --> Q[Detect Account Type]
+    Q --> R{Smart Account?}
+    R -->|Yes| S[Enable Smart Features]
+    R -->|No| T[Standard EOA Features]
+    
+    S --> U[Batch Transactions Available]
+    S --> V[Enhanced Gaming Experience]
+    T --> W[Standard Gaming Experience]
+    
+    U --> X[Update App State]
+    V --> X
+    W --> X
+    X --> Y[Enable Game Features]
+```
+
+## 🔷 Smart Account Detection & Features
+
+```mermaid
+graph TB
+    subgraph Detection["Account Detection"]
+        A[Connected Wallet] --> B[Get Bytecode]
+        B --> C{Has Contract Code?}
+        C -->|Yes| D[Smart Account]
+        C -->|No| E[EOA Account]
+    end
+    
+    subgraph SmartFeatures["Smart Account Features"]
+        D --> F[Batch Transactions]
+        D --> G[Sponsored Transactions]
+        D --> H[Session Keys]
+        D --> I[Social Recovery]
+    end
+    
+    subgraph CasinoFeatures["Casino Benefits"]
+        F --> J[Multi-Bet in One TX]
+        G --> K[Gasless Gaming]
+        H --> L[Auto-Play Sessions]
+        I --> M[Account Recovery]
+    end
+    
+    subgraph EOAFeatures["EOA Features"]
+        E --> N[Standard Transactions]
+        E --> O[Manual Signing]
+        N --> P[Single Bet per TX]
+        O --> Q[Manual Confirmations]
+    end
+    
+    subgraph UI["User Interface"]
+        J --> R[Enhanced Game UI]
+        K --> R
+        L --> R
+        P --> S[Standard Game UI]
+        Q --> S
+    end
+```
+
+## �  Multi-Network Architecture (Monad + Arbitrum)
+
+```mermaid
+graph TB
+    subgraph User["User Layer"]
+        U[User] --> W[MetaMask Wallet]
+        W --> SA[Smart Account Detection]
+    end
+    
+    subgraph Frontend["Frontend Application"]
+        F[Next.js Casino] --> WC[Wallet Connection]
+        WC --> NS[Network Switcher]
+        NS --> GM[Game Manager]
+    end
+    
+    subgraph MonadNet["Monad Testnet (Chain ID: 10143)"]
+        MT[Monad Testnet] --> MON[MON Token]
+        MON --> DEP[Deposit Contract]
+        MON --> WITH[Withdraw Contract]
+        DEP --> TB[Treasury Balance]
+        WITH --> TB
+        
+        subgraph SmartAccount["Smart Account Features"]
+            BATCH[Batch Transactions]
+            SPONSOR[Sponsored TX]
+            SESSION[Session Keys]
+        end
+    end
+    
+    subgraph ArbitrumNet["Arbitrum Sepolia (Chain ID: 421614)"]
+        AS[Arbitrum Sepolia] --> EC[Entropy Consumer]
+        EC --> PE[Pyth Entropy Contract]
+        PE --> PN[Pyth Network]
+        
+        subgraph EntropyFlow["Entropy Generation"]
+            REQ[Request Entropy]
+            GEN[Generate Random]
+            PROOF[Cryptographic Proof]
+        end
+    end
+    
+    U --> F
+    F --> MT
+    F --> AS
+    GM --> DEP
+    GM --> EC
+    SA --> BATCH
+    REQ --> GEN
+    GEN --> PROOF
+    PROOF --> GM
 ```
 
 ## 🎲 Pyth Entropy Integration Architecture
@@ -126,18 +240,31 @@ graph LR
     K --> A
 ```
 
-## 🎮 Game Execution Flow
+## 🎮 Game Execution Flow (Smart Account Enhanced)
 
 ```mermaid
 sequenceDiagram
     participant U as User
+    participant SA as Smart Account
     participant UI as Game UI
+    participant MT as Monad Testnet
     participant API as API Route
-    participant SC as Smart Contract
+    participant SC as Smart Contract (Arbitrum)
     participant PE as Pyth Entropy
     participant DB as Database
     
-    U->>UI: Start Game
+    U->>SA: Initiate Game Session
+    SA->>UI: Check Account Type
+    
+    alt Smart Account
+        UI->>SA: Enable Batch Features
+        SA->>MT: Batch Bet Transactions
+        MT->>UI: Confirm Batch
+    else EOA Account
+        UI->>MT: Single Bet Transaction
+        MT->>UI: Confirm Single Bet
+    end
+    
     UI->>API: POST /api/generate-entropy
     API->>SC: request(userRandomNumber)
     SC->>PE: Request Entropy
@@ -147,8 +274,17 @@ sequenceDiagram
     PE->>SC: entropyCallback()
     SC->>API: Event: EntropyFulfilled
     API->>DB: Store Game Result
-    API->>UI: Game Result
-    UI->>U: Display Outcome
+    
+    alt Smart Account Batch
+        API->>SA: Batch Results
+        SA->>MT: Process Batch Payouts
+        MT->>UI: Batch Payout Complete
+    else Single Transaction
+        API->>MT: Single Payout
+        MT->>UI: Single Payout Complete
+    end
+    
+    UI->>U: Display Outcome(s)
 ```
 
 ## 🏗️ Smart Contract Deployment Flow
@@ -469,3 +605,138 @@ journey
 ```
 
 This comprehensive set of Mermaid diagrams provides visual representations of all major architectural components and flows in the APT Casino application, making it easier to understand the complex interactions between different system layers. The diagrams now accurately reflect the current Pyth Entropy integration for random number generation instead of Pyth Entropy.
+## 🎯 
+Smart Account Gaming Benefits
+
+```mermaid
+graph TB
+    subgraph Traditional["Traditional EOA Gaming"]
+        EOA[EOA Account] --> ST[Single Transactions]
+        ST --> MF[Manual Confirmations]
+        MF --> HG[Higher Gas Costs]
+        HG --> SG[Slower Gaming]
+    end
+    
+    subgraph SmartAccount["Smart Account Gaming"]
+        SA[Smart Account] --> BT[Batch Transactions]
+        SA --> SP[Sponsored Transactions]
+        SA --> SK[Session Keys]
+        SA --> SR[Social Recovery]
+        
+        BT --> MB[Multi-Bet in One TX]
+        SP --> GL[Gasless Gaming]
+        SK --> AP[Auto-Play Sessions]
+        SR --> AS[Account Security]
+    end
+    
+    subgraph CasinoGames["Casino Game Benefits"]
+        MB --> PL[Plinko: Multi-Ball Drop]
+        MB --> RT[Roulette: Multi-Number Bets]
+        MB --> WH[Wheel: Continuous Play]
+        MB --> MN[Mines: Pattern Betting]
+        
+        GL --> FP[Free Play Mode]
+        AP --> ST_AUTO[Strategy Automation]
+        AS --> RF[Risk-Free Recovery]
+    end
+    
+    subgraph UserExperience["Enhanced UX"]
+        PL --> FG[Faster Gaming]
+        RT --> LG[Lower Costs]
+        WH --> BG[Better Strategies]
+        MN --> EG[Enhanced Security]
+        
+        FG --> HS[Higher Satisfaction]
+        LG --> HS
+        BG --> HS
+        EG --> HS
+    end
+```
+
+## 🔄 Smart Account Transaction Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant UI as Casino UI
+    participant SA as Smart Account
+    participant MT as Monad Testnet
+    participant AS as Arbitrum Sepolia
+    participant PE as Pyth Entropy
+    
+    Note over U,PE: Smart Account Batch Gaming Session
+    
+    U->>UI: Select Multiple Games
+    UI->>SA: Prepare Batch Transaction
+    
+    rect rgb(200, 255, 200)
+        Note over SA,MT: Batch Transaction on Monad
+        SA->>MT: Batch Bet Transaction
+        MT->>SA: Confirm All Bets
+    end
+    
+    rect rgb(200, 200, 255)
+        Note over AS,PE: Entropy Generation on Arbitrum
+        UI->>AS: Request Entropy for All Games
+        AS->>PE: Generate Multiple Random Numbers
+        PE->>AS: Return Entropy Proofs
+        AS->>UI: All Game Results
+    end
+    
+    rect rgb(255, 200, 200)
+        Note over SA,MT: Batch Payout on Monad
+        UI->>SA: Process Batch Payouts
+        SA->>MT: Batch Payout Transaction
+        MT->>SA: Confirm All Payouts
+    end
+    
+    SA->>UI: Update All Game States
+    UI->>U: Display All Results
+    
+    Note over U,PE: Single transaction for multiple games!
+```
+
+## 📊 Performance Comparison: EOA vs Smart Account
+
+```mermaid
+graph LR
+    subgraph Metrics["Performance Metrics"]
+        subgraph EOA_Perf["EOA Performance"]
+            E1[1 Game = 1 TX]
+            E2[Manual Confirmations]
+            E3[Higher Gas per Game]
+            E4[Slower UX]
+        end
+        
+        subgraph SA_Perf["Smart Account Performance"]
+            S1[5 Games = 1 TX]
+            S2[Batch Confirmations]
+            S3[Optimized Gas]
+            S4[Faster UX]
+        end
+    end
+    
+    subgraph Comparison["Direct Comparison"]
+        subgraph Time["Time Efficiency"]
+            T1[EOA: 5 minutes for 5 games]
+            T2[Smart Account: 1 minute for 5 games]
+        end
+        
+        subgraph Cost["Cost Efficiency"]
+            C1[EOA: 5x Gas Costs]
+            C2[Smart Account: 1.2x Gas Cost]
+        end
+        
+        subgraph UX["User Experience"]
+            U1[EOA: 5 Confirmations]
+            U2[Smart Account: 1 Confirmation]
+        end
+    end
+    
+    E1 --> T1
+    S1 --> T2
+    E3 --> C1
+    S3 --> C2
+    E2 --> U1
+    S2 --> U2
+```

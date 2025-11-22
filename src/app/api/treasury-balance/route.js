@@ -5,7 +5,7 @@ import PYTH_ENTROPY_CONFIG from '@/config/pythEntropy.js';
 
 export async function GET() {
   try {
-    const network = process.env.NEXT_PUBLIC_NETWORK || 'flow-testnet';
+    const network = process.env.NEXT_PUBLIC_NETWORK || 'monad-testnet';
     const networkConfig = PYTH_ENTROPY_CONFIG.getNetworkConfig(network);
     
     if (!networkConfig) {
@@ -23,7 +23,7 @@ export async function GET() {
     
     // Get treasury balance
     const balance = await provider.getBalance(treasuryWallet.address);
-    const balanceInEth = ethers.formatEther(balance);
+    const balanceInMon = ethers.formatEther(balance);
     
     // Get entropy contract address
     const entropyContractAddress = PYTH_ENTROPY_CONFIG.getEntropyContract(network);
@@ -32,7 +32,7 @@ export async function GET() {
       success: true,
       treasury: {
         address: treasuryWallet.address,
-        balance: balanceInEth,
+        balance: balanceInMon,
         balanceWei: balance.toString()
       },
       network: {
@@ -42,7 +42,7 @@ export async function GET() {
       },
       entropy: {
         contractAddress: entropyContractAddress,
-        requiredFee: "0.001" // FLOW
+        requiredFee: "0.001" // MON
       }
     });
     

@@ -11,21 +11,19 @@ const MinesHistory = ({ gameHistory = [], userStats = {} }) => {
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState('asc');
 
-  // Open Flow Explorer link for transaction hash
-  const openFlowExplorer = (txHash) => {
-    if (txHash && txHash !== 'unknown') {
-      const network = process.env.NEXT_PUBLIC_NETWORK || 'flow-testnet';
-      let explorerUrl;
-      
-      if (network === 'flow-testnet') {
-        explorerUrl = `https://testnet.flowscan.io/tx/${txHash}`;
-      } else if (network === 'flow-mainnet') {
-        explorerUrl = `https://flowscan.io/tx/${txHash}`;
-      } else {
-        explorerUrl = `https://testnet.flowscan.io/tx/${txHash}`;
-      }
-      
+  // Open Monad Explorer link for transaction hash
+  const openMonadExplorer = (hash) => {
+    if (hash && hash !== 'unknown') {
+      const explorerUrl = `https://testnet.monadexplorer.com/tx/${hash}`;
       window.open(explorerUrl, '_blank');
+    }
+  };
+
+  // Open Entropy Explorer link
+  const openEntropyExplorer = (txHash) => {
+    if (txHash) {
+      const entropyExplorerUrl = `https://entropy-explorer.pyth.network/?chain=monad-testnet&search=${txHash}`;
+      window.open(entropyExplorerUrl, '_blank');
     }
   };
   
@@ -243,7 +241,7 @@ const MinesHistory = ({ gameHistory = [], userStats = {} }) => {
           <div 
             className="flex items-center cursor-pointer hover:text-white/90 transition-colors text-white/70"
           >
-            Flow Explorer
+            Entropy Explorer
           </div>
         </div>
         
@@ -310,27 +308,32 @@ const MinesHistory = ({ gameHistory = [], userStats = {} }) => {
                 <span>{game.time}</span>
               </div>
               <div className="text-white/70 flex items-center justify-center">
-                {(game.flowVRF || game.entropyProof) ? (
+                {game.entropyProof ? (
                   <div className="flex flex-col gap-1 items-center">
                     <div className="text-xs text-gray-300 font-mono text-center">
-                      <div className="text-green-400 font-bold">
-                        {game.flowVRF?.transactionId ? `TX: ${game.flowVRF.transactionId.slice(0, 8)}...` : 
-                         game.entropyProof?.requestId ? `Request: ${game.entropyProof.requestId.slice(0, 8)}...` : ''}
-                      </div>
-                      {(game.flowVRF?.randomSeed || game.entropyProof?.randomValue) && (
-                        <div className="text-blue-400">
-                          Random: {(game.flowVRF?.randomSeed || game.entropyProof?.randomValue)?.toString().slice(0, 8)}...
-                        </div>
-                      )}
+                      <div className="text-yellow-400 font-bold">{game.entropyProof.sequenceNumber && game.entropyProof.sequenceNumber !== '0' ? String(game.entropyProof.sequenceNumber) : ''}</div>
                     </div>
                     <div className="flex gap-1">
-                      {(game.flowVRF?.transactionId || game.entropyProof?.transactionHash) && (
+                      {(game.entropyProof.monadExplorerUrl || game.entropyProof.transactionHash) && (
                         <button
-                          onClick={() => openFlowExplorer(game.flowVRF?.transactionId || game.entropyProof?.transactionHash)}
-                          className="flex items-center gap-1 px-2 py-1 bg-green-500/10 border border-green-500/30 rounded text-green-400 text-xs hover:bg-green-500/20 transition-colors"
+                          onClick={() => {
+                            const url = game.entropyProof.monadExplorerUrl || 
+                                       `https://testnet.monadexplorer.com/tx/${game.entropyProof.transactionHash}`;
+                            window.open(url, '_blank');
+                          }}
+                          className="flex items-center gap-1 px-2 py-1 bg-[#8B2398]/10 border border-[#8B2398]/30 rounded text-[#8B2398] text-xs hover:bg-[#8B2398]/20 transition-colors"
                         >
                           <FaExternalLinkAlt size={8} />
-                          Flow Tx
+                          Monad
+                        </button>
+                      )}
+                      {game.entropyProof.transactionHash && (
+                        <button
+                          onClick={() => openEntropyExplorer(game.entropyProof.transactionHash)}
+                          className="flex items-center gap-1 px-2 py-1 bg-[#681DDB]/10 border border-[#681DDB]/30 rounded text-[#681DDB] text-xs hover:bg-[#681DDB]/20 transition-colors"
+                        >
+                          <FaExternalLinkAlt size={8} />
+                          Entropy
                         </button>
                       )}
                     </div>

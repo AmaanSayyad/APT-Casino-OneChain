@@ -31,6 +31,15 @@ module.exports = {
         "User-Agent": "hardhat"
       }
     },
+    'monad-testnet': {
+      url: process.env.NEXT_PUBLIC_MONAD_TESTNET_RPC || "https://testnet-rpc.monad.xyz",
+      accounts: process.env.TREASURY_PRIVATE_KEY ? [process.env.TREASURY_PRIVATE_KEY] : [],
+      chainId: 10143,
+      timeout: 120000,
+      httpHeaders: {
+        "User-Agent": "hardhat"
+      }
+    },
     localhost: {
       url: "http://127.0.0.1:8545",
       chainId: 31337,

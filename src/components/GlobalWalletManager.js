@@ -1,26 +1,25 @@
 "use client";
 import React from 'react';
-import { useFlowWallet } from '@/hooks/useFlowWallet';
+import { useVercelWalletPersistence } from '@/hooks/useVercelWalletPersistence';
 
 /**
  * Global Wallet Manager
  * This component should be included in every page to ensure wallet persistence
- * Uses Flow wallet for Flow Testnet connection
+ * Uses Vercel-specific persistence for better compatibility
  */
 export default function GlobalWalletManager() {
-  // Use Flow wallet
-  const { isConnected, address, isConnecting, isDisconnecting, error } = useFlowWallet();
+  // Use Vercel-specific wallet persistence
+  const { isConnected, address, isReconnecting, globalState } = useVercelWalletPersistence();
   
   // Debug logging
   React.useEffect(() => {
     console.log('🔧 GlobalWalletManager state:', {
       isConnected,
       address,
-      isConnecting,
-      isDisconnecting,
-      error
+      isReconnecting,
+      globalState
     });
-  }, [isConnected, address, isConnecting, isDisconnecting, error]);
+  }, [isConnected, address, isReconnecting, globalState]);
   
   // This component doesn't render anything, it just manages wallet state
   return null;

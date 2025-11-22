@@ -36,11 +36,11 @@ export default async function handler(req, res) {
       });
     }
 
-    // Validate Flow address
+    // Validate Ethereum address
     if (!/^0x[a-fA-F0-9]{40}$/.test(userAddress)) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid Flow address format'
+        error: 'Invalid Ethereum address format'
       });
     }
 

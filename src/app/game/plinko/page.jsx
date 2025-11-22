@@ -8,77 +8,23 @@ import PlinkoWinProbabilities from "./components/PlinkoWinProbabilities";
 import PlinkoPayouts from "./components/PlinkoPayouts";
 import PlinkoLeaderboard from "./components/PlinkoLeaderboard";
 import { gameData, bettingTableData } from "./config/gameDetail";
-import { useSelector, useDispatch } from 'react-redux';
-import { setFlowBalance } from '@/store/balanceSlice';
+import { useSelector } from 'react-redux';
 import { motion } from "framer-motion";
 import { Typography } from "@mui/material";
 import { GiRollingDices, GiCardRandom, GiPokerHand } from "react-icons/gi";
 import { FaPercentage, FaBalanceScale, FaChartLine, FaCoins, FaTrophy, FaPlay, FaExternalLinkAlt } from "react-icons/fa";
-import { useFlowWallet } from '@/hooks/useFlowWallet';
-import { useNotification } from '@/components/NotificationSystem';
+import pythEntropyService from '../../../services/PythEntropyService';
 
 export default function Plinko() {
-  const { userFlowBalance } = useSelector((state) => state.balance);
-  const dispatch = useDispatch();
+  const userBalance = useSelector((state) => state.balance.userBalance);
   
   const [currentRows, setCurrentRows] = useState(15);
   const [currentRiskLevel, setCurrentRiskLevel] = useState("Medium");
-  const [currentBetAmount, setCurrentBetAmount] = useState(100);
+  const [currentBetAmount, setCurrentBetAmount] = useState(0);
   const [gameHistory, setGameHistory] = useState([]);
   const [showMobileWarning, setShowMobileWarning] = useState(false);
-  const [vrfNotificationId, setVrfNotificationId] = useState(null);
-
-  const notification = useNotification();
 
   const plinkoGameRef = useRef(null);
-  const { executeTransaction, executeTreasuryTransaction, address, isConnected } = useFlowWallet();
-
-  // Plinko multipliers - exact same tables as Cadence contract
-  const getPlinkoMultipliers = (rows, riskLevel) => {
-    const risk = riskLevel.toLowerCase();
-    
-    if (risk === 'low') {
-      if (rows === 8) {
-        return [5.6, 2.1, 1.1, 1.0, 0.5, 1.0, 1.1, 2.1, 5.6];
-      } else if (rows === 12) {
-        return [10.0, 3.0, 1.6, 1.4, 1.1, 1.0, 0.5, 1.0, 1.1, 1.4, 1.6, 3.0, 10.0];
-      } else if (rows === 15) {
-        return [15.0, 8.0, 3.0, 2.0, 1.5, 1.1, 1.0, 0.7, 0.7, 1.0, 1.1, 1.5, 2.0, 3.0, 8.0, 15.0];
-      } else if (rows === 16) {
-        return [16.0, 9.0, 2.0, 1.4, 1.4, 1.2, 1.1, 1.0, 0.5, 1.0, 1.1, 1.2, 1.4, 1.4, 2.0, 9.0, 16.0];
-      }
-    } else if (risk === 'medium') {
-      if (rows === 8) {
-        return [13.0, 3.0, 1.3, 0.7, 0.4, 0.7, 1.3, 3.0, 13.0];
-      } else if (rows === 12) {
-        return [33.0, 11.0, 4.0, 2.0, 1.1, 0.6, 0.3, 0.6, 1.1, 2.0, 4.0, 11.0, 33.0];
-      } else if (rows === 15) {
-        return [88.0, 18.0, 11.0, 5.0, 3.0, 1.3, 0.5, 0.3, 0.3, 0.5, 1.3, 3.0, 5.0, 11.0, 18.0, 88.0];
-      } else if (rows === 16) {
-        return [110.0, 41.0, 10.0, 5.0, 3.0, 1.5, 1.0, 0.5, 0.3, 0.5, 1.0, 1.5, 3.0, 5.0, 10.0, 41.0, 110.0];
-      }
-    } else { // high risk
-      if (rows === 8) {
-        return [29.0, 4.0, 1.5, 0.3, 0.2, 0.3, 1.5, 4.0, 29.0];
-      } else if (rows === 12) {
-        return [170.0, 24.0, 8.1, 2.0, 0.7, 0.2, 0.2, 0.2, 0.7, 2.0, 8.1, 24.0, 170.0];
-      } else if (rows === 15) {
-        return [620.0, 83.0, 27.0, 8.0, 3.0, 0.5, 0.2, 0.2, 0.2, 0.2, 0.5, 3.0, 8.0, 27.0, 83.0, 620.0];
-      } else if (rows === 16) {
-        return [1000.0, 130.0, 26.0, 9.0, 4.0, 2.0, 0.2, 0.2, 0.2, 0.2, 0.2, 2.0, 4.0, 9.0, 26.0, 130.0, 1000.0];
-      }
-    }
-    
-    // Fallback for unsupported row counts - generate simple multipliers
-    const buckets = [];
-    const center = Math.floor(rows / 2);
-    for (let i = 0; i < rows; i++) {
-      const distanceFromCenter = Math.abs(i - center);
-      let multiplier = 1.0 + (distanceFromCenter * 0.3);
-      buckets.push(multiplier);
-    }
-    return buckets;
-  };
 
   // Smooth scroll helper
   const scrollToElement = (elementId) => {
@@ -105,8 +51,8 @@ export default function Plinko() {
   const PlinkoHeader = () => {
     const gameStatistics = {
       totalBets: '1,234,567',
-      totalVolume: '5.2M FLOW',
-      maxWin: '120,000 FLOW'
+      totalVolume: '5.2M MON',
+      maxWin: '120,000 MON'
     };
     return (
       <div className="relative text-white px-4 md:px-8 lg:px-20 mb-8 pt-28 md:pt-32 lg:pt-36 mt-6">
@@ -241,7 +187,7 @@ export default function Plinko() {
   };
 
   const handleBet = () => {
-    // Trigger the ball dropping animation in PlinkoGame. Balance and bet validity are checked inside PlinkoGame
+    // Trigger the ball dropping animation in PlinkoGame. balance MOName
     console.log('Main page handleBet called');
     if (plinkoGameRef.current && plinkoGameRef.current.dropBall) {
       plinkoGameRef.current.dropBall();
@@ -251,132 +197,36 @@ export default function Plinko() {
   const handleBetHistoryChange = async (newBetResult) => {
     console.log('🔍 handleBetHistoryChange called with:', newBetResult);
     
-    // Show VRF waiting notification
-    const notificationId = notification.info('🎯 Waiting for VRF result... Getting random Plinko path from Flow blockchain');
-    setVrfNotificationId(notificationId);
-    
-    // Use treasury-sponsored Flow transaction for randomness
+    // Use Pyth Entropy for randomness
     try {
-      console.log('🎯 Using treasury-sponsored Flow transaction for Plinko randomness...');
-      const transactionResult = await executeTreasuryTransaction('plinko', {
-        betAmount: newBetResult.betAmount,
-        risk: currentRiskLevel.toLowerCase(),
-        rows: currentRows,
-        finalPosition: newBetResult.finalPosition || 0,  // Pass frontend-calculated position
-        multiplier: newBetResult.multiplierValue || 1.0  // Pass frontend-calculated multiplier
+      console.log('🎯 Using Pyth Entropy for Plinko randomness...');
+      const randomData = await pythEntropyService.generateRandom('PLINKO', {
+        purpose: 'plinko_ball_path',
+        gameType: 'PLINKO'
       });
+      console.log('🎲 Plinko game completed with Pyth Entropy randomness:', randomData);
       
-      console.log('🎲 Plinko treasury transaction completed:', transactionResult);
-      
-      // Close VRF waiting notification
-      if (vrfNotificationId) {
-        notification.closeNotification(vrfNotificationId);
-        setVrfNotificationId(null);
-      }
-      
-      // Extract game result from transaction events
-      let gameResultData = null;
-      let finalPosition = null;
-      let multiplier = 1.0;
-      
-      console.log('🔍 Parsing transaction events:', transactionResult.events);
-      
-      if (transactionResult.events && transactionResult.events.length > 0) {
-        const gameEvent = transactionResult.events.find(event => 
-          event.type.includes('GamePlayed') || event.type.includes('CasinoGames.GamePlayed')
-        );
-        
-        console.log('🎮 Found game event:', gameEvent);
-        
-        if (gameEvent && gameEvent.data && gameEvent.data.gameResult) {
-          gameResultData = gameEvent.data.gameResult;
-          finalPosition = parseInt(gameResultData.finalPosition || '0');
-          multiplier = parseFloat(gameResultData.multiplier || '1.0');
-          console.log('✅ Parsed Plinko result:', { finalPosition, multiplier });
-        }
-      }
-
-      // Fallback: use transaction ID for randomness if no events
-      if (!gameResultData || finalPosition === null) {
-        console.log('⚠️ No game result found in events, using transaction ID fallback');
-        const seed = parseInt(transactionResult.id.slice(-8), 16);
-        finalPosition = Math.abs(seed) % (currentRows + 1);
-        // Calculate multiplier based on position and risk level
-        const multipliers = getPlinkoMultipliers(currentRows, currentRiskLevel);
-        multiplier = multipliers[finalPosition] || 1.0;
-        console.log('🎲 Fallback Plinko result:', { finalPosition, multiplier });
-      }
-      
-      // Add Flow VRF transaction info to the bet result (compatible with game history)
-      // Calculate net win: (bet * multiplier) - bet = bet * (multiplier - 1)
-      const totalPayout = newBetResult.betAmount * multiplier;
-      const calculatedNetWin = totalPayout - newBetResult.betAmount; // This can be negative
-      
+      // Add Pyth Entropy info to the bet result
       const enhancedBetResult = {
         ...newBetResult,
-        finalPosition: finalPosition,
-        multiplier: multiplier,
-        payout: totalPayout, // Keep total payout for display
-        netWin: calculatedNetWin, // Add net win for balance calculation
-        flowVRF: {
-          transactionId: transactionResult.id || transactionResult.transactionId,
-          blockHeight: transactionResult.blockId,
-          finalPosition: finalPosition,
-          multiplier: multiplier,
-          explorerUrl: `https://testnet.flowscan.io/tx/${transactionResult.id || transactionResult.transactionId}`,
-          timestamp: Date.now(),
-          source: 'Flow Blockchain',
-          randomSeed: gameResultData?.randomSeed || Math.floor(Math.random() * 1000000000)
+        entropyProof: {
+          requestId: randomData.entropyProof?.requestId,
+          sequenceNumber: randomData.entropyProof?.sequenceNumber,
+          randomValue: randomData.randomValue,
+          transactionHash: randomData.entropyProof?.transactionHash,
+          timestamp: randomData.entropyProof?.timestamp
         },
         timestamp: new Date().toISOString()
       };
       
-      console.log('📝 Enhanced Plinko bet result:', enhancedBetResult);
+      console.log('📝 Enhanced bet result:', enhancedBetResult);
       setGameHistory(prev => [enhancedBetResult, ...prev].slice(0, 100)); // Keep up to last 100 entries
       
-      // Update balance based on treasury transaction result
-      // Note: Bet amount was already deducted when ball was dropped
-      const netWin = parseFloat(enhancedBetResult.netWin);
-      const currentBalance = parseFloat(userFlowBalance);
-      
-      // Add only net win (can be negative for losses)
-      const newBalance = currentBalance + netWin;
-      
-      console.log('💰 Balance update:', {
-        currentBalance,
-        netWin,
-        newBalance
-      });
-      
-      dispatch(setFlowBalance(newBalance.toString()));
-      
     } catch (error) {
-      console.error('❌ Error using Flow VRF for Plinko game:', error);
+      console.error('❌ Error using Yellow Network for Plinko game:', error);
       
-      // Close VRF waiting notification
-      if (vrfNotificationId) {
-        notification.closeNotification(vrfNotificationId);
-        setVrfNotificationId(null);
-      }
-      
-      // Show error notification
-      notification.error(`VRF transaction failed: ${error.message}`);
-      
-      // Still add the bet result even if Flow VRF fails, but with fallback flowVRF
-      const fallbackBetResult = {
-        ...newBetResult,
-        flowVRF: {
-          transactionId: 'fallback_' + Date.now(),
-          blockHeight: 'unknown',
-          finalPosition: newBetResult.finalPosition || 0,
-          multiplier: newBetResult.multiplier || 1.0,
-          explorerUrl: null,
-          timestamp: Date.now(),
-          source: 'Fallback (Transaction Failed)',
-          error: true
-        }
-      };
-      setGameHistory(prev => [fallbackBetResult, ...prev].slice(0, 100));
+      // Still add the bet result even if Yellow Network fails
+      setGameHistory(prev => [newBetResult, ...prev].slice(0, 100));
     }
   };
 

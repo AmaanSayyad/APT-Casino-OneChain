@@ -19,14 +19,14 @@ const arbitrumClient = {
   }
 };
 
-const CASINO_MODULE_ADDRESS = "0x1234567890123456789012345678901234567890123456789012345678901234";
+const CASINO_MODULE_ADDRESS = process.env.NEXT_PUBLIC_CASINO_MODULE_ADDRESS || "0x0000000000000000000000000000000000000000";
 
 const formatEthAmount = (amount) => {
   // Mock formatting for demo
   return (parseFloat(amount) / 100000000).toFixed(8);
 };
 
-const parseEthAmount = (amount) => {
+const parseMON amount = (amount) => {
   // Mock parsing for demo
   return (parseFloat(amount) * 100000000).toString();
 };
@@ -128,7 +128,7 @@ export const useArbitrumCasino = () => {
       setLoading(true);
       setError(null);
 
-      const payload = CasinoGames.roulette.placeBet(betType, betValue, parseEthAmount(amount), numbers);
+      const payload = CasinoGames.roulette.placeBet(betType, betValue, parseMON amount(amount), numbers);
       
       // Mock transaction for demo
       const mockTxHash = '0x' + Math.random().toString(16).substr(2, 64);
@@ -166,7 +166,7 @@ export const useArbitrumCasino = () => {
       setLoading(true);
       setError(null);
 
-      const payload = CasinoGames.mines.startGame(parseEthAmount(betAmount), minesCount, tilesToReveal);
+      const payload = CasinoGames.mines.startGame(parseMON amount(betAmount), minesCount, tilesToreveal);
       
       // Mock transaction for demo
       const mockTxHash = '0x' + Math.random().toString(16).substr(2, 64);
@@ -248,7 +248,7 @@ export const useArbitrumCasino = () => {
       setLoading(true);
       setError(null);
 
-      const payload = CasinoGames.wheel.spin(parseEthAmount(betAmount), segments);
+      const payload = CasinoGames.wheel.spin(parseMON amount(betAmount), segments);
       
       // Mock transaction for demo
       const mockTxHash = '0x' + Math.random().toString(16).substr(2, 64);
@@ -317,6 +317,6 @@ export const useArbitrumCasino = () => {
     
     // Utility functions
     formatEthAmount,
-    parseEthAmount,
+    parseMON amount,
   };
 };

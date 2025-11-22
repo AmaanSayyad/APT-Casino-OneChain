@@ -47,7 +47,7 @@ export default function ArbitrumConnectWalletButton() {
 
   // MetaMask event listeners for better connection stability
   useEffect(() => {
-    if (!window.flow) return;
+    if (!window.ethereum) return;
 
     const handleAccountsChanged = (accounts) => {
       console.log('🔄 Accounts changed:', accounts);
@@ -80,18 +80,18 @@ export default function ArbitrumConnectWalletButton() {
     };
 
     // Add event listeners
-    window.flow.on('accountsChanged', handleAccountsChanged);
-    window.flow.on('chainChanged', handleChainChanged);
-    window.flow.on('connect', handleConnect);
-    window.flow.on('disconnect', handleDisconnect);
+    window.ethereum.on('accountsChanged', handleAccountsChanged);
+    window.ethereum.on('chainChanged', handleChainChanged);
+    window.ethereum.on('connect', handleConnect);
+    window.ethereum.on('disconnect', handleDisconnect);
 
     // Cleanup
     return () => {
-      if (window.flow.removeListener) {
-        window.flow.removeListener('accountsChanged', handleAccountsChanged);
-        window.flow.removeListener('chainChanged', handleChainChanged);
-        window.flow.removeListener('connect', handleConnect);
-        window.flow.removeListener('disconnect', handleDisconnect);
+      if (window.ethereum.removeListener) {
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        window.ethereum.removeListener('chainChanged', handleChainChanged);
+        window.ethereum.removeListener('connect', handleConnect);
+        window.ethereum.removeListener('disconnect', handleDisconnect);
       }
     };
   }, [disconnect]);
@@ -115,10 +115,10 @@ export default function ArbitrumConnectWalletButton() {
         console.log('🔌 Connecting with connector:', connector.name);
         
         // Check if MetaMask is available
-        if (window.flow) {
+        if (window.ethereum) {
           try {
             // Request account access first
-            const accounts = await window.flow.request({ 
+            const accounts = await window.ethereum.request({ 
               method: 'eth_requestAccounts' 
             });
             console.log('📋 Accounts received:', accounts);

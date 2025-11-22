@@ -1,9 +1,9 @@
 import { NitroliteClient } from '@erc7824/nitrolite';
 import { createPublicClient, http } from 'viem';
-import { arbitrumTestnet } from 'viem/chains';
+import { arbitrumSepolia } from 'viem/chains';
 import { yellowCanary, CLEARNODE_TESTNET_CONFIG } from '../config/yellowCanaryChain.js';
 import { CLEARNODE_TESTNET_TOKENS, DEFAULT_CASINO_TOKEN, getTokensByTestnet } from '../config/yellowCanaryTokens.js';
-import { YELLOW_ARBITRUM_CONFIG, switchToArbitrumTestnet } from '../config/arbitrumTestnetConfig.js';
+import { YELLOW_ARBITRUM_CONFIG, switchToArbitrumSepolia } from '../config/arbitrumSepoliaConfig.js';
 
 /**
  * Yellow Network Service
@@ -21,7 +21,7 @@ class YellowNetworkService {
     this.maxRetries = 2;
     this.selectedToken = DEFAULT_CASINO_TOKEN;
     this.channelBalance = '0';
-    this.selectedTestnet = 'flow-testnet'; // Default to Flow Testnet
+    this.selectedTestnet = 'arbitrum-sepolia'; // Default to Arbitrum Sepolia
     // Managed service connection (optional)
     this.autoConnectToken = process.env.YELLOW_SERVICE_ACCESS_TOKEN || null;
     this.defaultChannelId = process.env.YELLOW_DEFAULT_CHANNEL_ID || null;
@@ -117,23 +117,23 @@ class YellowNetworkService {
         console.log('🟡 YELLOW NETWORK: Initializing ERC-7824 Nitrolite client...');
         console.log('🔗 Connecting to Clearnode Testnet:', process.env.CLEARNODE_TESTNET_WS_URL || CLEARNODE_TESTNET_CONFIG.clearNodeUrl);
 
-        // Create Flow Testnet client for on-chain operations
+        // Create Monad Network client for on-chain operations
         const arbitrumClient = createPublicClient({
-          chain: arbitrumTestnet,
-          transport: http(process.env.NEXT_PUBLIC_ARBITRUM_SEPOLIA_RPC || 'https://testnet-rollup.flow.io/rpc')
+          chain: arbitrumSepolia,
+          transport: http(process.env.NEXT_PUBLIC_ARBITRUM_SEPOLIA_RPC || 'https://sepolia-rollup.arbitrum.io/rpc')
         });
 
-        console.log('🔗 Primary Network: Flow Testnet (Chain ID: 421614)');
+        console.log('🔗 Primary Network: Monad Network (Chain ID: 421614)');
         console.log('🟡 Yellow Network: Clearnode Testnet for state channels');
 
-        // Get wallet client from window.flow if available
+        // Get wallet client from window.ethereum if available
         let walletClient = null;
-        if (typeof window !== 'undefined' && window.flow) {
+        if (typeof window !== 'undefined' && window.ethereum) {
           try {
             walletClient = {
-              account: window.flow.selectedAddress,
+              account: window.ethereum.selectedAddress,
               chain: { id: 421614 },
-              transport: { url: 'https://testnet-rollup.flow.io/rpc' }
+              transport: { url: 'https://sepolia-rollup.arbitrum.io/rpc' }
             };
           } catch (error) {
             console.warn('⚠️  Could not create wallet client:', error);
@@ -268,7 +268,7 @@ class YellowNetworkService {
       this.connectionRetries = 0;
       
       console.log('✅ YELLOW NETWORK: ERC-7824 connection established');
-      console.log('🔗 State channels active on Flow Testnet settlement layer');
+      console.log('🔗 State channels active on Monad Network settlement layer');
       console.log('⚡ Gasless transactions enabled via state channels');
       
       return true;
@@ -649,7 +649,7 @@ class YellowNetworkService {
 
   /**
    * Set the testnet to use
-   * @param {string} testnet - Testnet name (testnet, flow-testnet, etc.)
+   * @param {string} testnet - Testnet name (sepolia, arbitrum-sepolia, etc.)
    */
   setTestnet(testnet) {
     if (!CLEARNODE_TESTNET_CONFIG.supportedTestnets.includes(testnet)) {
@@ -671,7 +671,7 @@ class YellowNetworkService {
 
   /**
    * Set the token to use for casino operations
-   * @param {string} tokenSymbol - Token symbol (FLOW, USDT, USDC, etc.)
+   * @param {string} tokenSymbol - Token symbol (ETH, USDT, USDC, etc.)
    * @param {string} testnet - Optional testnet specification
    */
   setToken(tokenSymbol, testnet = null) {

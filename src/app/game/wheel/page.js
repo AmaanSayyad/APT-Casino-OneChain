@@ -12,11 +12,14 @@ import { FaHistory, FaTrophy, FaInfoCircle, FaChartLine, FaCoins, FaChevronDown,
 import { GiCardRandom, GiWheelbarrow, GiSpinningBlades, GiTrophyCup } from "react-icons/gi";
 import { HiOutlineTrendingUp, HiOutlineChartBar } from "react-icons/hi";
 import { useSelector, useDispatch } from 'react-redux';
-import { setBalance, setFlowBalance, setLoading, loadBalanceFromStorage } from '@/store/balanceSlice';
+import { setBalance, setLoading, loadBalanceFromStorage } from '@/store/balanceSlice';
 import { useNotification } from '@/components/NotificationSystem';
 import useWalletStatus from '@/hooks/useWalletStatus';
-// Flow wallet integration
-import { useFlowWallet } from '@/hooks/useFlowWallet';
+// Pyth Entropy integration for randomness
+// import vrfProofService from '@/services/VRFProofService';
+// import VRFProofRequiredModal from '@/components/VRF/VRFProofRequiredModal';
+// import vrfLogger from '@/services/VRFLoggingService';
+import pythEntropyService from '@/services/PythEntropyService';
 
 // Import new components
 import WheelVideo from "./components/WheelVideo";
@@ -27,7 +30,7 @@ import WheelPayouts from "./components/WheelPayouts";
 import WheelHistory from "./components/WheelHistory";
 
 export default function Home() {
-  const [betAmount, setBetAmount] = useState(100);
+  const [betAmount, setBetAmount] = useState(0.001);
   const [risk, setRisk] = useState("medium");
   const [noOfSegments, setSegments] = useState(10);
   const [isSpinning, setIsSpinning] = useState(false);
@@ -45,49 +48,14 @@ export default function Home() {
   const [showStats, setShowStats] = useState(false);
   const [detectedColor, setDetectedColor] = useState(null);
   const [detectedMultiplier, setDetectedMultiplier] = useState(null);
-  const [winningSegmentIndex, setWinningSegmentIndex] = useState(0);
-  const [winningMultiplier, setWinningMultiplier] = useState(0);
-  const [finalWheelPosition, setFinalWheelPosition] = useState(0);
-  const [calculatedSegment, setCalculatedSegment] = useState(0);
-  
-  // Store the latest wheel data for immediate use
-  const latestWheelDataRef = useRef({
-    segmentIndex: 0,
-    multiplier: 0,
-    wheelPosition: 0,
-    calculatedSegment: 0
-  });
   
   const dispatch = useDispatch();
-  const { userBalance, userFlowBalance, isLoading: isLoadingBalance } = useSelector((state) => state.balance);
+  const { userBalance, isLoading: isLoadingBalance } = useSelector((state) => state.balance);
   const notification = useNotification();
   const { isConnected } = useWalletStatus();
-  const { executeTreasuryTransaction, address } = useFlowWallet();
-  
-  // Format balance for display (show 0 instead of 0.00000)
-  const formatBalance = (balance) => {
-    const num = parseFloat(balance || '0');
-    if (num === 0) return '0';
-    // If it's a whole number, show without decimals
-    if (num % 1 === 0) return num.toString();
-    // Otherwise show with up to 5 decimals, removing trailing zeros
-    return parseFloat(num.toFixed(5)).toString();
-  };
   
   // Use ref to prevent infinite loop in useEffect
   const isInitialized = useRef(false);
-  
-  // Reset wheel data ref when starting new spin
-  const resetWheelData = () => {
-    latestWheelDataRef.current = {
-      segmentIndex: 0,
-      multiplier: 0,
-      wheelPosition: 0,
-      calculatedSegment: 0,
-      source: 'initial'
-    };
-    console.log('🎯 Reset wheel data ref for new spin');
-  };
   
   // Load balance from localStorage on component mount
   useEffect(() => {
@@ -116,66 +84,43 @@ export default function Home() {
 
   // Game modes
   const manulBet = async () => {
-    if (betAmount < 1 || isSpinning) return;
-    
-    // Reset wheel data for fresh spin
-    resetWheelData();
+    if (betAmount <= 0 || isSpinning) return;
 
     // Check if wallet is connected first
-    console.log('🔌 Wheel Bet - Wallet Status:', { isConnected, userFlowBalance });
+    console.log('🔌 Wheel Bet - Wallet Status:', { isConnected, userBalance });
     if (!isConnected) {
-      alert("Please connect your Flow wallet first to play Wheel!");
+      alert("Please connect your Ethereum wallet first to play Wheel!");
       return;
     }
 
-    // Generate Flow VRF in background for provably fair proof
-  const generateVRFInBackground = async (historyItemId, winningSegment = 0, multiplier = 0, wheelPos = 0, calcSegment = 0) => {
+    // Generate Pyth Entropy in background for provably fair proof
+  const generateEntropyInBackground = async (historyItemId) => {
     try {
-      console.log('🏦 Executing treasury-sponsored Wheel transaction...');
-      console.log('🎯 Parameters received by generateVRFInBackground:', {
-        winningSegment,
-        multiplier,
-        wheelPos,
-        calcSegment,
-        betAmount,
-        noOfSegments
+      console.log('🔮 PYTH ENTROPY: Generating background entropy for Wheel game...');
+      
+      const entropyResult = await pythEntropyService.generateRandom('WHEEL', { 
+        purpose: 'wheel_spin', 
+        gameType: 'WHEEL' 
       });
       
-      const transactionParams = {
-        betAmount: betAmount,
-        segments: noOfSegments,
-        winningSegment: winningSegment,
-        multiplier: multiplier,
-        wheelPosition: wheelPos,
-        calculatedSegment: calcSegment
-      };
+      console.log('✅ PYTH ENTROPY: Background entropy generated successfully');
+      console.log('🔗 Transaction:', entropyResult.entropyProof.transactionHash);
       
-      console.log('🎯 Transaction parameters being sent:', transactionParams);
-      
-      const transactionResult = await executeTreasuryTransaction('wheel', transactionParams);
-      
-      console.log('✅ Flow Transaction: Background transaction completed successfully');
-      console.log('🔗 Transaction:', transactionResult.id);
-      
-      // Parse game events from treasury transaction result
-      const gameResultData = transactionResult.events?.find(event => 
-        event.type?.includes('GamePlayed')
-      )?.data;
-      
-      // Update the history item with real transaction proof
+      // Update the history item with real entropy proof
       setGameHistory(prev => prev.map(item => 
         item.id === historyItemId 
           ? {
               ...item,
-              flowVRF: {
-                transactionId: transactionResult.id || transactionResult.transactionId,
-                blockHeight: transactionResult.blockId,
-                randomSeed: gameResultData?.randomSeed || Math.floor(Math.random() * 1000000000),
-                explorerUrl: `https://testnet.flowscan.io/tx/${transactionResult.id || transactionResult.transactionId}`,
-                timestamp: Date.now(),
-                source: 'Flow Blockchain',
-                winningSegment: gameResultData?.result?.winningSegment,
-                payout: parseFloat(gameResultData?.payout || '0')
+              entropyProof: {
+                requestId: entropyResult.entropyProof?.requestId,
+                sequenceNumber: entropyResult.entropyProof?.sequenceNumber,
+                randomValue: entropyResult.randomValue,
+                randomNumber: entropyResult.randomValue,
+                transactionHash: entropyResult.entropyProof?.transactionHash,
+                monadExplorerUrl: entropyResult.entropyProof?.monadExplorerUrl,
+                explorerUrl: entropyResult.entropyProof?.explorerUrl,
+                timestamp: entropyResult.entropyProof?.timestamp,
+                source: 'Pyth Entropy'
               }
             }
           : item
@@ -187,10 +132,10 @@ export default function Home() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            sessionId: transactionResult.id || `wheel_${Date.now()}`,
+            sessionId: entropyResult.entropyProof?.requestId || `wheel_${Date.now()}`,
             gameType: 'WHEEL',
             channelId: entropyResult.entropyProof?.requestId || 'entropy_channel',
-            valueEth: 0
+            valueMon: 0
           })
         })
           .then(async (r) => {
@@ -203,15 +148,15 @@ export default function Home() {
       }
       
     } catch (error) {
-      console.error('❌ FLOW VRF: Background generation failed:', error);
+      console.error('❌ PYTH ENTROPY: Background generation failed:', error);
     }
   };
 
-    // Check Redux Flow balance (balance is already in FLOW)
-    const currentBalance = parseFloat(userFlowBalance || '0');
+    // Check Redux balance (balance is already in MON)
+    const currentBalance = parseFloat(userBalance || '0');
     
     if (currentBalance < betAmount) {
-      alert(`Insufficient balance. You have ${formatBalance(currentBalance)} FLOW but need ${betAmount} FLOW`);
+      alert(`Insufficient balance. You have ${currentBalance.toFixed(5)} MON but need ${betAmount} MON`);
       return;
     }
 
@@ -220,15 +165,15 @@ export default function Home() {
       setHasSpun(false);
 
       console.log('=== STARTING WHEEL BET WITH REDUX BALANCE ===');
-      console.log('Bet amount (FLOW):', betAmount);
-      console.log('Current balance (FLOW):', currentBalance);
+      console.log('Bet amount (ETH):', betAmount);
+      console.log('Current balance (ETH):', currentBalance);
       console.log('Sectors:', noOfSegments);
       
-      // Deduct bet amount from Redux Flow balance
-      const newBalance = (parseFloat(userFlowBalance || '0') - betAmount).toString();
-      dispatch(setFlowBalance(newBalance));
+      // Deduct bet amount from Redux balance
+      const newBalance = (parseFloat(userBalance || '0') - betAmount).toString();
+      dispatch(setBalance(newBalance));
       
-      console.log('Balance deducted. New balance:', formatBalance(newBalance), 'FLOW');
+      console.log('balance MON');
       
       // Set up callback to handle wheel animation completion
       window.wheelBetCallback = async (landedMultiplier) => {
@@ -265,9 +210,9 @@ export default function Home() {
             id: Date.now(),
             game: 'Wheel',
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            betAmount: formatBalance(betAmount),
+            betAmount: betAmount.toFixed(5),
             multiplier: `${actualMultiplier.toFixed(2)}x`,
-            payout: formatBalance(winAmount),
+            payout: winAmount.toFixed(5),
             result: 0,
             color: detectedColor
           };
@@ -279,8 +224,8 @@ export default function Home() {
             randomValue: Math.floor(Math.random() * 1000000),
             randomNumber: Math.floor(Math.random() * 1000000),
             transactionHash: 'generating...',
-            arbiscanUrl: 'https://testnet.arbiscan.io/',
-            explorerUrl: 'https://testnet.flowscan.io',
+            monadExplorerUrl: 'https://testnet.monadexplorer.com/',
+            explorerUrl: 'https://entropy-explorer.pyth.network/?chain=monad-testnet',
             timestamp: Date.now(),
             source: 'Generating...'
           };
@@ -292,41 +237,31 @@ export default function Home() {
           
           // Show result and update balance immediately
           if (actualMultiplier > 0) {
-            notification.success(`Congratulations! ${betAmount} FLOW × ${actualMultiplier.toFixed(2)} = ${formatBalance(winAmount)} FLOW won!`);
+            notification.success(`Congratulations! ${betAmount} MON × ${actualMultiplier.toFixed(2)} = ${winAmount.toFixed(5)} MON won!`);
             
-            // Update Flow balance with winnings
-            const currentBalance = parseFloat(userFlowBalance || '0');
+            // Update balance with winnings
+            const currentBalance = parseFloat(userBalance || '0');
             const newBalanceWithWin = currentBalance + winAmount;
             
             console.log('💰 Adding winnings:', {
-              currentBalance: formatBalance(currentBalance),
-              winAmount: formatBalance(winAmount),
-              newBalance: formatBalance(newBalanceWithWin)
+              currentBalance: currentBalance.toFixed(5),
+              winAmount: winAmount.toFixed(5),
+              newBalance: newBalanceWithWin.toFixed(5)
             });
             
-            dispatch(setFlowBalance(newBalanceWithWin.toString()));
+            dispatch(setBalance(newBalanceWithWin.toString()));
           } else {
             notification.info(`Game over. Multiplier: ${actualMultiplier.toFixed(2)}x`);
           }
 
-          // Generate Flow VRF in background for provably fair proof
-          const wheelData = latestWheelDataRef.current;
-          console.log('🎯 Calling generateVRFInBackground with FINAL ref values:', wheelData);
-          console.log('🎯 Using ColorDetector multiplier:', wheelData.multiplier, 'Source:', wheelData.source);
-          
-          generateVRFInBackground(
-            newHistoryItem.id, 
-            wheelData.segmentIndex, 
-            wheelData.multiplier,  // This MUST be from ColorDetector
-            wheelData.wheelPosition, 
-            wheelData.calculatedSegment
-          ).catch(error => {
+          // Generate Pyth Entropy in background for provably fair proof
+          generateEntropyInBackground(newHistoryItem.id).catch(error => {
             console.error('❌ Background entropy generation failed:', error);
           });
           
           // Clean up callback
           window.wheelBetCallback = null;
-        }, 50); // Faster transaction execution
+        }, 300); // Wait for color detection to update
       };
       
     } catch (e) {
@@ -334,8 +269,8 @@ export default function Home() {
       alert(`Bet failed: ${e?.message || e}`);
       setIsSpinning(false);
       
-      // Refund the deducted Flow balance on error
-      dispatch(setFlowBalance(userFlowBalance));
+      // Refund the deducted balance on error
+      dispatch(setBalance(userBalance));
     }
   };
 
@@ -351,7 +286,7 @@ export default function Home() {
   }) => {
     // Check if wallet is connected first
     if (!isConnected) {
-      alert('Please connect your Flow wallet first to play Wheel!');
+      alert('Please connect your Ethereum wallet first to play Wheel!');
       return;
     }
     
@@ -384,26 +319,26 @@ export default function Home() {
     let totalProfit = 0;
 
     for (let i = 0; i < numberOfBets; i++) {
-      // Check Redux Flow balance before each bet
-      let currentBalance = parseFloat(userFlowBalance || '0');
+      // Check Redux balance before each bet
+      let currentBalance = parseFloat(userBalance || '0');
       
       console.log(`💰 Auto bet ${i + 1} balance check:`, {
-        currentBalance: formatBalance(currentBalance),
-        currentBet: formatBalance(currentBet),
+        currentBalance: currentBalance.toFixed(5),
+        currentBet: currentBet.toFixed(5),
         hasEnoughBalance: currentBalance >= currentBet
       });
       
       if (currentBalance < currentBet) {
-        alert(`Insufficient balance for bet ${i + 1}. Need ${formatBalance(currentBet)} FLOW but have ${formatBalance(currentBalance)} FLOW`);
+        alert(`Insufficient balance for bet ${i + 1}. Need ${currentBet.toFixed(5)} MON but have ${currentBalance.toFixed(5)} MON`);
         break;
       }
 
       setIsSpinning(true);
       setHasSpun(false);
       
-      // Deduct bet amount from Redux Flow balance
-      const newBalance = (parseFloat(userFlowBalance || '0') - currentBet).toString();
-      dispatch(setFlowBalance(newBalance));
+      // Deduct bet amount from Redux balance
+      const newBalance = (parseFloat(userBalance || '0') - currentBet).toString();
+      dispatch(setBalance(newBalance));
 
       // Calculate result position
       const resultPosition = Math.floor(Math.random() * noOfSegments);
@@ -477,18 +412,18 @@ export default function Home() {
       // Calculate win amount
       const winAmount = currentBet * actualMultiplier;
 
-      // Update Redux Flow balance with winnings
+      // Update Redux balance with winnings
       if (actualMultiplier > 0) {
-        const currentBalance = parseFloat(userFlowBalance || '0');
+        const currentBalance = parseFloat(userBalance || '0');
         const newBalanceWithWin = currentBalance + winAmount;
         
         console.log('💰 Auto bet winnings:', {
-          currentBalance: formatBalance(currentBalance),
-          winAmount: formatBalance(winAmount),
-          newBalance: formatBalance(newBalanceWithWin)
+          currentBalance: currentBalance.toFixed(5),
+          winAmount: winAmount.toFixed(5),
+          newBalance: newBalanceWithWin.toFixed(5)
         });
         
-        dispatch(setFlowBalance(newBalanceWithWin.toString()));
+        dispatch(setBalance(newBalanceWithWin.toString()));
       }
 
       // Update total profit
@@ -497,7 +432,7 @@ export default function Home() {
       
       // Show notification for win
       if (actualMultiplier > 0) {
-        notification.success(`Congratulations! ${currentBet} FLOW × ${actualMultiplier.toFixed(2)} = ${formatBalance(winAmount)} FLOW won!`);
+        notification.success(`Congratulations! ${currentBet} MON × ${actualMultiplier.toFixed(2)} = ${winAmount.toFixed(8)} MON won!`);
       }
 
       // Store history entry
@@ -543,10 +478,10 @@ export default function Home() {
         currentBet = currentBet + (currentBet * lossIncrease);
       }
 
-      // Clamp bet to Flow balance
-      currentBalance = parseFloat(userFlowBalance || '0');
+      // Clamp bet to balance
+      currentBalance = parseFloat(userBalance || '0');
       if (currentBet > currentBalance) {
-        console.log(`💰 Bet amount ${formatBalance(currentBet)} exceeds Flow balance ${formatBalance(currentBalance)}, clamping to balance`);
+        console.log(`💰 Bet amount ${currentBet.toFixed(5)} exceeds balance ${currentBalance.toFixed(5)}, clamping to balance`);
         currentBet = currentBalance;
       }
       if (currentBet <= 0) currentBet = initialBetAmount;
@@ -569,8 +504,8 @@ export default function Home() {
     // Sample statistics
     const gameStatistics = {
       totalBets: '1,856,342',
-      totalVolume: '8.3M FLOW',
-      maxWin: '243,500 FLOW'
+      totalVolume: '8.3M MON',
+      maxWin: '243,500 MON'
     };
     
     return (
@@ -737,50 +672,8 @@ export default function Home() {
               onColorDetected={({ color, multiplier }) => {
                 setDetectedColor(color);
                 setDetectedMultiplier(multiplier);
-                console.log('🎯 ColorDetector: REAL multiplier detected:', multiplier, 'Color:', color);
-                
-                // Update ref with detected multiplier (this is the REAL one for transaction!)
-                if (multiplier !== null && multiplier !== undefined) {
-                  // Calculate current position and segment based on wheelPosition
-                  const currentWheelPos = wheelPosition % (Math.PI * 2);
-                  const segmentAngle = (Math.PI * 2) / noOfSegments;
-                  const offsetPosition = (currentWheelPos + Math.PI/2 + Math.PI) % (Math.PI * 2);
-                  const currentSegmentIndex = Math.floor(offsetPosition / segmentAngle) % noOfSegments;
-                  
-                  latestWheelDataRef.current = {
-                    segmentIndex: currentSegmentIndex,
-                    multiplier: multiplier, // REAL multiplier from ColorDetector
-                    wheelPosition: currentWheelPos,
-                    calculatedSegment: currentSegmentIndex,
-                    detectedColor: color,
-                    source: 'colorDetector'
-                  };
-                  console.log('🎯 FINAL ref updated with ColorDetector data:', latestWheelDataRef.current);
-                }
+                console.log('🎯 Color detected from GameWheel:', color, 'Multiplier:', multiplier);
               }}
-        onWinningSegment={(result) => {
-          console.log('🎯 Page: Received initial data from GameWheel:', result);
-          
-          // Only update ref if ColorDetector hasn't provided data yet
-          if (latestWheelDataRef.current.source !== 'colorDetector') {
-            latestWheelDataRef.current = {
-              segmentIndex: result.segmentIndex,
-              multiplier: result.multiplier,
-              wheelPosition: result.wheelPosition,
-              calculatedSegment: result.calculatedSegment,
-              source: result.source || 'gameWheel'
-            };
-            console.log('🎯 Page: Initial data stored in ref (will be overridden by ColorDetector):', latestWheelDataRef.current);
-          } else {
-            console.log('🎯 Page: Ignoring GameWheel data, ColorDetector data already available');
-          }
-          
-          // Update state for UI
-          setWinningSegmentIndex(result.segmentIndex);
-          setWinningMultiplier(result.multiplier);
-          setFinalWheelPosition(result.wheelPosition);
-          setCalculatedSegment(result.calculatedSegment);
-        }}
             />
           </div>
           <div className="w-full lg:w-1/3">
@@ -789,7 +682,7 @@ export default function Home() {
               setGameMode={setGameMode}
               betAmount={betAmount}
               setBetAmount={setBetAmount}
-              balance={parseFloat(userFlowBalance || '0')} // Use Flow balance
+              balance={parseFloat(userBalance || '0')}
               manulBet={manulBet}
               risk={selectedRisk}
               setRisk={setSelectedRisk}

@@ -118,7 +118,7 @@ const UpcomingTournaments = () => {
                     </div>
                     <div>
                       <p className="text-white/50 text-xs">Entry Fee</p>
-                      <p className="text-white font-bold">{tournament.entryFee} FLOW</p>
+                      <p className="text-white font-bold">{tournament.entryFee} MON</p>
                     </div>
                     <div>
                       <p className="text-white/50 text-xs">Participants</p>

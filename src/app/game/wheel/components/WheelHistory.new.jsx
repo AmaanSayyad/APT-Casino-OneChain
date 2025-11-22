@@ -15,7 +15,7 @@ const WheelHistory = ({ gameHistory = [] }) => {
   // Open Etherscan link for transaction hash
   const openEtherscan = (hash) => {
     if (hash && hash !== 'unknown') {
-      const network = process.env.NEXT_PUBLIC_NETWORK || 'testnet';
+      const network = process.env.NEXT_PUBLIC_NETWORK || 'sepolia';
       const explorerUrl = `https://${network}.etherscan.io/tx/${hash}`;
       window.open(explorerUrl, '_blank');
     }
@@ -157,7 +157,7 @@ const WheelHistory = ({ gameHistory = [] }) => {
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap'
               }}>
-                {totalVolume.toFixed(5)} FLOW
+                {totalVolume.toFixed(5)} MON
               </Typography>
               <Box 
                 sx={{ 
@@ -193,7 +193,7 @@ const WheelHistory = ({ gameHistory = [] }) => {
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap'
               }}>
-                {biggestWin.toFixed(5)} FLOW
+                {biggestWin.toFixed(5)} MON
               </Typography>
               <FaTrophy color="#FFA500" />
             </Box>
@@ -513,7 +513,7 @@ const WheelHistory = ({ gameHistory = [] }) => {
                           whiteSpace: 'nowrap'
                         }}
                       >
-                        {item.betAmount} FLOW
+                        {item.betAmount} MON
                       </Typography>
                       <Image src="/coin.png" width={16} height={16} alt="coin" />
                     </Box>
@@ -544,7 +544,7 @@ const WheelHistory = ({ gameHistory = [] }) => {
                           whiteSpace: 'nowrap'
                         }}
                       >
-                        {item.payout} FLOW
+                        {item.payout} MON
                       </Typography>
                       <Image src="/coin.png" width={16} height={16} alt="coin" />
                     </Box>

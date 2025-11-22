@@ -2,24 +2,14 @@
 import { useState, forwardRef, useImperativeHandle, useCallback, useEffect, useRef } from "react";
 import Matter from 'matter-js';
 import { useSelector, useDispatch } from 'react-redux';
-import { setBalance, setFlowBalance, addToBalance, subtractFromBalance } from '@/store/balanceSlice';
-import { flowVRFService } from '@/services/FlowVRFService';
+import { setBalance, addToBalance, subtractFromBalance } from '@/store/balanceSlice';
+import pythEntropyService from '@/services/PythEntropyService';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaPlay, FaPause, FaRedo, FaCog, FaInfoCircle } from 'react-icons/fa';
 
 const PlinkoGame = forwardRef(({ rowCount = 16, riskLevel = "Medium", onRowChange, betAmount = 0, onBetHistoryChange }, ref) => {
   const dispatch = useDispatch();
-  const { userFlowBalance } = useSelector((state) => state.balance);
-  
-  // Format balance for display (show 0 instead of 0.00000)
-  const formatBalance = (balance) => {
-    const num = parseFloat(balance || '0');
-    if (num === 0) return '0';
-    // If it's a whole number, show without decimals
-    if (num % 1 === 0) return num.toString();
-    // Otherwise show with up to 5 decimals, removing trailing zeros
-    return parseFloat(num.toFixed(5)).toString();
-  };
+  const userBalance = useSelector((state) => state.balance.userBalance);
   
   const [isDropping, setIsDropping] = useState(false);
   const [ballPosition, setBallPosition] = useState(null);
@@ -482,8 +472,7 @@ const PlinkoGame = forwardRef(({ rowCount = 16, riskLevel = "Medium", onRowChang
         
         // Use latest bet amount from ref to avoid stale values captured by closures
         const latestBetAmount = betAmountRef.current;
-        const totalPayout = latestBetAmount * multiplierValue;
-        const netWin = totalPayout - latestBetAmount; // Net win (can be negative)
+        const reward = latestBetAmount * multiplierValue;
         
         console.log('=== GAME RESULT ===');
         console.log('Row configuration:', rows, 'rows,', riskLevel, 'risk');
@@ -492,41 +481,54 @@ const PlinkoGame = forwardRef(({ rowCount = 16, riskLevel = "Medium", onRowChang
         console.log('Bet amount (ref):', betAmountRef.current);
         console.log('Multiplier:', multiplier, '(bin index:', binIndex, ')');
         console.log('Multiplier value:', multiplierValue);
-        console.log('Total payout:', totalPayout, 'FLOW');
-        console.log('Net win/loss:', netWin, 'FLOW');
+        console.log('Reward calculated:', reward, 'MON');
         console.log('==================');
         
-        // Note: Balance updates are handled by treasury transaction, not here
+        // Add reward to current balance (bet amount already deducted when ball was spawned)
         if (latestBetAmount > 0) {
-          console.log('Game completed - balance will be updated by treasury transaction');
-          console.log('  Current balance from Redux:', userFlowBalance);
-          console.log('  Net win calculated:', netWin);
+          console.log('Adding reward to balance:');
+          console.log('  Current balance from Redux:', userBalance);
+          console.log('  Current balance in ETH:', parseFloat(userBalance));
+          console.log('  Reward to add:', reward);
+          
+          // Use addToBalance to properly update Redux store
+          dispatch(addToBalance(reward));
+          
+          console.log('Reward added to balance via Redux');
         }
         
         // Play bin land sound
         playAudio(binLandAudioRef);
         
-        // Add to bet history with Flow VRF integration
+        // Add to bet history
         const newBetResult = {
           id: Date.now(),
           game: "Plinko",
           title: new Date().toLocaleTimeString(),
-          betAmount: formatBalance(latestBetAmount),
+          betAmount: latestBetAmount.toFixed(5),
           multiplier: multipliers[binIndex],
-          multiplierValue: multiplierValue, // Add numerical multiplier value
-          payout: formatBalance(totalPayout),
-          timestamp: Date.now(),
-          rows: currentRows,
-          riskLevel: currentRiskLevel,
-          binIndex: binIndex,
-          finalPosition: binIndex  // Frontend-calculated position for Cadence
+          payout: reward.toFixed(5),
+          timestamp: Date.now()
         };
         setBetHistory(prev => {
           const updated = [newBetResult, ...prev.slice(0, 99)]; // Keep last 100
           return updated;
         });
+        // Fire-and-forget casino session log
+        try {
+          fetch('/api/casino-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId: `plinko_${Date.now()}`,
+              gameType: 'PLINKO',
+              requestId: `plinko_request_${Date.now()}`,
+              valueMon: 0
+            })
+          }).catch(() => {});
+        } catch {}
         
-        // Notify parent component about bet history change (will trigger Flow VRF)
+        // Notify parent component about bet history change
         if (onBetHistoryChange) {
           console.log('📞 PlinkoGame: Calling onBetHistoryChange with:', newBetResult);
           onBetHistoryChange(newBetResult);
@@ -536,7 +538,7 @@ const PlinkoGame = forwardRef(({ rowCount = 16, riskLevel = "Medium", onRowChang
         
         setTimeout(() => {
           setIsDropping(false);
-          console.log(`Ball landed in bin ${binIndex} with multiplier ${multipliers[binIndex]}, net win: ${netWin} FLOW`);
+          console.log(`Ball landed in bin ${binIndex} with multiplier ${multipliers[binIndex]}, payout: $${reward}`);
         }, 100);
       }
       
@@ -575,16 +577,16 @@ const PlinkoGame = forwardRef(({ rowCount = 16, riskLevel = "Medium", onRowChang
   const dropBall = useCallback(async () => {
     
     // Simple balance check - if user doesn't have enough balance, don't allow playing
-    const currentBalance = parseFloat(userFlowBalance);
+    const currentBalance = parseFloat(userBalance);
     const latestBetAmount = betAmountRef.current;
     
     if (latestBetAmount > currentBalance) {
-      console.warn('Insufficient Flow balance for bet:', {
+      console.warn('Insufficient balance for bet:', {
         currentBalance: currentBalance,
         betAmount: latestBetAmount,
-        balanceInETH: formatBalance(currentBalance)
+        balanceInETH: currentBalance.toFixed(9)
       });
-              alert(`Insufficient balance! You have ${formatBalance(currentBalance)} FLOW but need ${latestBetAmount} FLOW`);
+              alert(`Insufficient balance! You have ${currentBalance.toFixed(9)} MON but need ${latestBetAmount} MON`);
       return;
     }
     
@@ -592,14 +594,13 @@ const PlinkoGame = forwardRef(({ rowCount = 16, riskLevel = "Medium", onRowChang
     setBallPosition(null);
     setHitPegs(new Set());
 
-    // Deduct bet amount when ball is spawned (immediate feedback)
+    // Deduct bet amount when ball is spawned
     if (latestBetAmount > 0) {
-      const newBalance = currentBalance - latestBetAmount;
-      dispatch(setFlowBalance(newBalance.toString()));
-      console.log('Bet amount deducted immediately:', { 
+      // Use subtractFromBalance to properly update Redux store
+      dispatch(subtractFromBalance(latestBetAmount));
+      console.log('Bet amount deduction:', { 
         currentBalance, 
         betAmount: latestBetAmount,
-        newBalance,
         betAmountProp: betAmount,
         betAmountRef: betAmountRef.current
       });
@@ -641,7 +642,7 @@ const PlinkoGame = forwardRef(({ rowCount = 16, riskLevel = "Medium", onRowChang
     
     // Play drop sound
     playAudio(ballDropAudioRef);
-  }, [isDropping, currentRows, userFlowBalance, dispatch]);
+  }, [isDropping, currentRows, userBalance, dispatch]);
 
   // Expose functions to parent component
   useImperativeHandle(ref, () => ({
@@ -769,7 +770,7 @@ const PlinkoGame = forwardRef(({ rowCount = 16, riskLevel = "Medium", onRowChang
               {betHistory.slice(0, 5).map((bet, index) => (
                 <div key={index} className="w-16 h-16 bg-[#2A0025] border border-[#333947] rounded-lg flex flex-col items-center justify-center p-1">
                   <span className="w-full text-center leading-tight text-xs font-bold text-white">{bet.multiplier}</span>
-                  <span className="w-full text-center leading-tight text-[10px] text-green-400">+{bet.payout} FLOW</span>
+                  <span className="w-full text-center leading-tight text-[10px] text-green-400">+{bet.payout} MON</span>
                 </div>
               ))}
               {Array.from({ length: Math.max(0, 5 - Math.min(5, betHistory.length)) }).map((_, index) => (
@@ -827,7 +828,7 @@ const PlinkoGame = forwardRef(({ rowCount = 16, riskLevel = "Medium", onRowChang
           <div className="text-xs text-gray-400">Best Multiplier</div>
         </div>
         <div className="text-center">
-                          <div className="text-2xl font-bold text-white">{formatBalance(totalWon)} FLOW</div>
+                          <div className="text-2xl font-bold text-white">{totalWon.toFixed(5)} MON</div>
           <div className="text-xs text-gray-400">Total Won</div>
         </div>
       </div>

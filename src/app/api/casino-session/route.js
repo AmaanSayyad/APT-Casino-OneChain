@@ -4,7 +4,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 // Environment (server-side only)
-const RPC_URL = process.env.NEXT_PUBLIC_ARBITRUM_SEPOLIA_RPC || 'https://testnet-rollup.flow.io/rpc';
+const RPC_URL = process.env.NEXT_PUBLIC_ARBITRUM_SEPOLIA_RPC || 'https://sepolia-rollup.arbitrum.io/rpc';
 const CASINO_ADDRESS = process.env.NEXT_PUBLIC_YELLOW_CASINO_ADDRESS || '';
 const CASINO_PRIVKEY = process.env.CASINO_WALLET_PRIVATE_KEY || process.env.TREASURY_PRIVATE_KEY || '';
 
@@ -29,7 +29,7 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { sessionId, gameType, channelId, valueEth } = body || {};
+    const { sessionId, gameType, channelId, valueMon } = body || {};
 
     if (!sessionId || !gameType || !channelId) {
       return new Response(JSON.stringify({ ok: false, error: 'Missing sessionId/gameType/channelId' }), { status: 400 });
@@ -54,8 +54,8 @@ export async function POST(request) {
     } catch {}
 
     let sendValue = 0n;
-    if (valueEth !== undefined && valueEth !== null) {
-      try { sendValue = ethers.parseEther(String(valueEth)); } catch {}
+    if (valueMon !== undefined && valueMon !== null) {
+      try { sendValue = ethers.parseEther(String(valueMon)); } catch {}
     }
     if (sendValue < minBetWei) sendValue = minBetWei;
 

@@ -3,14 +3,14 @@ import { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp, Minus, Plus } from "lucide-react";
 import { useSelector } from 'react-redux';
 import useWalletStatus from '@/hooks/useWalletStatus';
-
+import pythEntropyService from '@/services/PythEntropyService';
 
 export default function GameControls({ onBet, onRowChange, onRiskLevelChange, onBetAmountChange, initialRows = 16, initialRiskLevel = "Medium" }) {
-  const { userFlowBalance } = useSelector((state) => state.balance);
+  const userBalance = useSelector((state) => state.balance.userBalance);
   const { isConnected } = useWalletStatus();
   
   const [gameMode, setGameMode] = useState("manual");
-  const [betAmount, setBetAmount] = useState("100");
+  const [betAmount, setBetAmount] = useState("0.001");
   const [numberOfBets, setNumberOfBets] = useState("1");
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const [riskLevel, setRiskLevel] = useState(initialRiskLevel);
@@ -28,6 +28,15 @@ export default function GameControls({ onBet, onRowChange, onRiskLevelChange, on
     setRiskLevel(initialRiskLevel);
     setRows(initialRows);
   }, [initialRiskLevel, initialRows]);
+
+  // Notify parent component when bet amount changes
+  useEffect(() => {
+    if (onBetAmountChange) {
+      const numericBetAmount = parseFloat(betAmount) || 0;
+      onBetAmountChange(numericBetAmount);
+      console.log('GameControls: Bet amount changed, notifying parent:', numericBetAmount);
+    }
+  }, [betAmount, onBetAmountChange]);
 
   // Cleanup auto betting interval when component unmounts or game mode changes
   useEffect(() => {
@@ -70,8 +79,8 @@ export default function GameControls({ onBet, onRowChange, onRiskLevelChange, on
     }
     
     // If it's a number (from buttons), format it
-    const numValue = parseFloat(value) || 100;
-    setBetAmount(numValue.toString());
+    const numValue = parseFloat(value) || 0.001;
+    setBetAmount(numValue.toFixed(3));
     
     // Notify parent component about bet amount change
     if (onBetAmountChange) {
@@ -80,9 +89,9 @@ export default function GameControls({ onBet, onRowChange, onRiskLevelChange, on
   };
 
   const handleHalfBet = () => {
-    const currentBet = parseFloat(betAmount) || 100;
-    const newBet = Math.max((currentBet / 2), 1);
-    setBetAmount(newBet.toString());
+    const currentBet = parseFloat(betAmount) || 0.001;
+    const newBet = Math.max((currentBet / 2), 0.001).toFixed(3);
+    setBetAmount(newBet);
     
     // Notify parent component
     if (onBetAmountChange) {
@@ -91,9 +100,9 @@ export default function GameControls({ onBet, onRowChange, onRiskLevelChange, on
   };
 
   const handleDoubleBet = () => {
-    const currentBet = parseFloat(betAmount) || 100;
-    const newBet = (currentBet * 2);
-    setBetAmount(newBet.toString());
+    const currentBet = parseFloat(betAmount) || 0.001;
+    const newBet = (currentBet * 2).toFixed(3);
+    setBetAmount(newBet);
     
     // Notify parent component
     if (onBetAmountChange) {
@@ -105,28 +114,28 @@ export default function GameControls({ onBet, onRowChange, onRiskLevelChange, on
     // Check if wallet is connected
     console.log('🔌 Plinko Bet - Wallet Status:', { 
       isConnected, 
-      userFlowBalance,
-      windowEthereum: !!window.flow,
-      windowEthereumConnected: window.flow?.isConnected?.(),
-      windowEthereumAccount: window.flow?.selectedAddress
+      userBalance,
+      windowEthereum: !!window.ethereum,
+      windowEthereumConnected: window.ethereum?.isConnected?.(),
+      windowEthereumAccount: window.ethereum?.selectedAddress
     });
     if (!isConnected) {
-      alert("Please connect your Flow wallet first to play Plinko!");
+      alert("Please connect your Ethereum wallet first to play Plinko!");
       return;
     }
     
     const betValue = parseFloat(betAmount);
-    const currentBalance = parseFloat(userFlowBalance);
+    const currentBalance = parseFloat(userBalance);
     
-    console.log('handleBet called with betValue:', betValue, 'currentBalance (FLOW):', currentBalance);
+    console.log('handleBet called with betValue:', betValue, 'currentBalance (ETH):', currentBalance);
     
-    if (betValue < 1) {
-      alert("Minimum bet amount is 1 FLOW");
+    if (betValue < 0.001) {
+      alert("Minimum bet amount is 0.001 MON");
       return;
     }
     
     if (betValue > currentBalance) {
-      alert(`Insufficient balance! You have ${formatBalance(currentBalance)} FLOW but need ${betValue} FLOW`);
+      alert(`Insufficient balance! You have ${currentBalance.toFixed(5)} MON but need ${betValue} MON`);
       return;
     }
     
@@ -167,20 +176,20 @@ export default function GameControls({ onBet, onRowChange, onRiskLevelChange, on
     let currentBet = 0;
     let localCurrentBet = 0; // Local variable for interval
     
-    // Check if we have enough Flow balance for all bets
+    // Check if we have enough balance for all bets
     const totalBetAmount = totalBets * parseFloat(betAmount);
-    const currentBalance = parseFloat(userFlowBalance);
+    const currentBalance = parseFloat(userBalance);
     
     console.log('Auto betting balance check:', {
       totalBets,
       betAmount,
       totalBetAmount,
       currentBalance,
-      balanceInETH: formatBalance(currentBalance)
+      balanceInETH: currentBalance.toFixed(5)
     });
     
     if (totalBetAmount > currentBalance) {
-      alert(`Insufficient balance for ${totalBets} bets of ${betAmount} FLOW each. You need ${totalBetAmount.toFixed(3)} FLOW but have ${formatBalance(currentBalance)} FLOW`);
+      alert(`Insufficient balance for ${totalBets} bets of ${betAmount} MON each. You need ${totalBetAmount.toFixed(3)} MON but have ${currentBalance.toFixed(5)} MON`);
       setIsAutoPlaying(false);
       return;
     }
@@ -310,38 +319,27 @@ export default function GameControls({ onBet, onRowChange, onRiskLevelChange, on
     }
   };
 
-  // Check if user has sufficient Flow balance for current bet
+  // Check if user has sufficient balance for current bet
   const hasSufficientBalance = () => {
     if (!isConnected) return false;
     const betValue = parseFloat(betAmount);
-    const currentBalance = parseFloat(userFlowBalance);
-    return betValue <= currentBalance && betValue >= 1;
+    const currentBalance = parseFloat(userBalance);
+    return betValue <= currentBalance && betValue >= 0.001;
   };
 
-  // Check if user has sufficient Flow balance for auto betting
+  // Check if user has sufficient balance for auto betting
   const hasSufficientBalanceForAutoBet = () => {
     if (!isConnected) return false;
     const betValue = parseFloat(betAmount);
     const totalBets = parseInt(numberOfBets) || 1;
     const totalBetAmount = totalBets * betValue;
-    const currentBalance = parseFloat(userFlowBalance);
-    return totalBetAmount <= currentBalance && betValue >= 1;
+    const currentBalance = parseFloat(userBalance);
+    return totalBetAmount <= currentBalance && betValue >= 0.001;
   };
 
-  // Get current balance in FLOW for display
-  const getCurrentBalanceInETH = () => {
-    const balance = parseFloat(userFlowBalance || '0');
-    return balance === 0 ? '0' : balance.toFixed(5);
-  };
-
-  // Format balance for display (show 0 instead of 0.00000)
-  const formatBalance = (balance) => {
-    const num = parseFloat(balance || '0');
-    if (num === 0) return '0';
-    // If it's a whole number, show without decimals
-    if (num % 1 === 0) return num.toString();
-    // Otherwise show with up to 5 decimals, removing trailing zeros
-    return parseFloat(num.toFixed(5)).toString();
+  // Get current balance in MON for display
+  const getCurrentBalanceInMON = () => {
+    return parseFloat(userBalance || '0').toFixed(5);
   };
 
   return (
@@ -379,7 +377,7 @@ export default function GameControls({ onBet, onRowChange, onRiskLevelChange, on
           Bet Amount
         </label>
         <div className="mb-2">
-          <span className="text-2xl font-bold text-white">{betAmount} FLOW</span>
+          <span className="text-2xl font-bold text-white">{betAmount} MON</span>
         </div>
         <div className="relative">
           <input
@@ -387,26 +385,27 @@ export default function GameControls({ onBet, onRowChange, onRiskLevelChange, on
             value={betAmount}
             onChange={(e) => handleBetAmountChange(e.target.value)}
             onBlur={(e) => {
-              const numValue = parseFloat(e.target.value) || 100;
-              setBetAmount(numValue.toString());
+              const numValue = parseFloat(e.target.value) || 0.001;
+              // Use more decimal places to handle small values like 0.001
+              setBetAmount(numValue.toFixed(3));
               if (onBetAmountChange) {
                 onBetAmountChange(numValue);
               }
             }}
             className="w-full bg-[#2A0025] border border-[#333947] rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
-            placeholder="100"
-            step="1"
-            min="1"
+            placeholder="0.001"
+            step="0.001"
+            min="0.001"
           />
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex flex-col">
             <button
-              onClick={() => handleBetAmountChange(parseFloat(betAmount || 0) + 1)}
+              onClick={() => handleBetAmountChange(parseFloat(betAmount || 0) + 0.001)}
               className="text-gray-400 hover:text-white p-1"
             >
               <ChevronUp className="w-4 h-4" />
             </button>
             <button
-              onClick={() => handleBetAmountChange(Math.max(parseFloat(betAmount || 0) - 1, 1))}
+              onClick={() => handleBetAmountChange(parseFloat(betAmount || 0) - 0.001)}
               className="text-gray-400 hover:text-white p-1"
             >
               <ChevronDown className="w-4 h-4" />
@@ -431,40 +430,40 @@ export default function GameControls({ onBet, onRowChange, onRiskLevelChange, on
         {/* Quick Bet Amounts */}
         <div className="grid grid-cols-3 gap-2 mt-2">
           <button
-            onClick={() => handleBetAmountChange(100)}
+            onClick={() => handleBetAmountChange(0.001)}
             className="bg-[#2A0025] border border-[#333947] rounded-lg py-2 text-xs text-white hover:bg-[#3A0035] transition-colors"
           >
-            100 FLOW
+            0.001 MON
           </button>
           <button
-            onClick={() => handleBetAmountChange(250)}
+            onClick={() => handleBetAmountChange(0.01)}
             className="bg-[#2A0025] border border-[#333947] rounded-lg py-2 text-xs text-white hover:bg-[#3A0035] transition-colors"
           >
-            250 FLOW
+            0.01 MON
           </button>
           <button
-            onClick={() => handleBetAmountChange(500)}
+            onClick={() => handleBetAmountChange(0.1)}
             className="bg-[#2A0025] border border-[#333947] rounded-lg py-2 text-xs text-white hover:bg-[#3A0035] transition-colors"
           >
-            500 FLOW
+            0.1 MON
           </button>
           <button
-            onClick={() => handleBetAmountChange(1000)}
+            onClick={() => handleBetAmountChange(1)}
             className="bg-[#2A0025] border border-[#333947] rounded-lg py-2 text-xs text-white hover:bg-[#3A0035] transition-colors"
           >
-            1000 FLOW
+            1.0 MON
           </button>
           <button
-            onClick={() => handleBetAmountChange(1500)}
+            onClick={() => handleBetAmountChange(5)}
             className="bg-[#2A0025] border border-[#333947] rounded-lg py-2 text-xs text-white hover:bg-[#3A0035] transition-colors"
           >
-            1500 FLOW
+            5.0 MON
           </button>
           <button
-            onClick={() => handleBetAmountChange(2000)}
+            onClick={() => handleBetAmountChange(10)}
             className="bg-[#2A0025] border border-[#333947] rounded-lg py-2 text-xs text-white hover:bg-[#3A0035] transition-colors"
           >
-            2000 FLOW
+            10.0 MON
           </button>
         </div>
       </div>
@@ -569,7 +568,7 @@ export default function GameControls({ onBet, onRowChange, onRiskLevelChange, on
           <div className="text-center p-3 bg-[#2A0025] rounded-lg border border-[#333947]">
             <span className="text-sm text-gray-400">Current Balance:</span>
             {isConnected ? (
-              <div className="text-lg font-bold text-green-400">{getCurrentBalanceInETH()} FLOW</div>
+              <div className="text-lg font-bold text-green-400">{getCurrentBalanceInMON()} MON</div>
             ) : (
               <div className="text-lg font-bold text-red-400">Connect Wallet</div>
             )}
@@ -592,8 +591,8 @@ export default function GameControls({ onBet, onRowChange, onRiskLevelChange, on
           {((gameMode === "auto" && !hasSufficientBalanceForAutoBet()) || (!gameMode === "auto" && !hasSufficientBalance())) && parseFloat(betAmount) > 0 && (
             <div className="text-center text-red-400 text-sm">
               {gameMode === "auto" 
-                ? `Insufficient balance for ${numberOfBets} bets of ${betAmount} FLOW each` 
-                : `Insufficient balance for ${betAmount} FLOW bet`
+                ? `Insufficient balance MON each` 
+                : `Insufficient balance MON bet`
               }
             </div>
           )}
