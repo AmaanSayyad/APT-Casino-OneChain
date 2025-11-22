@@ -39,7 +39,14 @@ export class GameHistoryService {
 
     try {
       const {
+        // Legacy field name (for backwards compatibility)
         vrfRequestId,
+        // New field names for One Chain migration
+        arbitrumVrfRequestId,
+        arbitrumEntropyTxHash,
+        onechainTxHash,
+        onechainBlockNumber,
+        // Common fields
         userAddress,
         gameType,
         gameConfig,
@@ -63,9 +70,15 @@ export class GameHistoryService {
         throw new Error('Invalid game type');
       }
 
+      // Support both old and new field names for backwards compatibility
+      const finalArbitrumVrfRequestId = arbitrumVrfRequestId || vrfRequestId || null;
+
       const query = `
         INSERT INTO game_results (
-          vrf_request_id,
+          arbitrum_vrf_request_id,
+          arbitrum_entropy_tx_hash,
+          onechain_tx_hash,
+          onechain_block_number,
           user_address,
           game_type,
           game_config,
@@ -73,12 +86,15 @@ export class GameHistoryService {
           bet_amount,
           payout_amount,
           created_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
         RETURNING *
       `;
 
       const values = [
-        vrfRequestId || null,
+        finalArbitrumVrfRequestId,
+        arbitrumEntropyTxHash || null,
+        onechainTxHash || null,
+        onechainBlockNumber || null,
         userAddress,
         gameType,
         JSON.stringify(gameConfig),
@@ -94,7 +110,10 @@ export class GameHistoryService {
 
       return {
         id: savedGame.id,
-        vrfRequestId: savedGame.vrf_request_id,
+        arbitrumVrfRequestId: savedGame.arbitrum_vrf_request_id,
+        arbitrumEntropyTxHash: savedGame.arbitrum_entropy_tx_hash,
+        onechainTxHash: savedGame.onechain_tx_hash,
+        onechainBlockNumber: savedGame.onechain_block_number,
         userAddress: savedGame.user_address,
         gameType: savedGame.game_type,
         gameConfig: JSON.parse(savedGame.game_config),
@@ -111,11 +130,11 @@ export class GameHistoryService {
   }
 
   /**
-   * Get VRF details for a game result
-   * @param {string} vrfRequestId - VRF request ID
+   * Get VRF details for a game result (Arbitrum Sepolia entropy)
+   * @param {string} arbitrumVrfRequestId - Arbitrum VRF request ID
    * @returns {Promise<Object>} VRF details
    */
-  async getVRFDetails(vrfRequestId) {
+  async getVRFDetails(arbitrumVrfRequestId) {
     this.ensureInitialized();
 
     try {
@@ -134,7 +153,7 @@ export class GameHistoryService {
         WHERE id = $1
       `;
 
-      const result = await this.pool.query(query, [vrfRequestId]);
+      const result = await this.pool.query(query, [arbitrumVrfRequestId]);
       
       if (result.rows.length === 0) {
         return null;
@@ -152,7 +171,7 @@ export class GameHistoryService {
         status: vrf.status,
         createdAt: vrf.created_at,
         fulfilledAt: vrf.fulfilled_at,
-        etherscanUrl: `${process.env.NEXT_PUBLIC_SEPOLIA_EXPLORER}/tx/${vrf.transaction_hash}`,
+        arbitrumSepoliaExplorerUrl: `${process.env.NEXT_PUBLIC_SEPOLIA_EXPLORER}/tx/${vrf.transaction_hash}`,
         verifiable: true
       };
 
@@ -183,7 +202,10 @@ export class GameHistoryService {
       let query = `
         SELECT 
           gr.id,
-          gr.vrf_request_id,
+          gr.arbitrum_vrf_request_id,
+          gr.arbitrum_entropy_tx_hash,
+          gr.onechain_tx_hash,
+          gr.onechain_block_number,
           gr.user_address,
           gr.game_type,
           gr.game_config,
@@ -193,8 +215,8 @@ export class GameHistoryService {
           gr.created_at,
           ${includeVrfDetails ? `
           vr.request_id as vrf_request_id_string,
-          vr.transaction_hash,
-          vr.block_number,
+          vr.transaction_hash as arbitrum_vrf_tx_hash,
+          vr.block_number as arbitrum_block_number,
           vr.vrf_value,
           vr.fulfilled_at,
           vr.game_sub_type,
@@ -205,7 +227,7 @@ export class GameHistoryService {
             ELSE -gr.bet_amount
           END as profit_loss
         FROM game_results gr
-        ${includeVrfDetails ? 'LEFT JOIN vrf_requests vr ON gr.vrf_request_id = vr.id' : ''}
+        ${includeVrfDetails ? 'LEFT JOIN vrf_requests vr ON gr.arbitrum_vrf_request_id = vr.id' : ''}
         WHERE gr.user_address = $1
       `;
 
@@ -229,7 +251,10 @@ export class GameHistoryService {
       const games = result.rows.map(row => {
         const game = {
           id: row.id,
-          vrfRequestId: row.vrf_request_id,
+          arbitrumVrfRequestId: row.arbitrum_vrf_request_id,
+          arbitrumEntropyTxHash: row.arbitrum_entropy_tx_hash,
+          onechainTxHash: row.onechain_tx_hash,
+          onechainBlockNumber: row.onechain_block_number,
           userAddress: row.user_address,
           gameType: row.game_type,
           gameConfig: JSON.parse(row.game_config),
@@ -241,18 +266,23 @@ export class GameHistoryService {
           isWin: row.payout_amount > row.bet_amount
         };
 
-        // Add VRF details if available
-        if (includeVrfDetails && row.transaction_hash) {
+        // Add One Chain explorer link if available
+        if (row.onechain_tx_hash) {
+          game.onechainExplorerUrl = `${process.env.NEXT_PUBLIC_ONECHAIN_TESTNET_EXPLORER}/tx/${row.onechain_tx_hash}`;
+        }
+
+        // Add VRF details if available (Arbitrum Sepolia entropy)
+        if (includeVrfDetails && row.arbitrum_vrf_tx_hash) {
           game.vrfDetails = {
             requestId: row.vrf_request_id_string,
-            transactionHash: row.transaction_hash,
-            blockNumber: row.block_number,
+            transactionHash: row.arbitrum_vrf_tx_hash,
+            blockNumber: row.arbitrum_block_number,
             vrfValue: row.vrf_value,
             fulfilledAt: row.fulfilled_at,
             gameSubType: row.game_sub_type,
-            etherscanUrl: `${process.env.NEXT_PUBLIC_SEPOLIA_EXPLORER}/tx/${row.transaction_hash}`,
+            arbitrumSepoliaExplorerUrl: `${process.env.NEXT_PUBLIC_SEPOLIA_EXPLORER}/tx/${row.arbitrum_vrf_tx_hash}`,
             verifiable: true,
-            verificationNote: "This result was generated using Pyth Entropy - click to verify on Etherscan"
+            verificationNote: "This result was generated using Pyth Entropy on Arbitrum Sepolia - click to verify on Etherscan"
           };
         }
 
@@ -380,7 +410,7 @@ export class GameHistoryService {
   }
 
   /**
-   * Verify game result using VRF
+   * Verify game result using VRF (Arbitrum Sepolia entropy)
    * @param {string} gameId - Game result ID
    * @returns {Promise<Object>} Verification result
    */
@@ -392,10 +422,10 @@ export class GameHistoryService {
         SELECT 
           gr.*,
           vr.vrf_value,
-          vr.transaction_hash,
+          vr.transaction_hash as arbitrum_vrf_tx_hash,
           vr.request_id
         FROM game_results gr
-        LEFT JOIN vrf_requests vr ON gr.vrf_request_id = vr.id
+        LEFT JOIN vrf_requests vr ON gr.arbitrum_vrf_request_id = vr.id
         WHERE gr.id = $1
       `;
 
@@ -422,11 +452,14 @@ export class GameHistoryService {
         verifiable: true,
         gameId: game.id,
         vrfValue: game.vrf_value,
-        transactionHash: game.transaction_hash,
+        arbitrumEntropyTxHash: game.arbitrum_vrf_tx_hash,
+        onechainTxHash: game.onechain_tx_hash,
         requestId: game.request_id,
-        etherscanUrl: `${process.env.NEXT_PUBLIC_SEPOLIA_EXPLORER}/tx/${game.transaction_hash}`,
+        arbitrumSepoliaExplorerUrl: `${process.env.NEXT_PUBLIC_SEPOLIA_EXPLORER}/tx/${game.arbitrum_vrf_tx_hash}`,
+        onechainExplorerUrl: game.onechain_tx_hash ? 
+          `${process.env.NEXT_PUBLIC_ONECHAIN_TESTNET_EXPLORER}/tx/${game.onechain_tx_hash}` : null,
         verified: true, // This would be the result of actual verification
-        message: 'Game result is verifiable on-chain via Pyth Entropy'
+        message: 'Game result is verifiable on-chain via Pyth Entropy (Arbitrum Sepolia) and One Chain'
       };
 
     } catch (error) {
@@ -454,13 +487,15 @@ export class GameHistoryService {
           gr.bet_amount,
           gr.payout_amount,
           gr.created_at,
-          vr.transaction_hash,
+          gr.onechain_tx_hash,
+          gr.arbitrum_entropy_tx_hash,
+          vr.transaction_hash as arbitrum_vrf_tx_hash,
           CASE 
             WHEN gr.payout_amount > gr.bet_amount THEN 'win'
             ELSE 'loss'
           END as result
         FROM game_results gr
-        LEFT JOIN vrf_requests vr ON gr.vrf_request_id = vr.id
+        LEFT JOIN vrf_requests vr ON gr.arbitrum_vrf_request_id = vr.id
         WHERE 1=1
       `;
 
@@ -485,10 +520,14 @@ export class GameHistoryService {
         betAmount: row.bet_amount,
         payoutAmount: row.payout_amount,
         result: row.result,
-        transactionHash: row.transaction_hash,
+        onechainTxHash: row.onechain_tx_hash,
+        arbitrumEntropyTxHash: row.arbitrum_entropy_tx_hash,
+        arbitrumVrfTxHash: row.arbitrum_vrf_tx_hash,
         createdAt: row.created_at,
-        etherscanUrl: row.transaction_hash ? 
-          `${process.env.NEXT_PUBLIC_SEPOLIA_EXPLORER}/tx/${row.transaction_hash}` : null
+        onechainExplorerUrl: row.onechain_tx_hash ? 
+          `${process.env.NEXT_PUBLIC_ONECHAIN_TESTNET_EXPLORER}/tx/${row.onechain_tx_hash}` : null,
+        arbitrumSepoliaExplorerUrl: row.arbitrum_vrf_tx_hash ? 
+          `${process.env.NEXT_PUBLIC_SEPOLIA_EXPLORER}/tx/${row.arbitrum_vrf_tx_hash}` : null
       }));
 
     } catch (error) {
