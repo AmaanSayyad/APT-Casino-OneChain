@@ -1,61 +1,34 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useAccount, useWalletClient } from 'wagmi';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 
 const SmartAccountInfo = () => {
-  const { address, isConnected } = useAccount();
-  const { data: walletClient } = useWalletClient();
+  const currentAccount = useCurrentAccount();
+  const address = currentAccount?.address;
+  const isConnected = !!currentAccount;
   const [smartAccountInfo, setSmartAccountInfo] = useState(null);
   const [isSmartAccount, setIsSmartAccount] = useState(false);
 
   useEffect(() => {
     const checkSmartAccount = async () => {
-      if (!isConnected || !address || !walletClient) return;
+      if (!isConnected || !address) return;
 
       try {
-        // Check if the connected account is a smart account
-        let code = '0x';
-        try {
-          if (walletClient.getBytecode) {
-            code = await walletClient.getBytecode({ address });
-          } else if (walletClient.getCode) {
-            code = await walletClient.getCode({ address });
-          } else if (window.ethereum) {
-            code = await window.ethereum.request({
-              method: 'eth_getCode',
-              params: [address, 'latest']
-            });
-          }
-        } catch (codeError) {
-          console.warn('Could not get bytecode:', codeError);
-          code = '0x';
-        }
-        
-        const hasCode = code && code !== '0x' && code.length > 2;
-        setIsSmartAccount(hasCode);
-
-        if (hasCode) {
-          setSmartAccountInfo({
-            address,
-            type: 'Smart Account',
-            hasCode: true,
-            codeLength: code?.length || 0
-          });
-        } else {
-          setSmartAccountInfo({
-            address,
-            type: 'Externally Owned Account (EOA)',
-            hasCode: false
-          });
-        }
+        // For Sui/One Chain, all accounts are regular accounts (not smart contracts)
+        setIsSmartAccount(false);
+        setSmartAccountInfo({
+          address,
+          type: 'Sui Account',
+          hasCode: false
+        });
       } catch (error) {
-        console.error('Error checking smart account:', error);
+        console.error('Error checking account:', error);
       }
     };
 
     checkSmartAccount();
-  }, [isConnected, address, walletClient]);
+  }, [isConnected, address]);
 
   if (!isConnected || !smartAccountInfo) return null;
 

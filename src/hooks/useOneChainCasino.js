@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from 'react';
-import { useAccount } from 'wagmi';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 import oneChainClientService from '../services/OneChainClientService.js';
 import {
   ServiceError,
@@ -16,7 +16,9 @@ import {
  * Ensures service independence between One Chain and Arbitrum Sepolia
  */
 export const useOneChainCasino = () => {
-  const { address: account, isConnected: connected } = useAccount();
+  const currentAccount = useCurrentAccount();
+  const account = currentAccount?.address;
+  const connected = !!currentAccount;
   const [balance, setBalance] = useState('0');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

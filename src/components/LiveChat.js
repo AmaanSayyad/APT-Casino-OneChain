@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { useAccount } from 'wagmi';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 
 function normalizeWalletAddress(account) {
   try {
@@ -25,8 +25,8 @@ function normalizeWalletAddress(account) {
 }
 
 export default function LiveChat({ open, onClose }) {
-  const { address } = useAccount();
-  const walletAddr = address || "guest";
+  const currentAccount = useCurrentAccount();
+  const walletAddr = currentAccount?.address || "guest";
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const bottomRef = useRef(null);

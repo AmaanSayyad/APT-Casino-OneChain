@@ -101,6 +101,7 @@ export function useOneChainWallet() {
       signAndExecuteTransaction(
         {
           transaction,
+          chain: 'sui:testnet', // OneChain uses Sui testnet identifier
           ...options,
         },
         {

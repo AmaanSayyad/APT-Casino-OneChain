@@ -1,105 +1,123 @@
 import { NextResponse } from 'next/server';
-import { ethers } from 'ethers';
+import { SuiClient } from '@mysten/sui/client';
+import { Transaction } from '@mysten/sui/transactions';
+import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
+import { fromBase64 } from '@mysten/sui/utils';
 
-// Monad Treasury private key from environment
-const MONAD_TREASURY_PRIVATE_KEY = process.env.MONAD_TREASURY_PRIVATE_KEY || process.env.TREASURY_PRIVATE_KEY || "0x73e0cfb4d786d6e542533e18eb78fb5c727ab802b89c6850962042a8f0835f0c";
+// One Chain Treasury wallet address
+const ONECHAIN_TREASURY_ADDRESS = process.env.ONECHAIN_CASINO_WALLET_ADDRESS;
 
-// Monad Testnet RPC URL
-const MONAD_TESTNET_RPC = process.env.NEXT_PUBLIC_0G_GALILEO_RPC || 'https://testnet-rpc.monad.xyz';
+// One Chain RPC URL
+const ONECHAIN_RPC = process.env.NEXT_PUBLIC_ONECHAIN_TESTNET_RPC || 'https://rpc-testnet.onelabs.cc:443';
 
-// Create provider and wallet
-const provider = new ethers.JsonRpcProvider(MONAD_TESTNET_RPC);
-const treasuryWallet = new ethers.Wallet(MONAD_TREASURY_PRIVATE_KEY, provider);
+// Create Sui client
+const suiClient = new SuiClient({ url: ONECHAIN_RPC });
+
+// Load treasury keypair from environment
+// Note: In production, use secure key management (e.g., AWS KMS, HashiCorp Vault)
+let treasuryKeypair = null;
+try {
+  // Load from Sui keystore format (base64 encoded with flag byte)
+  const privateKeyBase64 = process.env.ONECHAIN_TREASURY_PRIVATE_KEY;
+  if (privateKeyBase64) {
+    const fullKeyBytes = fromBase64(privateKeyBase64);
+    // Skip the first byte (flag) and take the next 32 bytes
+    const privateKeyBytes = fullKeyBytes.slice(1, 33);
+    treasuryKeypair = Ed25519Keypair.fromSecretKey(privateKeyBytes);
+    console.log('✅ Treasury keypair loaded successfully');
+    console.log('Treasury address:', treasuryKeypair.getPublicKey().toSuiAddress());
+  }
+} catch (error) {
+  console.error('❌ Failed to load treasury keypair:', error);
+}
 
 export async function POST(request) {
   try {
-    const { userAddress, amount } = await request.json();
+    const { userAddress, amount, network } = await request.json();
 
-    console.log('📥 Received withdrawal request:', { userAddress, amount, type: typeof userAddress });
+    console.log('📥 Received withdrawal request:', { userAddress, amount, network });
 
     // Validate input
     if (!userAddress || !amount || amount <= 0) {
-      return new Response(JSON.stringify({
-        error: 'Invalid parameters'
-      }), {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-    }
-
-    if (!MONAD_TREASURY_PRIVATE_KEY) {
       return NextResponse.json(
-        { error: 'Treasury not configured' },
-        { status: 500 }
-      );
-    }
-
-    console.log(`🏦 Processing withdrawal: ${amount} MON to ${userAddress}`);
-    console.log(`📍 Treasury: ${treasuryWallet.address}`);
-
-    // Check treasury balance
-    let treasuryBalance = 0;
-    try {
-      treasuryBalance = await provider.getBalance(treasuryWallet.address);
-      console.log(`💰 Treasury balance: ${ethers.formatEther(treasuryBalance)} MON`);
-    } catch (balanceError) {
-      console.log('⚠️ Could not check treasury balance, proceeding with transfer attempt...');
-      console.log('Balance error:', balanceError.message);
-    }
-
-    // Check if treasury has sufficient funds
-    const amountWei = ethers.parseEther(amount.toString());
-    if (treasuryBalance < amountWei) {
-      return NextResponse.json(
-        { error: `Insufficient treasury funds. Available: ${ethers.formatEther(treasuryBalance)} MON, Requested: ${amount} MON` },
+        { error: 'Invalid parameters' },
         { status: 400 }
       );
     }
 
-    // Format user address
-    let formattedUserAddress;
-    if (typeof userAddress === 'object' && userAddress.data) {
-      // Convert Uint8Array-like object to hex string
-      const bytes = Object.values(userAddress.data);
-      formattedUserAddress = '0x' + bytes.map(b => b.toString(16).padStart(2, '0')).join('');
-    } else if (typeof userAddress === 'string') {
-      formattedUserAddress = userAddress.startsWith('0x') ? userAddress : `0x${userAddress}`;
-    } else {
-      throw new Error(`Invalid userAddress format: ${typeof userAddress}`);
+    if (!treasuryKeypair || !ONECHAIN_TREASURY_ADDRESS) {
+      return NextResponse.json(
+        { error: 'Treasury wallet not configured' },
+        { status: 500 }
+      );
     }
 
-    console.log('🔧 Formatted user address:', formattedUserAddress);
-    console.log('🔧 Treasury account:', treasuryWallet.address);
-    console.log('🔧 Amount in Wei:', amountWei.toString());
+    console.log(`🏦 Processing One Chain withdrawal: ${amount} OCT to ${userAddress}`);
+    console.log(`📍 Treasury: ${ONECHAIN_TREASURY_ADDRESS}`);
 
-    // Send transaction from treasury to user
-    const tx = await treasuryWallet.sendTransaction({
-      to: formattedUserAddress,
-      value: amountWei,
-      gasLimit: process.env.GAS_LIMIT_WITHDRAW ? parseInt(process.env.GAS_LIMIT_WITHDRAW) : 100000
+    // Check treasury balance
+    let treasuryBalance;
+    try {
+      const balanceData = await suiClient.getBalance({
+        owner: ONECHAIN_TREASURY_ADDRESS,
+        coinType: '0x2::sui::SUI', // Using SUI coin type as fallback
+      });
+      treasuryBalance = BigInt(balanceData.totalBalance);
+      console.log(`💰 Treasury balance: ${Number(treasuryBalance) / 1e9} OCT`);
+    } catch (balanceError) {
+      console.error('⚠️ Could not check treasury balance:', balanceError);
+      return NextResponse.json(
+        { error: 'Failed to check treasury balance' },
+        { status: 500 }
+      );
+    }
+
+    // Convert amount to MIST (1 OCT = 1,000,000,000 MIST)
+    const amountInMist = BigInt(Math.floor(amount * 1e9));
+    
+    // Check if treasury has sufficient funds (including gas)
+    const estimatedGas = BigInt(10000000); // 0.01 OCT for gas
+    if (treasuryBalance < amountInMist + estimatedGas) {
+      return NextResponse.json(
+        { 
+          error: `Insufficient treasury funds. Available: ${Number(treasuryBalance) / 1e9} OCT, Requested: ${amount} OCT (+ gas)` 
+        },
+        { status: 400 }
+      );
+    }
+
+    // Create Sui transaction
+    const tx = new Transaction();
+    
+    // Split coin for exact amount
+    const [coin] = tx.splitCoins(tx.gas, [amountInMist.toString()]);
+    
+    // Transfer to user
+    tx.transferObjects([coin], userAddress);
+    
+    // Set gas budget
+    tx.setGasBudget(estimatedGas.toString());
+
+    console.log('🔧 Executing withdrawal transaction...');
+
+    // Sign and execute transaction
+    const result = await suiClient.signAndExecuteTransaction({
+      signer: treasuryKeypair,
+      transaction: tx,
     });
 
-    console.log(`📤 Transaction sent: ${tx.hash}`);
+    console.log(`📤 Transaction executed: ${result.digest}`);
+    console.log(`✅ Withdrew ${amount} OCT to ${userAddress}`);
 
-    // Return transaction hash immediately without waiting for confirmation
-    // User can check transaction status on Etherscan
-    console.log(`✅ Withdraw MON to ${userAddress}, TX: ${tx.hash}`);
-
-    return new Response(JSON.stringify({
+    return NextResponse.json({
       success: true,
-      transactionHash: tx.hash,
+      transactionDigest: result.digest,
       amount: amount,
       userAddress: userAddress,
-      treasuryAddress: treasuryWallet.address,
-      status: 'pending',
-      message: 'Transaction sent successfully. Check Etherscan for confirmation.'
-    }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      treasuryAddress: ONECHAIN_TREASURY_ADDRESS,
+      status: 'success',
+      message: 'Withdrawal successful. Check One Chain explorer for confirmation.',
+      explorerUrl: `https://onescan.cc/testnet/tx/${result.digest}`
     });
 
   } catch (error) {
@@ -110,52 +128,49 @@ export async function POST(request) {
       name: error.name
     });
 
-    // Ensure error message is a string
     const errorMessage = error?.message || 'Unknown error occurred';
     const safeErrorMessage = typeof errorMessage === 'string' ? errorMessage : 'Unknown error occurred';
 
-    return new Response(JSON.stringify({
-      error: `Withdrawal failed: ${safeErrorMessage}`
-    }), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    return NextResponse.json(
+      { error: `Withdrawal failed: ${safeErrorMessage}` },
+      { status: 500 }
+    );
   }
 }
 
 // GET endpoint to check treasury balance
 export async function GET() {
   try {
-    if (!MONAD_TREASURY_PRIVATE_KEY) {
+    if (!ONECHAIN_TREASURY_ADDRESS) {
       return NextResponse.json(
         { error: 'Treasury not configured' },
         { status: 500 }
       );
     }
 
-    const treasuryAccount = new EthereumAccount(
-      new Uint8Array(Buffer.from(MONAD_TREASURY_PRIVATE_KEY.slice(2), 'hex'))
-    );
-
-    const coinClient = new CoinClient(client);
-
     try {
-      const balance = await coinClient.checkBalance(treasuryAccount);
+      const balanceData = await suiClient.getBalance({
+        owner: ONECHAIN_TREASURY_ADDRESS,
+        coinType: '0x2::sui::SUI',
+      });
+
+      const balanceInOct = Number(balanceData.totalBalance) / 1e9;
 
       return NextResponse.json({
-        treasuryAddress: treasuryAccount.address().hex(),
-        balance: balance / 100000000, // Convert to MON balanceOctas: balance.toString(),
-        status: 'active'
+        treasuryAddress: ONECHAIN_TREASURY_ADDRESS,
+        balance: balanceInOct,
+        balanceMist: balanceData.totalBalance,
+        status: 'active',
+        network: 'onechain-testnet'
       });
     } catch (balanceError) {
+      console.error('Balance check error:', balanceError);
       return NextResponse.json({
-        treasuryAddress: treasuryAccount.address().hex(),
+        treasuryAddress: ONECHAIN_TREASURY_ADDRESS,
         balance: 0,
-        balanceOctas: '0',
-        status: 'initializing',
-        note: 'Treasury wallet is being initialized. Please wait a few minutes.'
+        balanceMist: '0',
+        status: 'error',
+        error: balanceError.message
       });
     }
 

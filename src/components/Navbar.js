@@ -12,7 +12,7 @@ import OneChainWalletButton from "./OneChainWalletButton";
 import LiveChat from "./LiveChat";
 import SmartAccountInfo from "./SmartAccountInfo";
 import SmartAccountModal from "./SmartAccountModal";
-
+import { Transaction } from '@mysten/sui/transactions';
 
 import { useNotification } from './NotificationSystem';
 import { TREASURY_CONFIG } from '../config/treasury';
@@ -132,7 +132,9 @@ export default function Navbar() {
     balance: walletBalance,
     formatOCTAmount,
     parseOCTAmount,
-    fetchBalance 
+    fetchBalance,
+    executeTransaction,
+    suiClient
   } = useOneChainWallet();
   const isWalletReady = isConnected && address;
 
@@ -141,8 +143,6 @@ export default function Navbar() {
     console.log('🔗 Wallet connection state:', { 
       isConnected, 
       address, 
-      chainId, 
-      walletClient: !!walletClient,
       isWalletReady 
     });
     
@@ -154,14 +154,12 @@ export default function Navbar() {
         console.log('⏰ After delay - Wallet state:', { 
           isConnected, 
           address, 
-          chainId, 
-          walletClient: !!walletClient,
           isWalletReady 
         });
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [isConnected, address, chainId, walletClient, isWalletReady]);
+  }, [isConnected, address, isWalletReady]);
 
 
   // Mock notifications for UI purposes
@@ -340,7 +338,7 @@ export default function Navbar() {
     dispatch(setLoading(false));
   };
 
-  // Handle withdraw from house account
+  // Handle withdraw from house account (One Chain)
   const handleWithdraw = async () => {
     if (!isConnected || !address) {
       notification.error('Please connect your wallet first');
@@ -349,16 +347,16 @@ export default function Navbar() {
 
     try {
       setIsWithdrawing(true);
-      const balanceInMon = parseFloat(userBalance || '0');
-      if (balanceInMon <= 0) {
+      const balanceInOct = parseFloat(userBalance || '0');
+      if (balanceInOct <= 0) {
         notification.error('No balance to withdraw');
         return;
       }
 
-      // Call backend API to process withdrawal from treasury
-      console.log('🔍 Account object:', address);
-      console.log('🔍 Account address:', address);
-      console.log('🔍 Account address type:', typeof address);
+      // Call backend API to process withdrawal from One Chain treasury
+      console.log('🔍 Withdrawing from One Chain treasury:', { address, amount: balanceInOct });
+      
+      notification.info('Processing withdrawal from treasury...');
       
       const response = await fetch('/api/withdraw', {
         method: 'POST',
@@ -367,7 +365,8 @@ export default function Navbar() {
         },
         body: JSON.stringify({
           userAddress: address,
-          amount: balanceInMon
+          amount: balanceInOct,
+          network: 'onechain-testnet'
         })
       });
 
@@ -385,11 +384,11 @@ export default function Navbar() {
       // Clear localStorage balance
       localStorage.setItem('userBalance', '0');
       
-      // Check if transaction hash exists before using it
-      const txHash = result?.transactionHash || 'Unknown';
-      const txDisplay = txHash !== 'Unknown' ? `${txHash.slice(0, 8)}...` : 'Pending';
+      // Check if transaction digest exists
+      const txDigest = result?.transactionDigest || result?.transactionHash || 'Unknown';
+      const txDisplay = txDigest !== 'Unknown' ? `${txDigest.slice(0, 10)}...` : 'Pending';
       
-      notification.success(`Withdrawal transaction sent! ${balanceInMon.toFixed(5)} MON will be transferred. TX: ${txDisplay}`);
+      notification.success(`Withdrawal successful! ${balanceInOct.toFixed(5)} OCT transferred. TX: ${txDisplay}`);
       
       // Close the modal
       setShowBalanceModal(false);
@@ -407,7 +406,7 @@ export default function Navbar() {
     }
   };
 
-  // Handle deposit to house balance
+  // Handle deposit to house balance (One Chain)
   const handleDeposit = async () => {
     // Prevent multiple simultaneous deposits
     if (isDepositing) {
@@ -428,143 +427,53 @@ export default function Navbar() {
     
     // Check deposit limits
     if (amount < TREASURY_CONFIG.LIMITS.MIN_DEPOSIT) {
-      notification.error(`Minimum deposit amount is ${TREASURY_CONFIG.LIMITS.MIN_DEPOSIT} MON`);
+      notification.error(`Minimum deposit amount is ${TREASURY_CONFIG.LIMITS.MIN_DEPOSIT} OCT`);
       return;
     }
     
     if (amount > TREASURY_CONFIG.LIMITS.MAX_DEPOSIT) {
-      notification.error(`Maximum deposit amount is ${TREASURY_CONFIG.LIMITS.MAX_DEPOSIT} MON`);
+      notification.error(`Maximum deposit amount is ${TREASURY_CONFIG.LIMITS.MAX_DEPOSIT} OCT`);
       return;
     }
 
     setIsDepositing(true);
-    console.log('🚀 Starting deposit process for:', amount, 'MON');
+    console.log('🚀 Starting One Chain deposit process for:', amount, 'OCT');
     try {
-      console.log('Depositing to house balance:', { address: address, amount });
+      console.log('Depositing to One Chain treasury:', { address, amount });
       
-      // Check if MetaMask is available
-      if (!window.ethereum) {
-        throw new Error('MetaMask is not installed');
-      }
+      // Create Sui transaction for OCT transfer
+      const tx = new Transaction();
       
-      // Request account access if not already connected
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const userAccount = accounts[0];
+      // Convert amount to MIST (1 OCT = 1,000,000,000 MIST)
+      const amountInMist = parseOCTAmount(amount);
       
-      // Check if user is on Monad Testnet network
-      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-      const expectedChainId = TREASURY_CONFIG.NETWORK.CHAIN_ID;
+      // Split coin for exact amount
+      const [coin] = tx.splitCoins(tx.gas, [amountInMist]);
       
-      console.log('🔍 Current chain ID:', chainId);
-      console.log('🔍 Expected chain ID:', expectedChainId);
+      // Transfer to treasury
+      tx.transferObjects([coin], TREASURY_CONFIG.ADDRESS);
       
-      if (chainId !== expectedChainId) {
-        console.log('🔄 Need to switch network...');
-        // Try to switch to Monad Testnet
-        try {
-          console.log('🔄 Attempting to switch to Monad Testnet...');
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: expectedChainId }],
-          });
-          console.log('✅ Successfully switched to Monad Testnet');
-        } catch (switchError) {
-          console.log('⚠️ Switch error:', switchError);
-          // If Monad Testnet is not added, add it
-          if (switchError.code === 4902) {
-            console.log('🔧 Network not found, adding Monad Testnet...');
-            try {
-              await window.ethereum.request({
-                method: 'wallet_addEthereumChain',
-                params: [{
-                  chainId: expectedChainId,
-                  chainName: TREASURY_CONFIG.NETWORK.CHAIN_NAME,
-                  nativeCurrency: {
-                    name: 'MON',
-                    symbol: 'MON',
-                    decimals: 18
-                  },
-                  rpcUrls: [TREASURY_CONFIG.NETWORK.RPC_URL],
-                  blockExplorerUrls: [TREASURY_CONFIG.NETWORK.EXPLORER_URL]
-                }]
-              });
-              console.log('✅ Successfully added Monad Testnet network');
-              
-              // Try to switch again after adding
-              await window.ethereum.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: expectedChainId }],
-              });
-              console.log('✅ Successfully switched to Monad Testnet after adding');
-            } catch (addError) {
-              console.error('❌ Failed to add network:', addError);
-              throw new Error(`Failed to add Monad Testnet network: ${addError.message}`);
-            }
-          } else {
-            console.error('❌ Switch error:', switchError);
-            throw new Error(`Please switch to ${TREASURY_CONFIG.NETWORK.CHAIN_NAME} network. Error: ${switchError.message}`);
-          }
-        }
-      } else {
-        console.log('✅ Already on correct network');
-      }
+      notification.info('Please approve the transaction in your wallet...');
       
-      // Casino treasury address from config
-      const TREASURY_ADDRESS = TREASURY_CONFIG.ADDRESS;
+      // Execute transaction
+      const result = await executeTransaction(tx);
       
-      // Convert amount to Wei (18 decimals)
-      const amountWei = (amount * 10**18).toString();
+      console.log('✅ Deposit transaction successful:', result);
       
-      // Send transaction to treasury
-      const transactionParameters = {
-        to: TREASURY_ADDRESS,
-        from: userAccount,
-        value: '0x' + parseInt(amountWei).toString(16), // Convert to hex
-        gas: TREASURY_CONFIG.GAS.DEPOSIT_LIMIT, // Gas limit from config
-      };
-      
-      console.log('Sending transaction to MetaMask:', transactionParameters);
-      
-      // Request transaction from MetaMask
-      const txHash = await window.ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [transactionParameters],
-      });
-      
-      console.log('Transaction sent:', txHash);
-      
-      // Wait for transaction confirmation
-      notification.info(`Transaction sent! Hash: ${txHash.slice(0, 10)}...`);
-      
-      // Wait for confirmation (you can implement proper confirmation checking here)
-      await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 seconds
-      
-      // After successful transaction, update local balance
+      // Update local balance
       const currentBalance = parseFloat(userBalance || '0');
       const newBalance = (currentBalance + amount).toString();
       
-      console.log('🔄 Balance update before dispatch:', { currentBalance, amount, newBalance });
+      console.log('🔄 Balance update:', { currentBalance, amount, newBalance });
       
-      // Update Redux store immediately (this will also update localStorage)
+      // Update Redux store
       dispatch(setBalance(newBalance));
       
-      console.log('✅ Balance updated in Redux store');
-      
-      // Call deposit API to record the transaction (optional - for logging purposes only)
-      try {
-        if (address) {
-          const result = await UserBalanceSystem.deposit(address, amount, txHash);
-          console.log('✅ Deposit recorded in API:', result);
-        } else {
-          console.warn('Account address not available for API call');
-        }
-        
-      } catch (apiError) {
-        console.warn('⚠️ Could not record deposit in API:', apiError);
-        // Don't fail the deposit if API call fails - balance is already updated
-      }
-      
-      notification.success(`Successfully deposited ${amount} MON to casino treasury! TX: ${txHash.slice(0, 10)}...`);
+      // Show success with transaction digest
+      const txDigest = result.digest;
+      notification.success(
+        `Successfully deposited ${amount} OCT! TX: ${txDigest.slice(0, 10)}...`
+      );
       
       setDepositAmount("");
       
@@ -999,22 +908,6 @@ export default function Navbar() {
             
             {/* One Chain Wallet Button */}
             <OneChainWalletButton />
-                {isSmartAccount ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <circle cx="9" cy="9" r="2"/>
-                    <path d="M21 15.5c-1.5-1.5-4-1.5-5.5 0"/>
-                    <path d="M12 12l9 9"/>
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                  </svg>
-                )}
-                {isSmartAccount ? 'Smart Account' : 'EOA Account'}
-              </button>
-            )}
             
             {/* Live Chat Button */}
             <button
@@ -1026,9 +919,6 @@ export default function Navbar() {
               </svg>
               Live Chat
             </button>
-            
-            {/* Ethereum Wallet Button */}
-            <EthereumConnectWalletButton />
       
           </div>
         </div>
@@ -1149,8 +1039,27 @@ export default function Navbar() {
               {/* Deposit Section */}
               <div className="mb-6">
                 <h4 className="text-sm font-medium text-white mb-2">Deposit OCT to Casino Treasury</h4>
-                <div className="text-xs text-gray-400 mb-2">
-                  Treasury: {TREASURY_CONFIG.ADDRESS.slice(0, 10)}...{TREASURY_CONFIG.ADDRESS.slice(-8)}
+                <div className="text-xs text-gray-400 mb-3 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500">Network:</span>
+                    <span className="text-purple-400 font-medium">{TREASURY_CONFIG.NETWORK.CHAIN_NAME}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500">Treasury:</span>
+                    <span className="font-mono">{TREASURY_CONFIG.ADDRESS.slice(0, 10)}...{TREASURY_CONFIG.ADDRESS.slice(-8)}</span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(TREASURY_CONFIG.ADDRESS);
+                        notification.success('Treasury address copied!');
+                      }}
+                      className="text-purple-400 hover:text-purple-300 transition-colors"
+                      title="Copy address"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <input

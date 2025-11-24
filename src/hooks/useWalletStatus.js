@@ -7,7 +7,7 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { useCurrentAccount, useConnectWallet, useDisconnectWallet } from '@mysten/dapp-kit';
 
 const WalletStatusContext = createContext(null);
 
@@ -15,14 +15,10 @@ export function WalletStatusProvider({ children }) {
   // Always use real wallet - no dev wallet
   const isDev = false;
 
-  const {
-    address: account,
-    isConnected: connected,
-    chain: network
-  } = useAccount();
-
-  const { connect, connectors } = useConnect();
-  const { disconnect } = useDisconnect();
+  // Use Sui wallet hooks instead of Wagmi
+  const currentAccount = useCurrentAccount();
+  const { mutate: connect } = useConnectWallet();
+  const { mutate: disconnect } = useDisconnectWallet();
 
   const [devWallet, setDevWallet] = useState({
     isConnected: false,
@@ -78,23 +74,24 @@ export function WalletStatusProvider({ children }) {
       setDevWallet({
         isConnected: true,
         address: '0x1234...dev',
-        chain: { id: 'arbitrum_testnet', name: 'Arbitrum Sepolia' },
+        chain: { id: 'onechain-testnet', name: 'One Chain Testnet' },
       });
       return;
     }
 
     try {
-      // MetaMask ile bağlan
-      const metaMaskConnector = connectors.find(connector => connector.id === 'metaMask');
-      if (metaMaskConnector) {
-        await connect({ connector: metaMaskConnector });
-      } else {
-        setError('MetaMask connector not found');
-      }
+      // Sui wallet will show connection modal automatically
+      connect(
+        { wallet: undefined }, // Let user choose wallet
+        {
+          onSuccess: () => console.log('Wallet connected successfully'),
+          onError: (err) => setError('Failed to connect wallet: ' + err.message)
+        }
+      );
     } catch (err) {
-      setError('Failed to connect to MetaMask: ' + err.message);
+      setError('Failed to connect wallet: ' + err.message);
     }
-  }, [connect, connectors, isDev]);
+  }, [connect, isDev]);
 
   const disconnectWallet = useCallback(async () => {
     if (isDev) {
@@ -119,18 +116,16 @@ export function WalletStatusProvider({ children }) {
   }, []);
 
   const currentStatus = {
-    isConnected: !!connected && !!account, // Only connected if we have both connected and address
-    address: account, // account is already the address string
-    chain: network,
+    isConnected: !!currentAccount,
+    address: currentAccount?.address,
+    chain: { id: 'onechain-testnet', name: 'One Chain Testnet' },
   };
 
   // Debug currentStatus calculation
   console.log('🔍 currentStatus calculation:', {
-    connected,
-    account,
-    accountAddress: account, // account is already the address
-    network,
-    finalIsConnected: !!connected && !!account
+    currentAccount,
+    address: currentAccount?.address,
+    finalIsConnected: !!currentAccount
   });
 
   useEffect(() => {
@@ -139,21 +134,12 @@ export function WalletStatusProvider({ children }) {
     console.log('Connected:', currentStatus.isConnected);
     console.log('Address:', currentStatus.address);
     console.log('Chain:', currentStatus.chain);
-    console.log('=== RAW WAGMI VALUES ===');
-    console.log('Raw connected:', connected);
-    console.log('Raw account:', account);
-    console.log('Raw network:', network);
+    console.log('=== RAW SUI VALUES ===');
+    console.log('Current account:', currentAccount);
     console.log('=== ENVIRONMENT ===');
     console.log('Is Dev:', isDev);
     console.log('Dev Wallet:', devWallet);
-    console.log('=== LOCAL STORAGE ===');
-    console.log('Dev wallet state:', localStorage.getItem('dev-wallet-state'));
-    console.log('Wagmi storage:', localStorage.getItem('aptcasino.wallet'));
-    console.log('=== WINDOW ETHEREUM ===');
-    console.log('Window ethereum exists:', !!window.ethereum);
-    console.log('Window ethereum connected:', window.ethereum?.isConnected?.());
-    console.log('Window ethereum accounts:', window.ethereum?.selectedAddress);
-  }, [currentStatus, connected, account, network, isDev, devWallet]);
+  }, [currentStatus, currentAccount, isDev, devWallet]);
 
   return (
     <WalletStatusContext.Provider
