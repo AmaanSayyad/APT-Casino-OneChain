@@ -101,7 +101,7 @@ export default function Home() {
     }
 
     // Generate Pyth Entropy in background for provably fair proof
-  const generateEntropyInBackground = async (historyItemId) => {
+  const generateEntropyInBackground = async (historyItem) => {
     try {
       console.log('🔮 PYTH ENTROPY: Generating background entropy for Wheel game...');
       
@@ -114,12 +114,12 @@ export default function Home() {
       console.log('🔗 Transaction:', entropyResult.entropyProof.transactionHash);
       
       // Log to OneChain
-      const historyItem = gameHistory.find(item => item.id === historyItemId);
       console.log('🔍 ONE CHAIN DEBUG (Wheel):', { 
         hasLogFunction: !!logWheelGame, 
         hasAddress: !!address,
         address: address,
-        hasHistoryItem: !!historyItem
+        hasHistoryItem: !!historyItem,
+        historyItem: historyItem
       });
       
       if (logWheelGame && address && historyItem) {
@@ -137,7 +137,7 @@ export default function Home() {
           entropyResult.entropyProof.transactionHash, // entropyTxHash
           { 
             multiplier: historyItem.multiplier, 
-            segment: historyItem.segment 
+            segment: historyItem.segment || 0
           }, // resultData
           historyItem.payout.toString() // payoutAmount
         ).then((onechainTxHash) => {
@@ -146,7 +146,7 @@ export default function Home() {
           
           // Update history with OneChain transaction hash
           setGameHistory(prev => prev.map(item => 
-            item.id === historyItemId 
+            item.id === historyItem.id 
               ? { ...item, onechainTxHash }
               : item
           ));
@@ -157,7 +157,7 @@ export default function Home() {
       
       // Update the history item with real entropy proof
       setGameHistory(prev => prev.map(item => 
-        item.id === historyItemId 
+        item.id === historyItem.id 
           ? {
               ...item,
               entropyProof: {
@@ -283,7 +283,7 @@ export default function Home() {
           }
 
           // Generate Pyth Entropy in background for provably fair proof
-          generateEntropyInBackground(newHistoryItem.id).catch(error => {
+          generateEntropyInBackground(newHistoryItem).catch(error => {
             console.error('❌ Background entropy generation failed:', error);
           });
           
