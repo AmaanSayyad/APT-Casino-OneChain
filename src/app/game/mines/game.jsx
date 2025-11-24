@@ -441,11 +441,15 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
           // Notify parent about game completion
           if (onGameComplete) {
             onGameComplete({
+              action: 'reveal',
               mines: minesCount,
               betAmount: betAmount,
               won: false,
               payout: 0,
-              multiplier: 0
+              multiplier: 0,
+              isMine: true,
+              tileIndex: row * gridSize + col,
+              gameId: `mines_${Date.now()}`
             });
           }
         };
@@ -495,11 +499,16 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
               // Notify parent about game completion
               if (onGameComplete) {
                 onGameComplete({
+                  action: 'reveal',
                   mines: minesCount,
                   betAmount: betAmount,
                   won: true,
                   payout: calculatePayout(),
-                  multiplier: multiplier
+                  multiplier: multiplier,
+                  isMine: false,
+                  tileIndex: -1, // All tiles revealed
+                  tilesRevealed: safeTiles,
+                  gameId: `mines_${Date.now()}`
                 });
               }
             };
@@ -709,11 +718,14 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
         // Notify parent about game completion
         if (onGameComplete) {
           onGameComplete({
+            action: 'cashout',
             mines: minesCount,
             betAmount: betAmount.toFixed(5),
             won: true,
             payout: payout.toFixed(5),
-            multiplier: multiplier.toFixed(2)
+            multiplier: multiplier.toFixed(2),
+            tilesRevealed: revealedCount,
+            gameId: `mines_${Date.now()}`
           });
         }
       };

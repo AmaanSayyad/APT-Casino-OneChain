@@ -237,19 +237,45 @@ export const useOneChainCasino = () => {
 
       console.log('💣 ONE CHAIN: Logging mines game start...', gameData);
 
-      // Log game start to One Chain
-      const txHash = await oneChainClientService.logGameResult(gameData);
+      // Build transaction data using OneChainClientService
+      const txData = await oneChainClientService.logGameResult(gameData);
       
-      console.log('⏳ ONE CHAIN: Waiting for transaction confirmation...');
+      console.log('📝 ONE CHAIN: Transaction data prepared:', txData);
       
-      // Wait for transaction confirmation before marking game complete
-      const receipt = await oneChainClientService.waitForTransaction(txHash);
+      // Send transaction to backend API for signing with treasury wallet
+      console.log('🔐 ONE CHAIN: Sending to backend for treasury signing...');
+      
+      const response = await fetch('/api/onechain-log-game', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          packageId: txData.data.packageObjectId,
+          module: txData.data.module,
+          functionName: txData.data.function,
+          arguments: txData.data.arguments,
+          typeArguments: txData.data.typeArguments || []
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to log game to OneChain');
+      }
+
+      const txHash = result.transactionDigest;
       
       console.log('✅ ONE CHAIN: Mines game started successfully');
-      console.log('📋 Transaction receipt:', receipt);
+      console.log('📋 Transaction hash:', txHash);
+      console.log('📊 Transaction effects:', result.effects);
       
-      // Update balance after transaction
-      await updateBalance();
+      // Update balance after transaction (independent operation)
+      // Balance update failure doesn't fail the game
+      updateBalance().catch(err => {
+        console.warn('⚠️ Balance update failed after game:', err);
+      });
       
       return txHash;
     } catch (error) {
@@ -302,16 +328,39 @@ export const useOneChainCasino = () => {
 
       console.log('💣 ONE CHAIN: Logging mines tile reveal...', gameData);
 
-      // Log tile reveal to One Chain
-      const txHash = await oneChainClientService.logGameResult(gameData);
+      // Build transaction data using OneChainClientService
+      const txData = await oneChainClientService.logGameResult(gameData);
       
-      console.log('⏳ ONE CHAIN: Waiting for transaction confirmation...');
+      console.log('📝 ONE CHAIN: Transaction data prepared:', txData);
       
-      // Wait for transaction confirmation before marking game complete
-      const receipt = await oneChainClientService.waitForTransaction(txHash);
+      // Send transaction to backend API for signing with treasury wallet
+      console.log('🔐 ONE CHAIN: Sending to backend for treasury signing...');
+      
+      const response = await fetch('/api/onechain-log-game', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          packageId: txData.data.packageObjectId,
+          module: txData.data.module,
+          functionName: txData.data.function,
+          arguments: txData.data.arguments,
+          typeArguments: txData.data.typeArguments || []
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to log game to OneChain');
+      }
+
+      const txHash = result.transactionDigest;
       
       console.log('✅ ONE CHAIN: Mines tile reveal logged successfully');
-      console.log('📋 Transaction receipt:', receipt);
+      console.log('📋 Transaction hash:', txHash);
+      console.log('📊 Transaction effects:', result.effects);
       
       return txHash;
     } catch (error) {
@@ -329,9 +378,10 @@ export const useOneChainCasino = () => {
    * @param {string} payoutAmount - Payout amount in OCT
    * @param {number} finalMultiplier - Final multiplier achieved
    * @param {number} tilesRevealed - Number of tiles revealed
+   * @param {string} betAmount - Original bet amount in OCT
    * @returns {Promise<string>} Transaction hash
    */
-  const cashoutMinesGame = useCallback(async (gameId, payoutAmount, finalMultiplier = 1.0, tilesRevealed = 0) => {
+  const cashoutMinesGame = useCallback(async (gameId, payoutAmount, finalMultiplier = 1.0, tilesRevealed = 0, betAmount = '0') => {
     if (!connected || !account) {
       throw new Error('Wallet not connected');
     }
@@ -341,12 +391,13 @@ export const useOneChainCasino = () => {
       setError(null);
 
       const payoutAmountWei = parseOCTAmount(payoutAmount);
+      const betAmountWei = parseOCTAmount(betAmount);
 
       // Create game data for cashout with all required fields
       const gameData = {
         gameType: 'MINES',
         playerAddress: account,
-        betAmount: '0',
+        betAmount: betAmountWei,
         payoutAmount: payoutAmountWei,
         gameConfig: {
           gameId,
@@ -366,19 +417,45 @@ export const useOneChainCasino = () => {
 
       console.log('💣 ONE CHAIN: Logging mines cashout...', gameData);
 
-      // Log cashout to One Chain
-      const txHash = await oneChainClientService.logGameResult(gameData);
+      // Build transaction data using OneChainClientService
+      const txData = await oneChainClientService.logGameResult(gameData);
       
-      console.log('⏳ ONE CHAIN: Waiting for transaction confirmation...');
+      console.log('📝 ONE CHAIN: Transaction data prepared:', txData);
       
-      // Wait for transaction confirmation before marking game complete
-      const receipt = await oneChainClientService.waitForTransaction(txHash);
+      // Send transaction to backend API for signing with treasury wallet
+      console.log('🔐 ONE CHAIN: Sending to backend for treasury signing...');
+      
+      const response = await fetch('/api/onechain-log-game', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          packageId: txData.data.packageObjectId,
+          module: txData.data.module,
+          functionName: txData.data.function,
+          arguments: txData.data.arguments,
+          typeArguments: txData.data.typeArguments || []
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to log game to OneChain');
+      }
+
+      const txHash = result.transactionDigest;
       
       console.log('✅ ONE CHAIN: Mines cashout logged successfully');
-      console.log('📋 Transaction receipt:', receipt);
+      console.log('📋 Transaction hash:', txHash);
+      console.log('📊 Transaction effects:', result.effects);
       
-      // Update balance after cashout
-      await updateBalance();
+      // Update balance after transaction (independent operation)
+      // Balance update failure doesn't fail the game
+      updateBalance().catch(err => {
+        console.warn('⚠️ Balance update failed after game:', err);
+      });
       
       return txHash;
     } catch (error) {

@@ -59,7 +59,7 @@ export default function Home() {
   // OneChain Casino hook for game logging
   const currentAccount = useCurrentAccount();
   const address = currentAccount?.address;
-  const { playWheel: logWheelGame } = useOneChainCasino();
+  const { spinWheel: logWheelGame } = useOneChainCasino();
   
   // Use ref to prevent infinite loop in useEffect
   const isInitialized = useRef(false);
@@ -174,27 +174,6 @@ export default function Home() {
             }
           : item
       ));
-      
-      // Log on-chain via casino wallet (non-blocking)
-      try {
-        fetch('/api/casino-session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId: entropyResult.entropyProof?.requestId || `wheel_${Date.now()}`,
-            gameType: 'WHEEL',
-            channelId: entropyResult.entropyProof?.requestId || 'entropy_channel',
-            valueMon: 0
-          })
-        })
-          .then(async (r) => {
-            const t = await r.text().catch(() => '');
-            console.log('🎡 Casino session log (Wheel):', r.status, t);
-          })
-          .catch((e) => console.warn('Casino session log failed (Wheel):', e));
-      } catch (e) {
-        console.warn('Casino session log threw (Wheel):', e);
-      }
       
     } catch (error) {
       console.error('❌ PYTH ENTROPY: Background generation failed:', error);

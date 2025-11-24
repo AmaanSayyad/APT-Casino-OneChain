@@ -514,19 +514,6 @@ const PlinkoGame = forwardRef(({ rowCount = 16, riskLevel = "Medium", onRowChang
           const updated = [newBetResult, ...prev.slice(0, 99)]; // Keep last 100
           return updated;
         });
-        // Fire-and-forget casino session log
-        try {
-          fetch('/api/casino-session', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sessionId: `plinko_${Date.now()}`,
-              gameType: 'PLINKO',
-              requestId: `plinko_request_${Date.now()}`,
-              valueMon: 0
-            })
-          }).catch(() => {});
-        } catch {}
         
         // Notify parent component about bet history change
         if (onBetHistoryChange) {

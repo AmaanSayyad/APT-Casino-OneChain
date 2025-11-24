@@ -32,7 +32,7 @@ export default function Mines() {
   // OneChain Casino hook for game logging
   const currentAccount = useCurrentAccount();
   const address = currentAccount?.address;
-  const { startMinesGame: logMinesStart, revealMinesTile: logMinesReveal, cashoutMines: logMinesCashout } = useOneChainCasino();
+  const { startMinesGame: logMinesStart, revealMinesTile: logMinesReveal, cashoutMinesGame: logMinesCashout } = useOneChainCasino();
   // Game State
   const [betSettings, setBetSettings] = useState({});
   const [activeTab, setActiveTab] = useState("Manual");
@@ -235,14 +235,19 @@ export default function Mines() {
       });
       
       if (address && entropyProof) {
-        if (result.action === 'cashout' && logMinesCashout) {
+        // Oyun bitince her zaman log yap (cashout veya mine hit)
+        // Eğer action belirtilmemişse, oyun bittiği için cashout olarak kabul et
+        const action = result.action || (result.won ? 'cashout' : 'reveal');
+        
+        if (action === 'cashout' && logMinesCashout) {
           console.log('🎲 ONE CHAIN: Calling logMinesCashout');
           
           onechainTxHash = await logMinesCashout(
-            result.gameId || 'mines_game_1', // gameId
+            result.gameId || `mines_${Date.now()}`, // gameId
             (result.payout || 0).toString(), // payoutAmount
-            result.multiplier || 1.0, // finalMultiplier
-            result.tilesRevealed || 0 // tilesRevealed
+            parseFloat(result.multiplier || 1.0), // finalMultiplier
+            result.tilesRevealed || 0, // tilesRevealed
+            (result.betAmount || '0').toString() // betAmount
           ).then((txHash) => {
             console.log('✅ ONE CHAIN: Mines cashout logged successfully');
             console.log('📋 ONE CHAIN Transaction Hash:', txHash);
@@ -251,13 +256,13 @@ export default function Mines() {
             console.error('❌ ONE CHAIN: Error logging Mines cashout:', error);
             return null;
           });
-        } else if (result.action === 'reveal' && logMinesReveal) {
+        } else if (action === 'reveal' && logMinesReveal) {
           console.log('🎲 ONE CHAIN: Calling logMinesReveal');
           onechainTxHash = await logMinesReveal(
-            result.gameId || 'mines_game_1', // gameId
+            result.gameId || `mines_${Date.now()}`, // gameId
             result.tileIndex || 0, // tileIndex
             result.isMine || false, // isMine
-            result.multiplier || 1.0 // currentMultiplier
+            parseFloat(result.multiplier || 1.0) // currentMultiplier
           ).then((txHash) => {
             console.log('✅ ONE CHAIN: Mines tile reveal logged successfully');
             console.log('📋 ONE CHAIN Transaction Hash:', txHash);
@@ -266,7 +271,30 @@ export default function Mines() {
             console.error('❌ ONE CHAIN: Error logging Mines tile reveal:', error);
             return null;
           });
+        } else if (!action) {
+          // Action belirtilmemişse, oyun bittiği için cashout olarak log yap
+          console.log('🎲 ONE CHAIN: No action specified, defaulting to cashout');
+          if (logMinesCashout) {
+            onechainTxHash = await logMinesCashout(
+              result.gameId || `mines_${Date.now()}`,
+              (result.payout || 0).toString(),
+              parseFloat(result.multiplier || 1.0),
+              result.tilesRevealed || 0
+            ).then((txHash) => {
+              console.log('✅ ONE CHAIN: Mines game logged successfully');
+              console.log('📋 ONE CHAIN Transaction Hash:', txHash);
+              return txHash;
+            }).catch(error => {
+              console.error('❌ ONE CHAIN: Error logging Mines game:', error);
+              return null;
+            });
+          }
         }
+      } else {
+        console.warn('⚠️ ONE CHAIN: Cannot log - missing address or entropyProof', {
+          hasAddress: !!address,
+          hasEntropyProof: !!entropyProof
+        });
       }
     } catch (error) {
       console.error('❌ Error using Pyth Entropy for Mines game:', error);
@@ -285,21 +313,6 @@ export default function Mines() {
     };
     
     setGameHistory(prev => [newHistoryItem, ...prev].slice(0, 50));
-    
-    // Fire-and-forget casino session log
-    try {
-      fetch('/api/casino-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId: result.entropyProof?.requestId || `mines_${Date.now()}`,
-          gameType: 'MINES',
-          requestId: result.entropyProof?.requestId || `mines_request_${Date.now()}`,
-          valueMon: 0,
-          entropyProof: result.entropyProof
-        })
-      }).catch(() => {});
-    } catch {}
   };
 
   // Handle tab change

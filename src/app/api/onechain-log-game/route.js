@@ -177,9 +177,15 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('❌ ONE CHAIN API: Error logging game:', error);
+    console.error('❌ Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     return NextResponse.json({
       success: false,
       error: error.message,
+      details: error.toString(),
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     }, { status: 500 });
   }
