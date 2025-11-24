@@ -44,10 +44,10 @@ export async function POST(request) {
     // Let's try to call the contract with minimal data to see what happens
     console.log('🧪 Testing contract call with minimal parameters...');
     
-    // Check if we have a private key for signing
-    const privateKey = process.env.TREASURY_PRIVATE_KEY;
+    // Check if we have a private key for signing (use Arbitrum Sepolia treasury)
+    const privateKey = process.env.ARBITRUM_TREASURY_PRIVATE_KEY;
     if (!privateKey) {
-      throw new Error('TREASURY_PRIVATE_KEY environment variable is required');
+      throw new Error('ARBITRUM_TREASURY_PRIVATE_KEY environment variable is required');
     }
     
     // Create wallet and signer
