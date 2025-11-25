@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 // One Chain Treasury address from environment
-const MONAD_TREASURY_ADDRESS = process.env.MONAD_TREASURY_ADDRESS || process.env.TREASURY_ADDRESS || "0x025182b20Da64b5997d09a5a62489741F68d9B96";
+const ONECHAIN_TREASURY_ADDRESS = process.env.ONECHAIN_TREASURY_ADDRESS || process.env.NEXT_PUBLIC_ONECHAIN_TREASURY_ADDRESS || process.env.TREASURY_ADDRESS || "0x025182b20Da64b5997d09a5a62489741F68d9B96";
 
 export async function POST(request) {
   try {
@@ -27,7 +27,7 @@ export async function POST(request) {
     const mockDepositId = 'deposit_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     
     console.log(`🏦 Processing deposit: ${amount} OCT from ${userAddress}`);
-    console.log(`📍 Treasury: ${MONAD_TREASURY_ADDRESS}`);
+    console.log(`📍 Treasury: ${ONECHAIN_TREASURY_ADDRESS}`);
     
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -39,7 +39,7 @@ export async function POST(request) {
       depositId: mockDepositId,
       amount: amount,
       userAddress: userAddress,
-      treasuryAddress: MONAD_TREASURY_ADDRESS,
+      treasuryAddress: ONECHAIN_TREASURY_ADDRESS,
       status: 'confirmed',
       timestamp: new Date().toISOString()
     });
@@ -72,7 +72,7 @@ export async function GET(request) {
         id: 'deposit_1',
         amount: '0.5',
         userAddress: userAddress,
-        treasuryAddress: MONAD_TREASURY_ADDRESS,
+        treasuryAddress: ONECHAIN_TREASURY_ADDRESS,
         status: 'confirmed',
         timestamp: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
         transactionHash: '0x' + Math.random().toString(16).substr(2, 64)
@@ -81,7 +81,7 @@ export async function GET(request) {
         id: 'deposit_2',
         amount: '1.0',
         userAddress: userAddress,
-        treasuryAddress: MONAD_TREASURY_ADDRESS,
+        treasuryAddress: ONECHAIN_TREASURY_ADDRESS,
         status: 'confirmed',
         timestamp: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
         transactionHash: '0x' + Math.random().toString(16).substr(2, 64)

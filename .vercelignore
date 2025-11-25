@@ -1,0 +1,61 @@
+# Development files
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Environment files (should be set in Vercel dashboard)
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test files
+coverage/
+.nyc_output/
+
+# Hardhat files
+cache/
+artifacts/
+deployments/
+
+# Scripts (not needed in production)
+scripts/
+contracts/
+hardhat.config.js
+
+# Documentation
+docs/
+onedocs/
+*.md
+!README.md
+
+# Move contracts (not needed in production build)
+move-contracts/
+
+# Deployment scripts
+deploy*.bat
+deploy*.sh
+*.bat
+
+# Git
+.git/
+.gitignore
+
+# Wallet info
+.wallet-info/
+
