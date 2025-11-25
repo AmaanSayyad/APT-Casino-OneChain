@@ -55,42 +55,84 @@ export async function POST(request) {
     console.log(`🏦 Processing One Chain withdrawal: ${amount} OCT to ${userAddress}`);
     console.log(`📍 Treasury: ${ONECHAIN_TREASURY_ADDRESS}`);
 
-    // Check treasury balance
-    let treasuryBalance;
+    // Get OCT coins from treasury (One Chain uses 0x2::oct::OCT)
+    let treasuryBalance = BigInt(0);
+    let gasCoin = null;
+    let paymentCoin = null;
+    
     try {
-      const balanceData = await suiClient.getBalance({
+      // Get OCT coins
+      const coins = await suiClient.getCoins({
         owner: ONECHAIN_TREASURY_ADDRESS,
-        coinType: '0x2::sui::SUI', // Using SUI coin type as fallback
+        coinType: '0x2::oct::OCT'
       });
-      treasuryBalance = BigInt(balanceData.totalBalance);
-      console.log(`💰 Treasury balance: ${Number(treasuryBalance) / 1e9} OCT`);
+
+      if (!coins.data || coins.data.length === 0) {
+        return NextResponse.json(
+          { error: 'No OCT coins found in treasury wallet' },
+          { status: 400 }
+        );
+      }
+
+      // Calculate total balance
+      treasuryBalance = coins.data.reduce((sum, coin) => sum + BigInt(coin.balance), 0n);
+      console.log(`💰 Treasury OCT balance: ${Number(treasuryBalance) / 1e9} OCT`);
+      console.log(`📦 Found ${coins.data.length} OCT coin(s)`);
+
+      // Convert amount to MIST (1 OCT = 1,000,000,000 MIST)
+      const amountInMist = BigInt(Math.floor(amount * 1e9));
+      const estimatedGas = BigInt(10000000); // 0.01 OCT for gas
+      const totalNeeded = amountInMist + estimatedGas;
+
+      // Check if treasury has sufficient funds
+      if (treasuryBalance < totalNeeded) {
+        return NextResponse.json(
+          { 
+            error: `Insufficient treasury funds. Available: ${Number(treasuryBalance) / 1e9} OCT, Requested: ${amount} OCT (+ gas)` 
+          },
+          { status: 400 }
+        );
+      }
+
+      // Find a coin with sufficient balance for payment
+      paymentCoin = coins.data.find(coin => BigInt(coin.balance) >= amountInMist);
+      if (!paymentCoin) {
+        // If no single coin has enough, use the largest one (will need to merge first)
+        paymentCoin = coins.data.reduce((max, coin) => 
+          BigInt(coin.balance) > BigInt(max.balance) ? coin : max
+        );
+      }
+
+      // Find a coin for gas (prefer one with sufficient balance, otherwise use any)
+      gasCoin = coins.data.find(coin => BigInt(coin.balance) >= estimatedGas) || coins.data[0];
+
+      console.log(`💳 Using payment coin: ${paymentCoin.coinObjectId} (${paymentCoin.balance} MIST)`);
+      console.log(`⛽ Using gas coin: ${gasCoin.coinObjectId} (${gasCoin.balance} MIST)`);
+
     } catch (balanceError) {
-      console.error('⚠️ Could not check treasury balance:', balanceError);
+      console.error('⚠️ Could not get treasury OCT coins:', balanceError);
       return NextResponse.json(
-        { error: 'Failed to check treasury balance' },
+        { error: 'Failed to get treasury OCT coins: ' + balanceError.message },
         { status: 500 }
       );
     }
 
-    // Convert amount to MIST (1 OCT = 1,000,000,000 MIST)
+    // Convert amount to MIST
     const amountInMist = BigInt(Math.floor(amount * 1e9));
-    
-    // Check if treasury has sufficient funds (including gas)
     const estimatedGas = BigInt(10000000); // 0.01 OCT for gas
-    if (treasuryBalance < amountInMist + estimatedGas) {
-      return NextResponse.json(
-        { 
-          error: `Insufficient treasury funds. Available: ${Number(treasuryBalance) / 1e9} OCT, Requested: ${amount} OCT (+ gas)` 
-        },
-        { status: 400 }
-      );
-    }
 
     // Create Sui transaction
     const tx = new Transaction();
     
-    // Split coin for exact amount
-    const [coin] = tx.splitCoins(tx.gas, [amountInMist.toString()]);
+    // Set gas payment using OCT coin
+    tx.setGasPayment([{
+      objectId: gasCoin.coinObjectId,
+      version: gasCoin.version,
+      digest: gasCoin.digest
+    }]);
+    
+    // Split coin for exact amount from payment coin
+    const [coin] = tx.splitCoins(tx.object(paymentCoin.coinObjectId), [amountInMist.toString()]);
     
     // Transfer to user
     tx.transferObjects([coin], userAddress);
@@ -149,19 +191,23 @@ export async function GET() {
     }
 
     try {
-      const balanceData = await suiClient.getBalance({
+      // Get OCT coins (One Chain uses 0x2::oct::OCT)
+      const coins = await suiClient.getCoins({
         owner: ONECHAIN_TREASURY_ADDRESS,
-        coinType: '0x2::sui::SUI',
+        coinType: '0x2::oct::OCT'
       });
 
-      const balanceInOct = Number(balanceData.totalBalance) / 1e9;
+      const totalBalance = coins.data.reduce((sum, coin) => sum + BigInt(coin.balance), 0n);
+      const balanceInOct = Number(totalBalance) / 1e9;
 
       return NextResponse.json({
         treasuryAddress: ONECHAIN_TREASURY_ADDRESS,
         balance: balanceInOct,
-        balanceMist: balanceData.totalBalance,
+        balanceMist: totalBalance.toString(),
+        coinCount: coins.data.length,
         status: 'active',
-        network: 'onechain-testnet'
+        network: 'onechain-testnet',
+        coinType: '0x2::oct::OCT'
       });
     } catch (balanceError) {
       console.error('Balance check error:', balanceError);

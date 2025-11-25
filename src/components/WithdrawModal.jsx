@@ -30,9 +30,9 @@ const WithdrawModal = ({ isOpen, onClose }) => {
   // Create account object for compatibility
   const account = { address };
   
-  // Display balance OCT format
-  const balanceInApt = parseFloat(userBalance || '0') / 100000000;
-  const maxWithdraw = Math.max(0, balanceInApt - 0.01); // Reserve 0.01 OCT for gas fees
+  // Display balance OCT format (userBalance is already in OCT)
+  const balanceInOct = parseFloat(userBalance || '0');
+  const maxWithdraw = Math.max(0, balanceInOct - 0.01); // Reserve 0.01 OCT for gas fees
   
   useEffect(() => {
     if (!isOpen) {
@@ -108,14 +108,14 @@ const WithdrawModal = ({ isOpen, onClose }) => {
         throw new Error(result.error || 'Withdrawal failed');
       }
       
-      // Deduct from user's balance
-      const amountOctas = Math.floor(amount * 100000000);
-      const currentBalanceOctas = parseInt(userBalance || '0');
-      const newBalanceOctas = currentBalanceOctas - amountOctas;
-      dispatch(setBalance(newBalanceOctas.toString()));
+      // Deduct from user's balance (userBalance is already in OCT)
+      const currentBalance = parseFloat(userBalance || '0');
+      const newBalance = Math.max(0, currentBalance - amount);
+      dispatch(setBalance(newBalance.toString()));
       
       setStep('success');
-      toast.success(`Successfully withdrew ${amount} OCT! TX: ${result.transactionHash.slice(0, 8)}...`);
+      const txHash = result.transactionDigest || result.transactionHash;
+      toast.success(`Successfully withdrew ${amount} OCT! TX: ${txHash.slice(0, 8)}...`);
       
       // Close modal after 3 seconds
       setTimeout(() => {

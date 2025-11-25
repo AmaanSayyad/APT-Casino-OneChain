@@ -442,17 +442,59 @@ export default function Navbar() {
     try {
       console.log('Depositing to One Chain treasury:', { address, amount });
       
+      // Get user's OCT coins (One Chain uses 0x2::oct::OCT)
+      const coins = await suiClient.getCoins({
+        owner: address,
+        coinType: '0x2::oct::OCT'
+      });
+
+      if (!coins.data || coins.data.length === 0) {
+        throw new Error('No OCT coins found in your wallet. Please ensure you have OCT tokens.');
+      }
+
+      // Calculate total balance
+      const totalBalance = coins.data.reduce((sum, coin) => sum + BigInt(coin.balance), 0n);
+      const amountInMist = BigInt(parseOCTAmount(amount));
+      const estimatedGas = BigInt(10000000); // 0.01 OCT for gas
+      const totalNeeded = amountInMist + estimatedGas;
+
+      if (totalBalance < totalNeeded) {
+        throw new Error(`Insufficient OCT balance. Available: ${Number(totalBalance) / 1e9} OCT, Needed: ${amount} OCT (+ gas)`);
+      }
+
+      // Find a coin with sufficient balance for payment
+      let paymentCoin = coins.data.find(coin => BigInt(coin.balance) >= amountInMist);
+      if (!paymentCoin) {
+        // If no single coin has enough, use the largest one
+        paymentCoin = coins.data.reduce((max, coin) => 
+          BigInt(coin.balance) > BigInt(max.balance) ? coin : max
+        );
+      }
+
+      // Find a coin for gas (prefer one with sufficient balance, otherwise use any)
+      const gasCoin = coins.data.find(coin => BigInt(coin.balance) >= estimatedGas) || coins.data[0];
+
+      console.log(`💳 Using payment coin: ${paymentCoin.coinObjectId} (${paymentCoin.balance} MIST)`);
+      console.log(`⛽ Using gas coin: ${gasCoin.coinObjectId} (${gasCoin.balance} MIST)`);
+      
       // Create Sui transaction for OCT transfer
       const tx = new Transaction();
       
-      // Convert amount to MIST (1 OCT = 1,000,000,000 MIST)
-      const amountInMist = parseOCTAmount(amount);
+      // Set gas payment using OCT coin
+      tx.setGasPayment([{
+        objectId: gasCoin.coinObjectId,
+        version: gasCoin.version,
+        digest: gasCoin.digest
+      }]);
       
-      // Split coin for exact amount
-      const [coin] = tx.splitCoins(tx.gas, [amountInMist]);
+      // Split coin for exact amount from payment coin
+      const [coin] = tx.splitCoins(tx.object(paymentCoin.coinObjectId), [amountInMist.toString()]);
       
       // Transfer to treasury
       tx.transferObjects([coin], TREASURY_CONFIG.ADDRESS);
+      
+      // Set gas budget
+      tx.setGasBudget(estimatedGas.toString());
       
       notification.info('Please approve the transaction in your wallet...');
       
