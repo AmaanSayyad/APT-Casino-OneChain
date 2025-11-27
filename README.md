@@ -51,6 +51,35 @@ APT Casino addresses these problems by offering:
 - **On-Chain Verification**: All game outcomes verifiable
 - **Transparent Mechanics**: Open-source game logic
 
+#### Pyth Entropy Integration Architecture
+
+```mermaid
+graph LR
+    subgraph Frontend["Frontend"]
+        A[Game Component] --> B[Pyth Entropy Request]
+    end
+    
+    subgraph Contract["Smart Contract"]
+        C[CasinoEntropyConsumer] --> D[request]
+        D --> E[Pyth Entropy Contract]
+    end
+    
+    subgraph Pyth["Pyth Network"]
+        F[Pyth Provider] --> G[Generate Entropy]
+        G --> H[Entropy Proof]
+    end
+    
+    subgraph Callback["Callback Flow"]
+        I[entropyCallback] --> J[Update Game State]
+        J --> K[Emit Events]
+    end
+    
+    B --> C
+    E --> F
+    H --> I
+    K --> A
+```
+
 ### 2. Game Selection
 
 - **Roulette**: European roulette with batch betting
@@ -68,42 +97,59 @@ APT Casino addresses these problems by offering:
 - **Real-time Gaming**: Instant deposits and withdrawals
 - **Advanced Betting**: Batch transactions and automated strategies
 
-## 🌐 Networks
-
-- **Gaming Network**: One Chain Testnet (Chain ID: 10143)
-- **Entropy Network**: Arbitrum Sepolia (Chain ID: 421614)
-- **Currency**: OCT (One Chain Token)
-
-## 🚀 Getting Started
-
-1. **Connect Wallet**: Connect your MetaMask wallet to One Chain Testnet
-2. **Get Tokens**: Get OCT tokens from the One Chain testnet faucet
-3. **Deposit**: Deposit OCT to your house balance
-4. **Play**: Start playing provably fair games!
-
-## 🔷 Smart Accounts
-
-This casino supports MetaMask Smart Accounts for enhanced gaming:
-
-### Benefits:
-- **Batch Transactions**: Multiple bets in one transaction
-- **Lower Gas Costs**: Optimized for frequent players
-- **Advanced Strategies**: Automated betting patterns
-- **Enhanced Security**: Smart contract-based accounts
 
 ## 🏗 System Architecture Overview
-<img width="1594" height="721" alt="Screenshot 2025-11-27 at 9 17 11 PM" src="https://github.com/user-attachments/assets/36824bae-6e36-4352-a7ac-2b8acd774026" />
 
+### Multi-Network Architecture
 
-### Usage:
-```javascript
-// Check if Smart Account is active
-const { isSmartAccount, batchTransactions } = useSmartAccount();
-
-// Execute multiple bets at once
-if (isSmartAccount) {
-  await batchTransactions([bet1, bet2, bet3]);
-}
+```mermaid
+graph TB
+    subgraph User["User Layer"]
+        U[User] --> W[OneWallet]
+        W --> SA[Smart Account Detection]
+    end
+    
+    subgraph Frontend["Frontend Application"]
+        F[Next.js Casino] --> WC[Wallet Connection]
+        WC --> NS[Network Switcher]
+        NS --> GM[Game Manager]
+    end
+    
+    subgraph OneChainNet["One Chain Testnet (Chain ID: 10143)"]
+        OC[One Chain Testnet] --> OCT[OCT Token]
+        OCT --> DEP[Deposit Contract]
+        OCT --> WITH[Withdraw Contract]
+        DEP --> TB[Treasury Balance]
+        WITH --> TB
+        
+        subgraph SmartAccount["Smart Account Features"]
+            BATCH[Batch Transactions]
+            SPONSOR[Sponsored TX]
+            SESSION[Session Keys]
+        end
+    end
+    
+    subgraph ArbitrumNet["Arbitrum Sepolia (Chain ID: 421614)"]
+        AS[Arbitrum Sepolia] --> EC[Entropy Consumer]
+        EC --> PE[Pyth Entropy Contract]
+        PE --> PN[Pyth Network]
+        
+        subgraph EntropyFlow["Entropy Generation"]
+            REQ[Request Entropy]
+            GEN[Generate Random]
+            PROOF[Cryptographic Proof]
+        end
+    end
+    
+    U --> F
+    F --> OC
+    F --> AS
+    GM --> DEP
+    GM --> EC
+    SA --> BATCH
+    REQ --> GEN
+    GEN --> PROOF
+    PROOF --> GM
 ```
 
 ## 🎯 Games
@@ -118,15 +164,81 @@ if (isSmartAccount) {
 - Multiple betting options
 - Smart Account batch bets
 
+```mermaid
+flowchart LR
+    A[Place Bets] --> B[Multiple Bet Types]
+    B --> C[Red/Black]
+    B --> D[Odd/Even]
+    B --> E[Numbers]
+    B --> F[Columns/Dozens]
+    
+    C --> G[Spin Wheel]
+    D --> G
+    E --> G
+    F --> G
+    
+    G --> H[Pyth Entropy Random 0-36]
+    H --> I[Determine Winners]
+    I --> J[Calculate Payouts]
+    J --> K[Update Balances]
+```
+
 ### 3. **Plinko**
 - Physics-based ball drop game
 - Adjustable rows and risk levels
 - Auto-betting features
 
+```mermaid
+graph TD
+    A[Drop Ball] --> B[Physics Engine]
+    B --> C[Pyth Entropy]
+    C --> D[Peg Collisions]
+    D --> E[Ball Path Calculation]
+    E --> F[Multiplier Zone]
+    F --> G[Payout Calculation]
+    
+    subgraph Physics["Physics Simulation"]
+        H[Matter.js] --> I[Gravity]
+        I --> J[Collision Detection]
+        J --> K[Bounce Physics]
+    end
+    
+    subgraph Visual["Visual Rendering"]
+        L[Three.js] --> M[3D Ball]
+        M --> N[Peg Animation]
+        N --> O[Trail Effects]
+    end
+    
+    B --> H
+    E --> L
+```
+
 ### 4. **Mines**
 - Strategic mine-sweeping game
 - Customizable mine count
 - Progressive betting strategies
+
+```mermaid
+stateDiagram-v2
+    [*] --> GridSetup
+    GridSetup --> BetPlacement
+    BetPlacement --> EntropyRequest
+    EntropyRequest --> MineGeneration
+    MineGeneration --> GameActive
+    
+    GameActive --> TileClick
+    TileClick --> SafeTile: Safe
+    TileClick --> MineTile: Mine Hit
+    
+    SafeTile --> ContinueGame: Continue
+    SafeTile --> CashOut: Cash Out
+    
+    ContinueGame --> GameActive
+    CashOut --> GameEnd
+    MineTile --> GameEnd
+    
+    GameEnd --> [*]
+```
 
 ## 🛠 Development
 
@@ -158,26 +270,95 @@ npm start
 npm run deploy:onechain
 ```
 
-## 🏗 Architecture
+### Game Execution Flow (Smart Account Enhanced)
 
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant SA as Smart Account
+    participant UI as Game UI
+    participant OC as One Chain Testnet
+    participant API as API Route
+    participant SC as Smart Contract (Arbitrum)
+    participant PE as Pyth Entropy
+    participant DB as Database
+    
+    U->>SA: Initiate Game Session
+    SA->>UI: Check Account Type
+    
+    alt Smart Account
+        UI->>SA: Enable Batch Features
+        SA->>OC: Batch Bet Transactions
+        OC->>UI: Confirm Batch
+    else EOA Account
+        UI->>OC: Single Bet Transaction
+        OC->>UI: Confirm Single Bet
+    end
+    
+    UI->>API: POST /api/generate-entropy
+    API->>SC: request(userRandomNumber)
+    SC->>PE: Request Entropy
+    
+    Note over PE: Generate Cryptographic Entropy
+    
+    PE->>SC: entropyCallback()
+    SC->>API: Event: EntropyFulfilled
+    API->>DB: Store Game Result
+    
+    alt Smart Account Batch
+        API->>SA: Batch Results
+        SA->>OC: Process Batch Payouts
+        OC->>UI: Batch Payout Complete
+    else Single Transaction
+        API->>OC: Single Payout
+        OC->>UI: Single Payout Complete
+    end
+    
+    UI->>U: Display Outcome(s)
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │  One Chain Testnet  │    │ Arbitrum Sepolia│
-│   (Next.js)     │◄──►│   (Gaming)      │    │   (Entropy)     │
-│                 │    │                 │    │                 │
-│ • React UI      │    │ • OCT Token     │    │ • Pyth Entropy  │
-│ • Smart Accounts│    │ • Deposits      │    │ • Randomness    │
-│ • Wagmi/Viem    │    │ • Withdrawals   │    │ • Proof Gen     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+
+### Smart Account Transaction Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant UI as Casino UI
+    participant SA as Smart Account
+    participant OC as One Chain Testnet
+    participant AS as Arbitrum Sepolia
+    participant PE as Pyth Entropy
+    
+    Note over U,PE: Smart Account Batch Gaming Session
+    
+    U->>UI: Select Multiple Games
+    UI->>SA: Prepare Batch Transaction
+    
+    rect rgb(0, 0, 0)
+        Note over SA,OC: Batch Transaction on One Chain
+        SA->>OC: Batch Bet Transaction
+        OC->>SA: Confirm All Bets
+    end
+    
+    rect rgb(0, 0, 0)
+        Note over AS,PE: Entropy Generation on Arbitrum
+        UI->>AS: Request Entropy for All Games
+        AS->>PE: Generate Multiple Random Numbers
+        PE->>AS: Return Entropy Proofs
+        AS->>UI: All Game Results
+    end
+    
+    rect rgb(0, 0, 0)
+        Note over SA,OC: Batch Payout on One Chain
+        UI->>SA: Process Batch Payouts
+        SA->>OC: Batch Payout Transaction
+        OC->>SA: Confirm All Payouts
+    end
+    
+    SA->>UI: Update All Game States
+    UI->>U: Display All Results
+    
+    Note over U,PE: Single transaction for multiple games!
 ```
-
-## 📊 Smart Account Analytics
-
-The application tracks Smart Account usage:
-- Account type detection (EOA vs Smart Account)
-- Feature utilization metrics
-- Gas optimization statistics
-- Batch transaction success rates
 
 ## 🔗 Links
 
