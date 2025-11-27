@@ -97,27 +97,43 @@ export function useOneChainWallet() {
 
   // Sign and execute transaction
   const executeTransaction = useCallback(async (transaction, options = {}) => {
+    // Check wallet connection before executing
+    if (!isConnected || !address) {
+      throw new Error('Wallet is not connected. Please connect your wallet first.');
+    }
+    
     return new Promise((resolve, reject) => {
-      signAndExecuteTransaction(
-        {
-          transaction,
-          chain: 'sui:testnet', // OneChain uses Sui testnet identifier
-          ...options,
-        },
-        {
-          onSuccess: (result) => {
-            console.log('Transaction successful:', result);
-            fetchBalance(); // Refresh balance after transaction
-            resolve(result);
+      try {
+        signAndExecuteTransaction(
+          {
+            transaction,
+            // Don't specify chain - let the provider use defaultNetwork
+            ...options,
           },
-          onError: (error) => {
-            console.error('Transaction failed:', error);
-            reject(error);
-          },
-        }
-      );
+          {
+            onSuccess: (result) => {
+              console.log('Transaction successful:', result);
+              fetchBalance(); // Refresh balance after transaction
+              resolve(result);
+            },
+            onError: (error) => {
+              console.error('Transaction failed:', error);
+              // Provide more helpful error message
+              const errorMessage = error?.message || error?.toString() || 'Unknown error';
+              if (errorMessage.includes('permission') || errorMessage.includes('viewAccount') || errorMessage.includes('suggestTransaction')) {
+                reject(new Error('Wallet permission denied. Please reconnect your wallet and approve the connection.'));
+              } else {
+                reject(error);
+              }
+            },
+          }
+        );
+      } catch (error) {
+        console.error('Error executing transaction:', error);
+        reject(error);
+      }
     });
-  }, [signAndExecuteTransaction, fetchBalance]);
+  }, [signAndExecuteTransaction, fetchBalance, isConnected, address]);
 
   // Connect wallet
   const connectWallet = useCallback(async (walletName) => {

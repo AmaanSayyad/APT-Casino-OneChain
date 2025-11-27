@@ -147,7 +147,7 @@ const WithdrawModal = ({ isOpen, onClose }) => {
             <div className="bg-gray-800/50 rounded-lg p-4">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-gray-400">Available Balance:</span>
-                <span className="text-white font-bold">{balanceInApt.toFixed(4)} OCT</span>
+                <span className="text-white font-bold">{balanceInOct.toFixed(4)} OCT</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Max Withdraw:</span>

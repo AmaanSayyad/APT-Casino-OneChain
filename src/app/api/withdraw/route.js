@@ -68,31 +68,31 @@ export async function POST(request) {
       });
 
       if (!coins.data || coins.data.length === 0) {
-        return NextResponse.json(
+      return NextResponse.json(
           { error: 'No OCT coins found in treasury wallet' },
           { status: 400 }
-        );
-      }
+      );
+    }
 
       // Calculate total balance
       treasuryBalance = coins.data.reduce((sum, coin) => sum + BigInt(coin.balance), 0n);
       console.log(`💰 Treasury OCT balance: ${Number(treasuryBalance) / 1e9} OCT`);
       console.log(`📦 Found ${coins.data.length} OCT coin(s)`);
 
-      // Convert amount to MIST (1 OCT = 1,000,000,000 MIST)
-      const amountInMist = BigInt(Math.floor(amount * 1e9));
+    // Convert amount to MIST (1 OCT = 1,000,000,000 MIST)
+    const amountInMist = BigInt(Math.floor(amount * 1e9));
       const estimatedGas = BigInt(10000000); // 0.01 OCT for gas
       const totalNeeded = amountInMist + estimatedGas;
-
+    
       // Check if treasury has sufficient funds
       if (treasuryBalance < totalNeeded) {
-        return NextResponse.json(
-          { 
-            error: `Insufficient treasury funds. Available: ${Number(treasuryBalance) / 1e9} OCT, Requested: ${amount} OCT (+ gas)` 
-          },
-          { status: 400 }
-        );
-      }
+      return NextResponse.json(
+        { 
+          error: `Insufficient treasury funds. Available: ${Number(treasuryBalance) / 1e9} OCT, Requested: ${amount} OCT (+ gas)` 
+        },
+        { status: 400 }
+      );
+    }
 
       // Find a coin with sufficient balance for payment
       paymentCoin = coins.data.find(coin => BigInt(coin.balance) >= amountInMist);
@@ -103,11 +103,24 @@ export async function POST(request) {
         );
       }
 
-      // Find a coin for gas (prefer one with sufficient balance, otherwise use any)
-      gasCoin = coins.data.find(coin => BigInt(coin.balance) >= estimatedGas) || coins.data[0];
+      // Find a SEPARATE coin for gas (must be different from payment coin)
+      gasCoin = coins.data.find(coin => 
+        coin.coinObjectId !== paymentCoin.coinObjectId && 
+        BigInt(coin.balance) >= estimatedGas
+      );
+      
+      // If no separate coin for gas, we'll handle it differently
+      if (!gasCoin && coins.data.length > 1) {
+        // Try to find any other coin for gas
+        gasCoin = coins.data.find(coin => coin.coinObjectId !== paymentCoin.coinObjectId);
+      }
 
       console.log(`💳 Using payment coin: ${paymentCoin.coinObjectId} (${paymentCoin.balance} MIST)`);
-      console.log(`⛽ Using gas coin: ${gasCoin.coinObjectId} (${gasCoin.balance} MIST)`);
+      if (gasCoin) {
+        console.log(`⛽ Using separate gas coin: ${gasCoin.coinObjectId} (${gasCoin.balance} MIST)`);
+      } else {
+        console.log(`⛽ No separate gas coin available, will use payment coin after split`);
+      }
 
     } catch (balanceError) {
       console.error('⚠️ Could not get treasury OCT coins:', balanceError);
@@ -124,12 +137,16 @@ export async function POST(request) {
     // Create Sui transaction
     const tx = new Transaction();
     
-    // Set gas payment using OCT coin
-    tx.setGasPayment([{
-      objectId: gasCoin.coinObjectId,
-      version: gasCoin.version,
-      digest: gasCoin.digest
-    }]);
+    // If we have a separate gas coin, use it for gas
+    // Otherwise, don't set gas payment - the wallet will auto-select from remaining coins after split
+    if (gasCoin && gasCoin.coinObjectId !== paymentCoin.coinObjectId) {
+      tx.setGasPayment([{
+        objectId: gasCoin.coinObjectId,
+        version: gasCoin.version,
+        digest: gasCoin.digest
+      }]);
+    }
+    // If no separate gas coin, don't set gas payment - the remaining coin after split will be used for gas
     
     // Split coin for exact amount from payment coin
     const [coin] = tx.splitCoins(tx.object(paymentCoin.coinObjectId), [amountInMist.toString()]);
@@ -141,15 +158,60 @@ export async function POST(request) {
     tx.setGasBudget(estimatedGas.toString());
 
     console.log('🔧 Executing withdrawal transaction...');
+    console.log('📋 Transaction details:', {
+      userAddress,
+      amount: amount.toString(),
+      amountInMist: amountInMist.toString(),
+      paymentCoin: paymentCoin.coinObjectId,
+      gasCoin: gasCoin?.coinObjectId || 'auto-select'
+    });
 
     // Sign and execute transaction
     const result = await suiClient.signAndExecuteTransaction({
       signer: treasuryKeypair,
       transaction: tx,
+      options: {
+        showEffects: true,
+        showEvents: true,
+      }
     });
 
     console.log(`📤 Transaction executed: ${result.digest}`);
-    console.log(`✅ Withdrew ${amount} OCT to ${userAddress}`);
+    console.log(`📊 Transaction effects:`, result.effects);
+    console.log(`📊 Transaction events:`, result.events);
+
+    // Wait for transaction to be confirmed
+    console.log('⏳ Waiting for transaction confirmation...');
+    const confirmedResult = await suiClient.waitForTransaction({
+      digest: result.digest,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+      }
+    });
+
+    console.log(`✅ Transaction confirmed: ${result.digest}`);
+    
+    // Verify transaction was successful
+    if (confirmedResult.effects?.status?.status !== 'success') {
+      throw new Error(`Transaction failed: ${JSON.stringify(confirmedResult.effects?.status)}`);
+    }
+
+    // Verify that coins were transferred to user
+    const objectChanges = confirmedResult.objectChanges || [];
+    const transferEvent = objectChanges.find(change => 
+      change.type === 'transferred' && 
+      change.recipient === userAddress
+    );
+
+    if (!transferEvent) {
+      console.warn('⚠️ Transfer event not found in object changes, but transaction succeeded');
+    } else {
+      console.log(`✅ Verified: OCT transferred to ${userAddress}`);
+    }
+
+    console.log(`✅ Successfully withdrew ${amount} OCT to ${userAddress}`);
 
     return NextResponse.json({
       success: true,

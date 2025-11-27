@@ -286,9 +286,9 @@ export default function Mines() {
               return txHash;
             }).catch(error => {
               console.error('❌ ONE CHAIN: Error logging Mines game:', error);
-              return null;
-            });
-          }
+            return null;
+          });
+        }
         }
       } else {
         console.warn('⚠️ ONE CHAIN: Cannot log - missing address or entropyProof', {

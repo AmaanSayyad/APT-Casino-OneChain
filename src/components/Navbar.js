@@ -440,6 +440,11 @@ export default function Navbar() {
     setIsDepositing(true);
     console.log('🚀 Starting One Chain deposit process for:', amount, 'OCT');
     try {
+      // Check wallet connection
+      if (!isConnected || !address) {
+        throw new Error('Wallet is not connected. Please connect your wallet first.');
+      }
+      
       console.log('Depositing to One Chain treasury:', { address, amount });
       
       // Get user's OCT coins (One Chain uses 0x2::oct::OCT)
@@ -471,21 +476,32 @@ export default function Navbar() {
         );
       }
 
-      // Find a coin for gas (prefer one with sufficient balance, otherwise use any)
-      const gasCoin = coins.data.find(coin => BigInt(coin.balance) >= estimatedGas) || coins.data[0];
-
+      // Find a separate coin for gas (different from payment coin)
+      let gasCoin = coins.data.find(coin => 
+        coin.coinObjectId !== paymentCoin.coinObjectId && 
+        BigInt(coin.balance) >= estimatedGas
+      );
+      
       console.log(`💳 Using payment coin: ${paymentCoin.coinObjectId} (${paymentCoin.balance} MIST)`);
-      console.log(`⛽ Using gas coin: ${gasCoin.coinObjectId} (${gasCoin.balance} MIST)`);
+      if (gasCoin) {
+        console.log(`⛽ Using separate gas coin: ${gasCoin.coinObjectId} (${gasCoin.balance} MIST)`);
+      } else {
+        console.log(`⛽ No separate gas coin, wallet will auto-select gas`);
+      }
       
       // Create Sui transaction for OCT transfer
       const tx = new Transaction();
       
-      // Set gas payment using OCT coin
-      tx.setGasPayment([{
-        objectId: gasCoin.coinObjectId,
-        version: gasCoin.version,
-        digest: gasCoin.digest
-      }]);
+      // Only set gas payment if we have a separate gas coin
+      // Otherwise, let the wallet auto-select gas from available coins
+      if (gasCoin) {
+        tx.setGasPayment([{
+          objectId: gasCoin.coinObjectId,
+          version: gasCoin.version,
+          digest: gasCoin.digest
+        }]);
+      }
+      // If no separate gas coin, don't set gas payment - wallet will handle it
       
       // Split coin for exact amount from payment coin
       const [coin] = tx.splitCoins(tx.object(paymentCoin.coinObjectId), [amountInMist.toString()]);
@@ -499,7 +515,19 @@ export default function Navbar() {
       notification.info('Please approve the transaction in your wallet...');
       
       // Execute transaction
-      const result = await executeTransaction(tx);
+      let result;
+      try {
+        result = await executeTransaction(tx);
+      } catch (error) {
+        // Handle permission errors specifically
+        if (error?.message?.includes('permission') || 
+            error?.message?.includes('viewAccount') || 
+            error?.message?.includes('suggestTransaction')) {
+          notification.error('Wallet permission denied. Please reconnect your wallet and try again.');
+          throw new Error('Wallet permission denied. Please disconnect and reconnect your wallet, then try again.');
+        }
+        throw error;
+      }
       
       console.log('✅ Deposit transaction successful:', result);
       
@@ -524,7 +552,19 @@ export default function Navbar() {
       
     } catch (error) {
       console.error('Deposit error:', error);
-      notification.error(`Deposit failed: ${error.message}`);
+      const errorMessage = error?.message || 'Unknown error';
+      
+      // Provide specific guidance for permission errors
+      if (errorMessage.includes('permission') || 
+          errorMessage.includes('viewAccount') || 
+          errorMessage.includes('suggestTransaction')) {
+        notification.error(
+          'Wallet permission denied. Please disconnect and reconnect your wallet, then try again.',
+          { duration: 5000 }
+        );
+      } else {
+        notification.error(`Deposit failed: ${errorMessage}`);
+      }
     } finally {
       setIsDepositing(false);
     }
