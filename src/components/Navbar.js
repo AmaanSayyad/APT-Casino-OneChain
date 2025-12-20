@@ -722,7 +722,7 @@ export default function Navbar() {
             {navLinks.map(({ name, path, classes }, index) => (
               <div key={index} className="relative group">
               <Link
-                  className={`${path === pathname ? "text-transparent bg-clip-text bg-gradient-to-r from-red-magic to-blue-magic font-semibold" : classes} flex items-center gap-1 text-lg font-medium transition-all duration-200 hover:scale-105`}
+                  className={`${path === pathname ? (name === "Home" ? "text-white font-semibold" : "text-transparent bg-clip-text bg-gradient-to-r from-red-magic to-blue-magic font-semibold") : (name === "Home" || name === "Game" || name === "Bank" ? "text-white" : classes)} flex items-center gap-1 text-lg font-medium transition-all duration-200 hover:scale-105`}
                 href={path}
               >
                 {name}
@@ -733,8 +733,6 @@ export default function Navbar() {
           
           <div className="flex items-center gap-2 md:gap-3">
           
-
-            
             {/* User Balance Display */}
             {isWalletReady && (
               <div className="flex items-center space-x-3">
@@ -761,11 +759,11 @@ export default function Navbar() {
             {/* Live Chat Button */}
             <button
               onClick={() => setShowLiveChat(true)}
-              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium rounded-lg transition-all duration-200 hover:scale-105 flex items-center gap-2"
+              className="px-4 py-2 border border-[#00A3FF] hover:border-[#00A3FF] hover:bg-[#00A3FF] text-[#00A3FF] hover:text-white font-medium rounded-[30px] transition-all duration-200 flex items-center gap-2 bg-transparent"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {/* <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
+              </svg> */}
               Live Chat
             </button>
       
@@ -779,7 +777,7 @@ export default function Navbar() {
               {navLinks.map(({ name, path, classes }, index) => (
                 <div key={index}>
                   <Link
-                    className={`${path === pathname ? 'text-white font-semibold' : 'text-white/80'} py-2 px-3 rounded-md hover:bg-purple-500/10 flex items-center w-full text-lg`}
+                    className={`${path === pathname ? (name === "Home" ? 'text-white font-semibold' : 'text-white font-semibold') : (name === "Home" || name === "Game" || name === "Bank" ? 'text-white' : 'text-white/80')} py-2 px-3 rounded-md hover:bg-purple-500/10 flex items-center w-full text-lg`}
                     href={path}
                     onClick={() => setShowMobileMenu(false)}
                   >
