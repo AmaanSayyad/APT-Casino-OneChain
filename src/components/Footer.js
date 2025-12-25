@@ -1,268 +1,243 @@
 'use client';
 
-import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import GradientBorderButton from "./GradientBorderButton";
-import { FaGlobe, FaChevronDown, FaChevronUp, FaMobileAlt, FaLock, FaShieldAlt, FaCoins } from "react-icons/fa";
+import { useMemo, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import Logo from '../assets/frontend_resources/logos/onearcade-logo-horizontal.png';
+
+import { FaTwitter, FaDiscord, FaTelegramPlane, FaGithub, FaLock, FaShieldAlt } from 'react-icons/fa';
 
 export default function Footer() {
-  const [email, setEmail] = useState("");
+  const pathname = usePathname();
+
+  const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [showLanguage, setShowLanguage] = useState(false);
-  
-  const socialLinks = [
-    { name: "Twitter", url: "https://twitter.com", icon: "/icons/twitter.svg" },
-    { name: "Discord", url: "https://discord.com", icon: "/icons/discord.svg" },
-    { name: "Telegram", url: "https://telegram.org", icon: "/icons/telegram.svg" },
-    { name: "GitHub", url: "https://github.com", icon: "/icons/github.svg" },
-  ];
-  
-  const languages = [
-    { code: "en", name: "English" },
-    { code: "es", name: "Español" },
-    { code: "fr", name: "Français" },
-    { code: "de", name: "Deutsch" },
-    { code: "jp", name: "日本語" },
-  ];
-  
-  const paymentMethods = [
-    { name: "OCT", icon: "/icons/eth.svg" },
-    { name: "OCT", icon: "/icons/apt.svg" },
-  ];
-  
+
+  const navLinks = useMemo(
+    () => [
+      { label: 'Home', href: '/' },
+      { label: 'Game', href: '/game' },
+      { label: 'Bank', href: '/bank' },
+      { label: 'About Us', href: '/about-us' },
+      { label: 'FAQs', href: '/faqs' },
+      { label: 'Contact Us', href: '/contact-us' },
+    ],
+    []
+  );
+
+  const supportLinks = useMemo(
+    () => [
+      { label: 'Privacy Policy', href: '/privacy-policy' },
+      { label: 'Terms of Service', href: '/terms-of-service' },
+      { label: 'Responsible Gaming', href: '/responsible-gaming' },
+    ],
+    []
+  );
+
+  const bottomLinks = useMemo(
+    () => [
+      { label: 'Terms', href: '/terms' },
+      { label: 'Privacy', href: '/privacy' },
+      { label: 'Cookies', href: '/cookies' },
+      { label: 'Play Responsibly', href: '/responsible-gaming' },
+    ],
+    []
+  );
+
+  const linkClass = (href) => {
+    const isActive = pathname === href;
+    return [
+      'text-[15px] transition-colors',
+      isActive ? 'text-white' : 'text-[#2F7BFF] hover:text-[#6AA6FF]',
+    ].join(' ');
+  };
+
   const handleSubscribe = (e) => {
     e.preventDefault();
-    if (email.trim() !== "") {
-      // In a real app, you would send this to your API
-      console.log("Subscribing email:", email);
-      setIsSubscribed(true);
-      setEmail("");
-      
-      // Reset after 3 seconds
-      setTimeout(() => {
-        setIsSubscribed(false);
-      }, 3000);
-    }
+    if (!email.trim()) return;
+
+    console.log('Subscribing email:', email);
+    setIsSubscribed(true);
+    setEmail('');
+
+    setTimeout(() => setIsSubscribed(false), 2500);
   };
 
   return (
-    <footer id="footer" className="bg-sharp-black text-white pt-16 pb-8 relative overflow-hidden">
-      {/* Background Glow Effect */}
-      <div className="absolute -top-20 -left-20 w-60 h-60 rounded-full bg-red-magic/10 blur-[100px] animate-pulse"></div>
-      <div className="absolute -bottom-20 -right-20 w-60 h-60 rounded-full bg-blue-magic/10 blur-[100px] animate-pulse" style={{animationDelay: "1.5s"}}></div>
-      <div className="absolute top-1/3 right-1/4 w-40 h-40 rounded-full bg-purple-600/10 blur-[80px] animate-pulse" style={{animationDelay: "0.7s"}}></div>
-      
-      {/* Top Divider with animated gradient */}
-      <div className="w-full h-0.5 bg-gradient-to-r from-red-magic via-blue-magic to-red-magic bg-[length:200%_auto] animate-gradient mb-12"></div>
+    <footer className="relative  bg-sharp-black text-white">
+      {/* subtle background glow like the screenshot */}
+      <div className="pointer-events-none absolute inset-0 opacity-70">
+        <div className="absolute -top-24 left-10 h-64 w-64 rounded-full bg-sharp-black blur-[90px]" />
+        <div className="absolute -top-24 right-24 h-64 w-64 rounded-full bg-sharp-black blur-[90px]" />
+        <div className="absolute bottom-0 left-1/2 h-56 w-[700px] -translate-x-1/2 bg-white/5 blur-[120px]" />
+      </div>
 
-      {/* Footer Content */}
-      <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 px-6">
-        {/* Logo and Description */}
-        <div className="md:col-span-4">
-          <a href="/" className="logo block mb-6 transition-transform hover:scale-105">
-            <Image src="/PowerPlay.png" alt="PowerPlay logo" width={172} height={15} />
-          </a>
-          <div className="p-[1px] bg-gradient-to-r from-red-magic/40 to-blue-magic/40 rounded-lg mb-6 hover:from-red-magic hover:to-blue-magic transition-all duration-300">
-            <div className="bg-[#120010] rounded-lg p-4">
-              <p className="text-white/80 text-sm leading-relaxed">
-                APT-Casino is your ultimate destination for One Chain Network gaming. Experience transparency, fairness,
-                and excitement powered by One Chain Network blockchain technology.
-              </p>
+      <div className="relative max-w-[1200px] mx-auto px-6 pt-14 pb-10">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
+          {/* Left: Logo + copy + socials */}
+          <div className="md:col-span-3">
+            <Link href="/" className="inline-block">
+              <Image src={Logo} alt="OneArcade logo" width={260} height={90} priority />
+            </Link>
+
+            <p className="mt-6 text-white/70 leading-relaxed">
+              OneArcade is the next-generation decentralized gaming and entertainment platform built on One Chain Network.
+              Experience transparent, fair, and secure on-chain gaming where you truly own your assets.
+            </p>
+
+            <div className="mt-8 flex items-center gap-6">
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Twitter"
+                className="text-[#2F7BFF] hover:text-[#6AA6FF] transition-colors"
+              >
+                <FaTwitter size={22} />
+              </a>
+              <a
+                href="https://discord.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Discord"
+                className="text-[#2F7BFF] hover:text-[#6AA6FF] transition-colors"
+              >
+                <FaDiscord size={22} />
+              </a>
+              <a
+                href="https://telegram.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Telegram"
+                className="text-[#2F7BFF] hover:text-[#6AA6FF] transition-colors"
+              >
+                <FaTelegramPlane size={22} />
+              </a>
+              <a
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                className="text-[#2F7BFF] hover:text-[#6AA6FF] transition-colors"
+              >
+                <FaGithub size={22} />
+              </a>
             </div>
           </div>
-          
-          {/* Social Media Links in a gradient border */}
-          <div className="p-[1px] bg-gradient-to-r from-red-magic to-blue-magic rounded-lg hover:shadow-lg hover:shadow-red-magic/20 transition-all duration-300">
-            <div className="bg-[#120010] rounded-lg p-4 flex justify-between">
-              {socialLinks.map((social) => (
-                <a 
-                  key={social.name}
-                  href={social.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  aria-label={social.name}
-                  className="group transition-transform hover:scale-110"
-                >
-                  <div className="w-10 h-10 flex items-center justify-center bg-[#250020] rounded-full group-hover:bg-gradient-to-r group-hover:from-red-magic group-hover:to-blue-magic transition-all duration-300">
-                    <Image 
-                      src={social.icon} 
-                      alt={social.name} 
-                      width={20} 
-                      height={20} 
-                      className="filter invert"
-                    />
-                  </div>
-                </a>
+
+          {/* Navigation */}
+          <div className="md:col-span-2 md:pl-6">
+            <h3 className="text-xl font-semibold">Navigation</h3>
+            <ul className="mt-8 space-y-4">
+              {navLinks.map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href} className={linkClass(l.href)}>
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Support */}
+          <div className="md:col-span-2">
+            <h3 className="text-xl font-semibold">Support</h3>
+            <ul className="mt-8 space-y-4">
+              {supportLinks.map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href} className={linkClass(l.href)}>
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Security */}
+          <div className="md:col-span-2">
+            <h3 className="text-xl font-semibold">Security</h3>
+
+            <div className="mt-8 space-y-4">
+              <div className="flex items-center gap-3 rounded-xl border border-[#2F7BFF]/35 bg-[#0B1424]/70 px-5 py-4">
+                <FaLock className="text-[#2F7BFF]" />
+                <span className="text-[#2F7BFF] font-medium">SSL Secured</span>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-xl border border-[#2F7BFF]/35 bg-[#0B1424]/70 px-5 py-4">
+                <FaShieldAlt className="text-[#2F7BFF]" />
+                <span className="text-[#2F7BFF] font-medium">Provably Fair</span>
+              </div>
+            </div>
+          </div>
+          {/* Stay Updated + CTA */}
+          <div className="md:col-span-3">
+            <h3 className="text-xl font-semibold">Stay Updated</h3>
+
+            <form onSubmit={handleSubscribe} className="mt-8">
+            <div className="flex w-full items-center rounded-2xl bg-white/10 ring-1 ring-white/10 p-1 gap-1">
+  <input
+    type="email"
+    placeholder="Enter your email"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+    className="min-w-0 flex-1 truncate bg-transparent px-4 sm:px-5 py-4 text-sm text-white placeholder:text-white/40 focus:outline-none"
+    required
+  />
+
+
+  <button
+    type="submit"
+    className="shrink-0 whitespace-nowrap rounded-xl bg-[#2F7BFF] px-4 sm:px-6 py-4 text-sm font-medium text-white hover:bg-[#4B8DFF] transition-colors"
+  >
+    Subscribe
+  </button>
+</div>
+
+
+              {isSubscribed && (
+                <div className="mt-2 text-xs text-green-400">Subscribed. Welcome aboard.</div>
+              )}
+            </form>
+
+            <Link
+              href="/game"
+              className="mt-8 block w-full rounded-3xl bg-[#2F7BFF] hover:bg-[#3F86FF] transition-colors
+                         shadow-[0_18px_50px_rgba(47,123,255,0.35)]"
+            >
+              <div className="py-8 flex flex-col items-center justify-center gap-4">
+                <span className="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M9 7l10 5-10 5V7z" fill="white" />
+                  </svg>
+                </span>
+                <span className="text-3xl font-semibold tracking-tight">Launch Game</span>
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div className="mt-12 border-t border-white/10 pt-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="text-white/60">
+              © {new Date().getFullYear()} OneArcade. All rights reserved.
+            </div>
+
+            <div className="flex items-center gap-6">
+              {bottomLinks.map((l) => (
+                <Link key={l.href} href={l.href} className="text-[#2F7BFF] hover:text-[#6AA6FF] transition-colors">
+                  {l.label}
+                </Link>
               ))}
             </div>
           </div>
-          
-          {/* Language Selector */}
-          <div className="mt-6 relative">
-            <button 
-              className="flex items-center gap-2 text-white/70 hover:text-white p-2 rounded-md bg-[#250020] hover:bg-[#350030] w-full transition-colors"
-              onClick={() => setShowLanguage(!showLanguage)}
-            >
-              <FaGlobe className="text-blue-magic" />
-              <span>Select Language</span>
-              {showLanguage ? <FaChevronUp className="ml-auto" /> : <FaChevronDown className="ml-auto" />}
-            </button>
-            
-            {showLanguage && (
-              <div className="absolute z-10 mt-1 w-full bg-[#250020] border border-white/10 rounded-md shadow-xl p-1 animate-fadeIn">
-                {languages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    className="flex items-center gap-2 text-white/70 hover:text-white hover:bg-white/10 p-2 rounded-md w-full text-left transition-colors"
-                    onClick={() => setShowLanguage(false)}
-                  >
-                    {lang.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
-
-        {/* Navigation Links */}
-        <div className="md:col-span-2 md:ml-8">
-          <div className="mb-3 flex items-center">
-            <div className="w-1 h-4 magic-gradient rounded-full mr-2"></div>
-            <h3 className="font-display text-lg">Navigation</h3>
-          </div>
-          <ul className="space-y-3 mt-4">
-            {["Home", "Game", "Bank", "About Us", "FAQs"].map((item) => (
-              <li key={item}>
-                <Link 
-                  href={item.toLowerCase() === "home" ? "/" : `/${item.toLowerCase().replace(" ", "-")}`} 
-                  className="text-white/70 hover:text-white flex items-center transition-all group"
-                >
-                  <span className="w-0 h-[1px] magic-gradient mr-0 group-hover:w-2 group-hover:mr-2 transition-all"></span>
-                  {item}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          
-         
-        </div>
-
-        {/* Support Links */}
-        <div className="md:col-span-2">
-          <div className="mb-3 flex items-center">
-            <div className="w-1 h-4 magic-gradient rounded-full mr-2"></div>
-            <h3 className="font-display text-lg">Support</h3>
-          </div>
-          <ul className="space-y-3 mt-4">
-            {[
-              "Contact Us", 
-              "Privacy Policy", 
-              "Terms of Service", 
-              "Responsible Gaming"
-            ].map((item) => (
-              <li key={item}>
-                <Link 
-                  href={`/${item.toLowerCase().replace(/\s+/g, "-")}`} 
-                  className="text-white/70 hover:text-white flex items-center transition-all group"
-                >
-                  <span className="w-0 h-[1px] magic-gradient mr-0 group-hover:w-2 group-hover:mr-2 transition-all"></span>
-                  {item}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          
-          {/* Security Badges */}
-          <div className="mt-6 pt-6 border-t border-white/10">
-            <h3 className="text-sm font-medium mb-3 text-white/90 flex items-center">
-              <FaShieldAlt className="mr-2 text-green-500" /> Security & Trust
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              <div className="bg-[#250020] p-1.5 rounded-md flex items-center gap-1.5 text-xs text-white/80">
-                <FaLock className="text-green-500" /> SSL Secured
-              </div>
-              <div className="bg-[#250020] p-1.5 rounded-md flex items-center gap-1.5 text-xs text-white/80">
-                <FaShieldAlt className="text-blue-magic" /> Provably Fair
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Newsletter and CTA */}
-        <div className="md:col-span-4">
-          <div className="mb-3 flex items-center">
-            <div className="w-1 h-4 magic-gradient rounded-full mr-2"></div>
-            <h3 className="font-display text-lg">Stay Updated</h3>
-          </div>
-          
-          <div className="mt-4 p-[1px] bg-gradient-to-r from-red-magic to-blue-magic rounded-lg shadow-lg transition-all hover:shadow-red-magic/30">
-            <div className="bg-[#120010] rounded-lg p-4">
-              <p className="text-white/70 text-sm mb-3">
-                Subscribe to receive updates about new games, features, and promotions.
-              </p>
-              
-              <form onSubmit={handleSubscribe} className="relative">
-                <div className="flex gap-2 mb-2">
-                  <input 
-                    type="email" 
-                    placeholder="Your email" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="flex-1 bg-[#250020] border border-white/10 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-magic transition-colors"
-                    required
-                  />
-                  <GradientBorderButton type="submit">
-                    Subscribe
-                  </GradientBorderButton>
-                </div>
-                
-                {isSubscribed && (
-                  <div className="text-green-500 text-xs animate-fadeIn absolute">
-                    Thank you for subscribing!
-                  </div>
-                )}
-              </form>
-              
-              <div className="flex justify-center mt-6">
-                <Link href="/game" className="w-full">
-                  <button className="w-full magic-gradient hover:opacity-90 transition-all text-white font-display py-3 px-6 rounded-md hover:shadow-lg hover:shadow-red-magic/30">
-                    Launch Game
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
-          
-          
-        </div>
-      </div>
-
-      {/* Bottom Divider and Legal */}
-      <div className="max-w-[1200px] mx-auto px-6">
-        <div className="mt-12 mb-6 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-        
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-sm text-white/50">
-            © {new Date().getFullYear()} APT-Casino. All rights reserved.
-          </div>
-          
-          <div className="text-xs text-white/40 flex gap-4">
-            <a href="/terms" className="hover:text-white/60 transition-colors">Terms</a>
-            <span>|</span>
-            <a href="/privacy" className="hover:text-white/60 transition-colors">Privacy</a>
-            <span>|</span>
-            <a href="/cookies" className="hover:text-white/60 transition-colors">Cookies</a>
-            <span>|</span>
-            <a href="/responsible-gaming" className="hover:text-white/60 transition-colors">Play Responsibly</a>
-          </div>
-        </div>
-        
         {/* Compliance Statement */}
-        <div className="text-xs text-white/30 text-center mt-6">
-          APT-Casino encourages responsible gaming. Please play responsibly and only with funds you can afford to lose.
-          Gambling can be addictive. If you need help or advice, please visit <a href="/responsible-gaming" className="underline hover:text-white/50 transition-colors">Responsible Gaming</a>.
-        </div>
+         <div className="text-xs text-white/30 text-center mt-6">
+           APT-Casino encourages responsible gaming. Please play responsibly and only with funds you can afford to lose.
+           Gambling can be addictive. If you need help or advice, please visit <a href="/responsible-gaming" className="underline hover:text-white/50 transition-colors">Responsible Gaming</a>.
+         </div>
       </div>
     </footer>
   );
