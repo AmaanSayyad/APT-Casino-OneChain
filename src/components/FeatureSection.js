@@ -86,8 +86,17 @@ export default function FeatureSection() {
                 <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-transparent to-black/55" />
               </div>
 
+              {/* Left side fade blend */}
+              <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#070005] to-transparent z-[1]" />
+              
+              {/* Right side fade blend */}
+              <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#070005] to-transparent z-[1]" />
+              
+              {/* Top side fade blend */}
+              <div className="pointer-events-none absolute left-0 right-0 top-0 h-32 bg-gradient-to-b from-[#070005] to-transparent z-[1]" />
+
               {/* Title */}
-              <div className="relative z-10 text-center">
+              <div className="relative z-30 text-center">
                 <h2 className="text-white text-[30px] md:text-[36px] font-extrabold uppercase tracking-wider">
                   TRADITIONAL VS ONEARCADE
                 </h2>
@@ -97,7 +106,7 @@ export default function FeatureSection() {
               </div>
 
               {/* HUD Table Frame */}
-              <div className="relative z-10 mx-auto mt-7 max-w-4xl">
+              <div className="relative z-30 mx-auto mt-7 max-w-4xl">
                 {/* frame glow */}
                 <div className="absolute -inset-[10px] rounded-[22px] bg-[radial-gradient(circle,rgba(0,209,255,0.22)_0%,rgba(0,209,255,0)_62%)] blur-[2px]" />
 
@@ -178,7 +187,7 @@ export default function FeatureSection() {
               </div>
 
               {/* Footer note */}
-              <p className="relative z-10 mx-auto mt-6 max-w-3xl text-center text-white/80 text-sm md:text-base">
+              <p className="relative z-30 mx-auto mt-6 max-w-3xl text-center text-white/80 text-sm md:text-base">
                 OneArcade leverages One Chain Network Blockchain to provide a transparent, provably fair gaming
                 experience with DeFi integration.
               </p>

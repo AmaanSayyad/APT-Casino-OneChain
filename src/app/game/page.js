@@ -2,6 +2,7 @@ import HeaderText from "@/components/HeaderText";
 import GameCarousel from "@/components/GameCarousel";
 import MostPlayed from "@/components/MostPlayed";
 import GameStats from "@/components/GameStats";
+import GameCarouselNew from "@/components/GameCarouselNew";
 
 export default function Page() {
   return (
@@ -10,7 +11,8 @@ export default function Page() {
         
         <div className="mb-10">
           
-          <GameCarousel />
+          {/* <GameCarousel /> */}
+          <GameCarouselNew />
         </div>
         
         <MostPlayed />

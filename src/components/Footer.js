@@ -73,7 +73,7 @@ export default function Footer() {
         <div className="absolute bottom-0 left-1/2 h-56 w-[700px] -translate-x-1/2 bg-white/5 blur-[120px]" />
       </div>
 
-      <div className="relative max-w-[1200px] mx-auto px-6 pt-14 pb-10">
+      <div className="relative max-w-[1200px] mx-auto px-0 pt-14 pb-10">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
           {/* Left: Logo + copy + socials */}
           <div className="md:col-span-3">
