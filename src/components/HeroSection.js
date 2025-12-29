@@ -48,7 +48,7 @@ export default function HeroSection() {
         </p>
         
         <div className="flex flex-wrap justify-center gap-4 mt-6">
-          <LaunchGameButton />
+          <LaunchGameButton /> 
           
           {/* Additional Quick Links */}
           <div className="flex gap-3 mt-2 sm:mt-0">

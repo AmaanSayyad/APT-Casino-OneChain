@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import GradientBorderButton from "@/components/GradientBorderButton";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -378,12 +377,12 @@ const GameCarouselNew = () => {
         </div>
       </div>
 
-      {/* View all games button (kept exactly) */}
+      {/* View all games button */}
       <div className="relative z-10 text-center mt-10">
         <Link href="/game">
-          <GradientBorderButton className="px-8">
+          <button className="bg-gradient-to-r from-[#0066FF] to-[#00A3FF] text-white font-medium px-8 py-2 rounded-[30px] hover:from-[#0066FF] hover:to-[#00A3FF] hover:shadow-[0_0_20px_rgba(0,163,255,0.8),0_0_40px_rgba(0,163,255,0.4)] transition-all">
             View All Games
-          </GradientBorderButton>
+          </button>
         </Link>
       </div>
     </div>
