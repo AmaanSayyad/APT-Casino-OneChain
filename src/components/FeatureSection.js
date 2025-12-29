@@ -44,7 +44,7 @@ export default function FeatureSection() {
 
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="flex items-center mb-12 justify-center">
-          <div className="w-1 h-6 bg-gradient-to-r from-red-magic to-blue-magic rounded-full mr-3"></div>
+          <div className="w-1 h-6 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full mr-3"></div>
           <h2 className="text-2xl font-display font-bold text-white">Key Features of APT-Casino</h2>
         </div>
 
@@ -87,13 +87,13 @@ export default function FeatureSection() {
               </div>
 
               {/* Left side fade blend */}
-              <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#070005] to-transparent z-[1]" />
+              <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-sharp-black to-transparent z-[1]" />
               
               {/* Right side fade blend */}
-              <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#070005] to-transparent z-[1]" />
+              <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-sharp-black to-transparent z-[1]" />
               
               {/* Top side fade blend */}
-              <div className="pointer-events-none absolute left-0 right-0 top-0 h-32 bg-gradient-to-b from-[#070005] to-transparent z-[1]" />
+              <div className="pointer-events-none absolute left-0 right-0 top-0 h-32 bg-gradient-to-b from-sharp-black to-transparent z-[1]" />
 
               {/* Title */}
               <div className="relative z-30 text-center">
@@ -203,22 +203,29 @@ export default function FeatureSection() {
               initial={{ opacity: 0.6, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="p-[1px] bg-gradient-to-r from-red-magic/80 to-blue-magic/80 rounded-xl cursor-pointer hover:from-red-magic hover:to-blue-magic transition-all"
+              className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] hover:shadow-[0_0_30px_rgba(0,163,255,0.6),0_0_30px_rgba(0,163,255,0.3)] transition-all duration-300 cursor-pointer"
               onClick={() => setActiveFeature(index)}
             >
-              <div className={`bg-[#1A0015] rounded-xl p-6 h-full flex flex-col ${activeFeature === index ? 'border-l-2 border-red-magic' : ''
+              <div className={`relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden p-6 h-full flex flex-col ${activeFeature === index ? 'border-l-2 border-[#00A3FF]' : ''
                 }`}>
-                <div className="mb-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-red-magic/30 to-blue-magic/30 flex items-center justify-center text-2xl">
+                {/* inner glow */}
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
+                
+                <div className="mb-4 relative z-10">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all duration-300 ${
+                    activeFeature === index 
+                      ? 'bg-[#00A3FF] shadow-[0_0_15px_rgba(0,163,255,0.5)]' 
+                      : 'bg-[#0B1324] border border-sky-400/20'
+                  }`}>
                     {feature.icon}
                   </div>
                 </div>
 
-                <h3 className="text-white font-medium text-lg mb-2">{feature.title}</h3>
-                <p className="text-white/70 text-sm">{feature.description}</p>
+                <h3 className="text-white font-medium text-lg mb-2 relative z-10">{feature.title}</h3>
+                <p className="text-white/70 text-sm relative z-10">{feature.description}</p>
 
-                <div className="mt-auto pt-4">
-                  <div className="h-1 w-12 magic-gradient rounded-full"></div>
+                <div className="mt-auto pt-4 relative z-10">
+                  <div className="h-1 w-12 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full"></div>
                 </div>
               </div>
             </motion.div>

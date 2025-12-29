@@ -60,7 +60,7 @@ const NewsUpdates = () => {
     <section className="py-16 px-4 md:px-8 lg:px-16">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center mb-8">
-          <div className="w-1 h-6 bg-gradient-to-r from-red-magic to-blue-magic rounded-full mr-3"></div>
+          <div className="w-1 h-6 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full mr-3"></div>
           <h2 className="text-2xl font-display font-bold text-white">Latest Updates</h2>
         </div>
         
@@ -71,8 +71,8 @@ const NewsUpdates = () => {
               key={category}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 activeCategory === category
-                  ? 'bg-gradient-to-r from-red-magic to-blue-magic text-white'
-                  : 'bg-[#250020] text-white/70 hover:text-white'
+                  ? 'bg-[#00A3FF] text-white shadow-[0_0_15px_rgba(0,163,255,0.5)]'
+                  : 'bg-[#0B1324] border border-sky-400/20 text-white/70 hover:text-white hover:border-sky-400/40'
               }`}
               onClick={() => setActiveCategory(category)}
             >
@@ -85,8 +85,11 @@ const NewsUpdates = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredNews.map((item) => (
             <Link href={item.url} key={item.id}>
-              <div className="p-[1px] bg-gradient-to-r from-red-magic/80 to-blue-magic/80 rounded-xl h-full cursor-pointer hover:from-red-magic hover:to-blue-magic transition-all">
-                <div className="bg-[#1A0015] rounded-xl h-full overflow-hidden">
+              <div className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] hover:shadow-[0_0_30px_rgba(0,163,255,0.6),0_0_30px_rgba(0,163,255,0.3)] transition-all duration-300 h-full cursor-pointer">
+                <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden h-full">
+                  {/* inner glow */}
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
+                  
                   {/* News Image */}
                   <div className="h-40 relative">
                     <Image 
@@ -96,17 +99,17 @@ const NewsUpdates = () => {
                       style={{ objectFit: 'cover' }}
                       className="transition-transform hover:scale-105"
                     />
-                    <div className="absolute bottom-0 left-0 bg-red-magic text-white text-xs py-1 px-2 rounded-tr-md">
+                    <div className="absolute bottom-0 left-0 bg-[#00A3FF] text-white text-xs py-1 px-2 rounded-tr-md font-semibold">
                       {item.category}
                     </div>
                   </div>
                   
-                  <div className="p-4">
+                  <div className="p-4 relative z-10">
                     <p className="text-white/50 text-xs mb-2">{formatDate(item.date)}</p>
                     <h3 className="text-white font-medium text-lg mb-2">{item.title}</h3>
                     <p className="text-white/70 text-sm">{item.excerpt}</p>
                     
-                    <div className="mt-4 flex items-center text-red-magic hover:text-blue-magic transition-colors">
+                    <div className="mt-4 flex items-center text-[#00A3FF] hover:text-blue-400 transition-colors">
                       <span className="text-sm font-medium">Read More</span>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -123,8 +126,8 @@ const NewsUpdates = () => {
         <div className="mt-10 text-center">
           <Link href="/news">
             <div className="inline-block">
-              <div className="p-[1px] bg-gradient-to-r from-red-magic to-blue-magic rounded-md inline-block">
-                <button className="bg-[#1A0015] hover:bg-[#250020] transition-colors text-white font-display px-8 py-3 rounded-md flex items-center">
+              <div className="relative rounded-full p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] hover:shadow-[0_0_30px_rgba(0,163,255,0.6),0_0_30px_rgba(0,163,255,0.3)] transition-all duration-300 inline-block">
+                <button className="bg-[#0A0F17] hover:bg-[#0B1324] border border-sky-400/25 transition-colors text-white font-display px-8 py-3 rounded-full flex items-center">
                   View All News
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />

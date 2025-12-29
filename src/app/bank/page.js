@@ -184,7 +184,7 @@ export default function Bank() {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sharp-black to-[#150012] text-white">
+    <div className="min-h-screen bg-sharp-black text-white">
       <div className="container mx-auto px-4 lg:px-8 pt-32 pb-16">
         {/* Network banner moved inside the container and positioned after the navbar */}
         {showNetworkBanner && (

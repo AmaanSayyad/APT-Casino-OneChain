@@ -16,9 +16,9 @@ export default function HeroSection() {
       className="min-h-screen flex flex-col pt-24 sm:pt-28 md:pt-28 lg:pt-32 relative w-full px-4 sm:px-10 md:px-20 lg:px-36"
     >
       {showAnnouncement && (
-        <div className="w-full max-w-2xl mx-auto bg-gradient-to-r from-red-magic/10 to-blue-magic/10 backdrop-blur-sm p-3 rounded-lg border border-purple-500/20 flex justify-center items-center mb-8 mt-8 sm:mt-6">
+        <div className="w-full max-w-2xl mx-auto bg-gradient-to-r from-sky-400/10 to-blue-500/10 backdrop-blur-sm p-3 rounded-lg border border-sky-400/20 flex justify-center items-center mb-8 mt-8 sm:mt-6">
           <p className="text-sm text-white text-center">
-            <span className="bg-purple-600 text-white px-2 py-0.5 rounded-md text-xs font-medium mr-2">NEW</span>
+            <span className="bg-[#00A3FF] text-white px-2 py-0.5 rounded-md text-xs font-medium mr-2">NEW</span>
             High Roller Tournament starting soon! 10,000 OCT prize pool.
           </p>
           <button 
@@ -35,7 +35,7 @@ export default function HeroSection() {
       }>
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight">
           100% On-Chain{" "}
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-magic to-blue-magic">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-blue-500">
           Randomness
           </span>
         </h1>
@@ -63,28 +63,28 @@ export default function HeroSection() {
         </div>
         
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-12 bg-black/20 backdrop-blur-sm p-6 rounded-xl border border-purple-600/20">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-12 bg-[#0A0F17]/80 backdrop-blur-sm p-6 rounded-xl border border-sky-400/25">
           <div className="text-center">
             <p className="text-gray-400 text-sm">Total Players</p>
-            <p className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-magic to-blue-magic">
+            <p className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-blue-500">
               {isDev ? '2,834' : '10,582'}
             </p>
           </div>
           <div className="text-center">
             <p className="text-gray-400 text-sm">Jackpot Size</p>
-            <p className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-magic to-blue-magic">
+            <p className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-blue-500">
               {isDev ? '15,000' : '37,500'} OCT
             </p>
           </div>
           <div className="text-center hidden sm:block">
             <p className="text-gray-400 text-sm">Channel Finality</p>
-            <p className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-magic to-blue-magic">
+            <p className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-blue-500">
               ~instant
             </p>
           </div>
           <div className="text-center hidden md:block">
             <p className="text-gray-400 text-sm">Provably Fair</p>
-            <p className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-magic to-blue-magic">
+            <p className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-blue-500">
               100%
             </p>
           </div>
@@ -92,7 +92,7 @@ export default function HeroSection() {
       </div>
       
       <div className="relative mt-12 w-full max-w-4xl mx-auto">
-        <div className="absolute -inset-1 bg-gradient-to-r from-red-magic/50 to-blue-magic/50 rounded-2xl blur-md"></div>
+        <div className="absolute -inset-1 bg-gradient-to-r from-sky-400/50 to-blue-500/50 rounded-2xl blur-md"></div>
         <div className="relative">
           <Image
             src="/images/HeroImage.png"

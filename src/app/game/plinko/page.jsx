@@ -294,7 +294,7 @@ export default function Plinko() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070005] text-white game-page-container">
+    <div className="min-h-screen bg-sharp-black text-white game-page-container">
       {showMobileWarning && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 px-4">
           <div className="bg-[#1A0015] border border-[#333947] rounded-xl p-6 max-w-md w-full text-center">

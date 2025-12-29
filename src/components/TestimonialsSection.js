@@ -57,26 +57,29 @@ const TestimonialsSection = () => {
   return (
     <section className="py-16 px-4 md:px-8 lg:px-16 relative overflow-hidden">
       {/* Background accents */}
-      <div className="absolute -top-20 left-1/4 w-64 h-64 rounded-full bg-red-magic/5 blur-[100px] z-0"></div>
-      <div className="absolute -bottom-20 right-1/4 w-64 h-64 rounded-full bg-blue-magic/5 blur-[100px] z-0"></div>
+      <div className="absolute -top-20 left-1/4 w-64 h-64 rounded-full bg-sky-400/5 blur-[100px] z-0"></div>
+      <div className="absolute -bottom-20 right-1/4 w-64 h-64 rounded-full bg-blue-500/5 blur-[100px] z-0"></div>
       
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="flex items-center mb-12 justify-center">
-          <div className="w-1 h-6 bg-gradient-to-r from-red-magic to-blue-magic rounded-full mr-3"></div>
+          <div className="w-1 h-6 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full mr-3"></div>
           <h2 className="text-2xl font-display font-bold text-white">What Our Players Say</h2>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           {/* Featured Testimonial */}
-          <div className="p-[1px] bg-gradient-to-r from-red-magic to-blue-magic rounded-xl">
-            <div className="bg-[#1A0015] rounded-xl p-6 md:p-8 h-full relative">
-              <FaQuoteLeft className="text-red-magic/20 text-6xl absolute top-4 right-4" />
+          <div className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] transition-all duration-300">
+            <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden p-6 md:p-8 h-full">
+              {/* inner glow */}
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
               
-              <div className="flex flex-col h-full">
+              <FaQuoteLeft className="text-sky-400/20 text-6xl absolute top-4 right-4 z-10" />
+              
+              <div className="flex flex-col h-full relative z-10">
                 <div className="mb-6">
                   <div className="flex items-center mb-4">
                     {/* Avatar placeholder - in a real app, use actual images */}
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-r from-red-magic/40 to-blue-magic/40 flex items-center justify-center mr-4">
+                    <div className="w-14 h-14 rounded-full bg-[#00A3FF] flex items-center justify-center mr-4 shadow-[0_0_15px_rgba(0,163,255,0.5)]">
                       <span className="text-white font-bold">{testimonials[activeIndex].name.charAt(0)}</span>
                     </div>
                     
@@ -129,14 +132,18 @@ const TestimonialsSection = () => {
                   key={testimonial.id}
                   className={`w-full text-left p-4 rounded-lg transition-all ${
                     activeIndex === index 
-                      ? 'bg-gradient-to-r from-red-magic/20 to-blue-magic/20 border-l-2 border-red-magic' 
-                      : 'hover:bg-[#250020]/30'
+                      ? 'bg-[#0B1324] border-l-2 border-[#00A3FF] shadow-[0_0_15px_rgba(0,163,255,0.2)]' 
+                      : 'hover:bg-[#0B1324]/30 border-l-2 border-transparent'
                   }`}
                   onClick={() => setActiveIndex(index)}
                 >
                   <div className="flex items-center">
                     {/* Small avatar placeholder */}
-                    <div className="w-10 h-10 rounded-full bg-[#250020] flex items-center justify-center mr-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 transition-all ${
+                      activeIndex === index 
+                        ? 'bg-[#00A3FF] shadow-[0_0_10px_rgba(0,163,255,0.4)]' 
+                        : 'bg-[#0B1324] border border-sky-400/20'
+                    }`}>
                       <span className="text-white text-sm">{testimonial.name.charAt(0)}</span>
                     </div>
                     
@@ -168,8 +175,8 @@ const TestimonialsSection = () => {
             <button 
               key={index}
               onClick={() => setActiveIndex(index)}
-              className={`w-2 h-2 mx-1 rounded-full ${
-                activeIndex === index ? 'bg-red-magic' : 'bg-white/30'
+              className={`w-2 h-2 mx-1 rounded-full transition-all ${
+                activeIndex === index ? 'bg-[#00A3FF] shadow-[0_0_10px_rgba(0,163,255,0.5)]' : 'bg-white/30'
               }`}
               aria-label={`Go to testimonial ${index + 1}`}
             />
