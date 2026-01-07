@@ -8,6 +8,7 @@ import OneChainLogo from '@/assets/frontend_resources/logos/One.png';
 import useWalletStatus from '@/hooks/useWalletStatus';
 import { Shield } from "lucide-react";
 import pythEntropyService from '@/services/PythEntropyService';
+import OneChainWalletButton from '@/components/OneChainWalletButton';
 // VRF removed in Pyth Entropy mode
 // import { wheelDataByRisk } from "./GameWheel"; // Make sure this is exported
 
@@ -97,17 +98,9 @@ const BettingPanel = ({
         {!isConnected ? (
           <div className="text-center py-2">
             <div className="text-sm text-gray-400 mb-2">Connect wallet to view VRF proofs</div>
-            <button
-              onClick={() => {
-                // Trigger wallet connection
-                if (window.ethereum) {
-                  window.ethereum.request({ method: 'eth_requestAccounts' });
-                }
-              }}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
-            >
-              Connect Wallet
-            </button>
+            <div className="flex justify-center">
+              <OneChainWalletButton />
+            </div>
           </div>
         ) : (
           <div className="flex items-center justify-between">

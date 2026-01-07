@@ -5,10 +5,12 @@ import HeaderText from "@/components/HeaderText";
 import Image from "next/image";
 import MagicBorder from "./MagicBorder";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FaFire, FaUsers, FaTrophy, FaStar, FaBolt, FaChevronRight } from "react-icons/fa";
 import GradientBorderButton from "@/components/GradientBorderButton";
 
 const MostPlayed = () => {
+  const router = useRouter();
   const [activeFilter, setActiveFilter] = useState("all");
   const [visibleGames, setVisibleGames] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -250,11 +252,15 @@ const MostPlayed = () => {
                     Join hundreds of players who are winning big with provably fair gameplay.
                   </p>
                   
-                  <Link href={typeof currentFeaturedGame.link === 'string' ? currentFeaturedGame.link : `/game/${currentFeaturedGame.name.toLowerCase().replace(/\s+/g, '-')}`}>
-                    <button className="bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 transition-all duration-300 text-white px-8 py-3.5 rounded-full font-semibold flex items-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.4)] hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] transform hover:scale-105">
-                      Play {currentFeaturedGame.name} Now <FaChevronRight />
-                    </button>
-                  </Link>
+                  <button 
+                    onClick={() => {
+                      const link = typeof currentFeaturedGame.link === 'string' ? currentFeaturedGame.link : `/game/${currentFeaturedGame.name.toLowerCase().replace(/\s+/g, '-')}`;
+                      router.push(link);
+                    }}
+                    className="bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 transition-all duration-300 text-white px-8 py-3.5 rounded-full font-semibold flex items-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.4)] hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] transform hover:scale-105"
+                  >
+                    Play {currentFeaturedGame.name} Now <FaChevronRight />
+                  </button>
                 </div>
               </div>
             </div>

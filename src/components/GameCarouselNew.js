@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   FaArrowLeft,
   FaArrowRight,
@@ -76,6 +77,7 @@ const INLINE_STATS = [
 
 
 const GameCarouselNew = () => {
+  const router = useRouter();
   const scrollContainerRef = useRef(null);
 
 
@@ -175,6 +177,10 @@ const GameCarouselNew = () => {
 
   // Mouse drag scrolling
   const handleMouseDown = (e) => {
+    // Don't interfere with button clicks
+    if (e.target.closest('button') || e.target.tagName === 'BUTTON') {
+      return;
+    }
     if (!scrollContainerRef.current) return;
     setIsDragging(true);
     setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
@@ -224,12 +230,12 @@ const GameCarouselNew = () => {
           <div className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] hover:shadow-[0_0_30px_rgba(0,163,255,0.6),0_0_30px_rgba(0,163,255,0.3)] transition-all duration-300">
           <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden">
             {/* inner glow */}
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)] z-0" />
 
 
-            <div className="relative p-5">
+            <div className="relative p-5 z-10">
               {/* Badge - Top Left */}
-              <div className="absolute top-5 left-5 z-20">
+              <div className="absolute top-5 left-5 z-30 pointer-events-none">
                 <span
                   className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold tracking-wide uppercase ${badgeClass(
                     game.badge
@@ -273,22 +279,35 @@ const GameCarouselNew = () => {
               </div>
 
               {/* Play Now Button */}
-              <div className="mt-5">
-                <Link href={game.path} className="block group">
-                  <button
-                    className="w-full rounded-full py-4 font-bold text-white bg-gradient-to-r from-[#00A3FF] via-[#0066FF] to-[#00A3FF] bg-size-200 bg-pos-0 hover:bg-pos-100 transition-all duration-300 shadow-[0_0_25px_rgba(0,163,255,0.4)] hover:shadow-[0_0_35px_rgba(0,163,255,0.6),0_0_50px_rgba(0,163,255,0.3)] transform hover:scale-[1.03] active:scale-[0.98] relative overflow-hidden"
-                    aria-label={`Play ${game.title}`}
-                  >
-                    {/* Animated shine effect */}
-                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
-                    <span className="relative z-10 flex items-center justify-center gap-2">
-                      Play Now
-                      <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </span>
-                  </button>
-                </Link>
+              <div className="mt-5 relative z-30">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (router) {
+                      router.push(game.path);
+                    } else {
+                      window.location.href = game.path;
+                    }
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  className="w-full rounded-full py-4 font-bold text-white bg-gradient-to-r from-[#00A3FF] via-[#0066FF] to-[#00A3FF] bg-size-200 bg-pos-0 hover:bg-pos-100 transition-all duration-300 shadow-[0_0_25px_rgba(0,163,255,0.4)] hover:shadow-[0_0_35px_rgba(0,163,255,0.6),0_0_50px_rgba(0,163,255,0.3)] transform hover:scale-[1.03] active:scale-[0.98] relative overflow-hidden group cursor-pointer z-30"
+                  style={{ position: 'relative', zIndex: 30 }}
+                  aria-label={`Play ${game.title}`}
+                  type="button"
+                >
+                  {/* Animated shine effect */}
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none z-0"></span>
+                  <span className="relative z-20 flex items-center justify-center gap-2 pointer-events-none">
+                    Play Now
+                    <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </span>
+                </button>
               </div>
             </div>
           </div>

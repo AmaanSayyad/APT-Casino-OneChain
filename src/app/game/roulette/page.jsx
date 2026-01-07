@@ -36,6 +36,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setBalance, setLoading, loadBalanceFromStorage } from '@/store/balanceSlice';
 import pythEntropyService from '@/services/PythEntropyService';
 import { useOneChainCasino } from '@/hooks/useOneChainCasino';
+import OneChainWalletButton from '@/components/OneChainWalletButton';
 
 // Ethereum client functions will be added here when needed
 
@@ -2659,19 +2660,36 @@ export default function GameRoulette() {
               mx: 'auto'
             }}
           >
-            <Typography
-              variant="h6"
-              sx={{
-                color: 'white',
-                fontWeight: 'bold',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1
-              }}
-            >
-              <FaCoins className="text-yellow-400" />
-              Balance: {isConnected ? `${parseFloat(userBalance || '0').toFixed(5)} OCT` : 'Connect Wallet'}
-            </Typography>
+            {isConnected ? (
+              <Typography
+                variant="h6"
+                sx={{
+                  color: 'white',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}
+              >
+                <FaCoins className="text-yellow-400" />
+                Balance: {`${parseFloat(userBalance || '0').toFixed(5)} OCT`}
+              </Typography>
+            ) : (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <FaCoins className="text-yellow-400" />
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: 'white',
+                    fontWeight: 'bold',
+                    mr: 1
+                  }}
+                >
+                  Balance:
+                </Typography>
+                <OneChainWalletButton />
+              </Box>
+            )}
           </Box>
 
           {/* Recent Results Bar */}
@@ -3140,70 +3158,6 @@ export default function GameRoulette() {
                 isSmallScreen={isSmallScreen}
                 isPortrait={isPortrait}
               />
-            </Box>
-
-            {/* Yellow Network Status */}
-            <Box sx={{
-              display: "flex",
-              flexDirection: "column",
-              width: { xs: isSmallScreen && !isPortrait ? 'auto' : '100%', md: 'auto' },
-              maxWidth: { xs: isSmallScreen && !isPortrait ? '300px' : '400px', md: 'none' },
-              minWidth: isSmallScreen && !isPortrait ? '250px' : 'auto',
-              mb: 2,
-              p: 2,
-              background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%)',
-              border: '1px solid rgba(255, 193, 7, 0.3)',
-              borderRadius: '12px'
-            }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Shield size={16} style={{ color: '#FFC107' }} />
-                <Typography variant="subtitle2" sx={{ color: '#FFC107', fontWeight: 'bold' }}>
-                  Pyth Entropy
-                </Typography>
-              </Box>
-              
-              {!isConnected ? (
-                <Box sx={{ textAlign: 'center', py: 1 }}>
-                  <Button
-                    onClick={() => {
-                      if (window.ethereum) {
-                        window.ethereum.request({ method: 'eth_requestAccounts' });
-                      }
-                    }}
-                    sx={{
-                      background: 'linear-gradient(135deg, #FFC107 0%, #FF9800 100%)',
-                      color: 'white',
-                      px: 2,
-                      py: 1,
-                      fontSize: '0.8rem',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #FFB300 0%, #F57C00 100%)',
-                      }
-                    }}
-                  >
-                    Connect Wallet
-                  </Button>
-                </Box>
-              ) : (
-                <Box>
-                  <Typography variant="h6" sx={{ 
-                    color: '#10B981',
-                    fontWeight: 'bold',
-                    textAlign: 'center'
-                  }}>
-                    Pyth Entropy
-                  </Typography>
-                  
-                  <Typography variant="body2" sx={{ 
-                    color: 'rgba(255,255,255,0.7)',
-                    fontSize: '0.8rem',
-                    textAlign: 'center',
-                    mt: 1
-                  }}>
-                    On-chain randomness
-                  </Typography>
-                </Box>
-              )}
             </Box>
 
             {/* Betting Controls */}
