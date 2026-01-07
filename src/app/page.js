@@ -14,7 +14,7 @@ import GameCarouselNew from "@/components/GameCarouselNew";
 
 export default function Home() {
   return (
-    <div className="bg-sharp-black overflow-x-hidden w-full">
+    <div className="bg-black overflow-x-hidden w-full">
       <HeroSection />
       <FeatureSection />
       {/* <GameCarousel /> */}
