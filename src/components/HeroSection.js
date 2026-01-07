@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import LaunchGameButton from "./LaunchGameButton";
+import OneChainLogo from "../assets/frontend_resources/logos/One.png";
 
 export default function HeroSection() {
   const [isDev, setIsDev] = useState(false);
@@ -40,11 +41,22 @@ export default function HeroSection() {
           </span>
         </h1>
         <h2 className="text-[#B3B3B3] mt-4 text-lg sm:text-xl leading-relaxed max-w-3xl">
-          <span className="text-white font-semibold">Autonomous Provably Transparent</span> gaming powered by <span className="text-white font-semibold">One Chain Network</span> & <span className="text-white font-semibold">Pyth Entropy</span>. Experience decentralized randomness with cryptographic fairness you can verify, not just trust.
+          <span className="text-white font-semibold">Autonomous Provably Transparent</span> gaming powered by{' '}
+          <span className="inline-flex items-center gap-1.5 text-white font-semibold">
+            <Image 
+              src={OneChainLogo} 
+              alt="One Chain Network" 
+              width={20} 
+              height={20} 
+              className="inline-block"
+            />
+            One Chain Network
+          </span>
+          {' '}& <span className="text-white font-semibold">Pyth Entropy</span>. Experience decentralized randomness with cryptographic fairness you can verify, not just trust.
         </h2>
         <p className="text-[#B3B3B3] text-lg sm:text-xl max-w-3xl">
           No rigged outcomes. No hidden limits. No custody of your funds. 
-          <span className="text-green-400 font-medium"> Just pure, transparent GambleFi</span> where mathematics replaces trust.
+          <span className="text-sky-400 font-medium"> Just pure, transparent GambleFi</span> where mathematics replaces trust.
         </p>
         
         <div className="flex flex-wrap justify-center gap-4 mt-6">

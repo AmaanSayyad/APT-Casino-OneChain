@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import LaunchGameButton from "./LaunchGameButton";
 import EthereumConnectWalletButton from "./EthereumConnectWalletButton";
 import { FaUsers, FaTrophy, FaCoins } from "react-icons/fa";
+import Logo from "../assets/frontend_resources/logos/onearcade-logo-horizontal.png";
 
 export default function LetsPlaySection() {
   // Stats with animation
@@ -36,15 +38,22 @@ export default function LetsPlaySection() {
       
       <div className="relative z-10 max-w-7xl mx-auto">
         <div className="font-display flex text-white flex-col text-center items-center gap-6 md:gap-8">
-          {/* Main heading with gradient text */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-blue-500">
-            APT-Casino
-          </h1>
+          {/* Logo */}
+          <div className="mb-2">
+            <Image
+              src={Logo}
+              alt="OneArcade logo"
+              width={300}
+              height={80}
+              priority
+              className="h-auto w-auto max-w-[280px] sm:max-w-[320px] md:max-w-[360px]"
+            />
+          </div>
           
           {/* Description with improved readability */}
           <h2 className="text-white/90 text-base sm:text-lg max-w-3xl leading-relaxed">
             Join us in the realm of gaming where every click opens up a world of adventure 
-            and discovery. APT-Casino isn&apos;t just a destination; it&apos;s a gateway to boundless 
+            and discovery. OneArcade isn&apos;t just a destination; it&apos;s a gateway to boundless 
             entertainment with provably fair games and exciting rewards.
           </h2>
           
