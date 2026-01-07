@@ -1,13 +1,14 @@
 'use client';
 import Image from 'next/image';
+import OneChainLogo from '@/assets/frontend_resources/logos/One.png';
 
 const PartnersSection = () => {
   const partners = [
     {
       category: 'Blockchain',
       items: [
-        { id: 1, name: 'One Chain Network', logo: '/images/partners/ethereum.svg' },
-        { id: 2, name: 'One Chain Network Labs', logo: '/images/partners/ethereum.svg' },
+        { id: 1, name: 'One Chain Network', logo: OneChainLogo, isImage: true },
+        { id: 2, name: 'One Chain Network Labs', logo: OneChainLogo, isImage: true },
       ]
     },
     {
@@ -41,12 +42,12 @@ const PartnersSection = () => {
     <section className="py-16 px-4 md:px-8 lg:px-16">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center mb-12 justify-center">
-          <div className="w-1 h-6 bg-gradient-to-r from-red-magic to-blue-magic rounded-full mr-3"></div>
+          <div className="w-1 h-6 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full mr-3"></div>
           <h2 className="text-2xl font-display font-bold text-white">Our Partners & Integrations</h2>
         </div>
         
-        <div className="p-[1px] bg-gradient-to-r from-red-magic/60 to-blue-magic/60 rounded-xl">
-          <div className="bg-[#1A0015] rounded-xl p-6 md:p-8">
+        <div className="p-[1px] bg-gradient-to-r from-sky-400/60 to-blue-500/60 rounded-xl">
+          <div className="bg-[#0A0F17] rounded-xl p-6 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               {partners.map((category) => (
                 <div key={category.category}>
@@ -57,11 +58,22 @@ const PartnersSection = () => {
                   
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     {category.items.map((partner) => (
-                      <div key={partner.id} className="bg-[#250020] rounded-lg p-4 flex flex-col items-center justify-center h-24 transition-transform hover:scale-105 hover:bg-[#300030]">
-                        {/* This would be replaced with actual logos in production */}
-                        <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-2">
-                          <span className="text-white font-bold">{partner.name.charAt(0)}</span>
-                        </div>
+                      <div key={partner.id} className="bg-[#0B1324] rounded-lg p-4 flex flex-col items-center justify-center h-24 transition-transform hover:scale-105 hover:bg-[#0B1324]/80 border border-sky-400/10">
+                        {partner.isImage ? (
+                          <div className="w-12 h-12 flex items-center justify-center mb-2">
+                            <Image 
+                              src={partner.logo} 
+                              alt={partner.name} 
+                              width={48} 
+                              height={48} 
+                              className="object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-2">
+                            <span className="text-white font-bold">{partner.name.charAt(0)}</span>
+                          </div>
+                        )}
                         <p className="text-white/80 text-xs text-center">{partner.name}</p>
                       </div>
                     ))}
@@ -72,10 +84,10 @@ const PartnersSection = () => {
             
             {/* Join Us CTA */}
             <div className="mt-10 text-center">
-              <div className="p-4 bg-gradient-to-r from-red-magic/20 to-blue-magic/20 rounded-lg inline-block">
+              <div className="p-4 bg-gradient-to-r from-sky-400/20 to-blue-500/20 rounded-lg inline-block border border-sky-400/20">
                 <h3 className="text-white font-medium mb-2">Interested in Partnering with Us?</h3>
-                <p className="text-white/70 text-sm mb-4">Join the APT Casino ecosystem and reach our growing player base.</p>
-                <button className="bg-gradient-to-r from-red-magic to-blue-magic text-white font-medium py-2 px-6 rounded-md">
+                <p className="text-white/70 text-sm mb-4">Join the OneArcade ecosystem and reach our growing player base.</p>
+                <button className="bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white font-medium py-2 px-6 rounded-md transition-all shadow-[0_0_15px_rgba(56,189,248,0.3)]">
                   Contact Us
                 </button>
               </div>
