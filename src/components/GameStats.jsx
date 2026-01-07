@@ -9,7 +9,7 @@ const GameStats = () => {
           <FaDice className="text-blue-400" />
           <span className="uppercase tracking-wider font-display">Total Bets</span>
         </div>
-        <p className="font-display font-bold text-xl md:text-2xl bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">956,421</p>
+        <p className="font-display font-bold text-xl md:text-2xl bg-gradient-to-r from-sky-300 to-blue-400 bg-clip-text text-transparent">956,421</p>
       </div>
       
       <div className="flex flex-col items-center md:items-end">
