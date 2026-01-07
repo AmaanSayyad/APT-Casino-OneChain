@@ -44,7 +44,7 @@ const FEATURED_GAMES = [
     players: 98,
     categories: ['featured', 'instant'],
     badge: 'FEATURED',
-    badgeColor: 'from-purple-500 to-pink-500',
+    badgeColor: 'from-sky-400 to-blue-500',
     isNew: false,
     isHot: true,
   },
@@ -210,8 +210,8 @@ const GameCarousel = () => {
   return (
     <div className="pt-12 pb-6 container mx-auto px-4 relative">
       {/* Decorative elements */}
-      <div className="absolute -top-40 -left-20 w-80 h-80 rounded-full bg-red-magic/5 blur-[100px] z-0"></div>
-      <div className="absolute top-1/3 right-1/4 w-60 h-60 rounded-full bg-blue-magic/5 blur-[80px] z-0"></div>
+      <div className="absolute -top-40 -left-20 w-80 h-80 rounded-full bg-sky-500/5 blur-[100px] z-0"></div>
+      <div className="absolute top-1/3 right-1/4 w-60 h-60 rounded-full bg-blue-500/5 blur-[80px] z-0"></div>
     
       <div className="mb-12 flex flex-col md:flex-row items-center justify-between">
         <div className="text-center md:text-left md:max-w-2xl">
@@ -233,7 +233,7 @@ const GameCarousel = () => {
             onClick={() => setActiveCategory(category.id)}
             className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-all ${
               activeCategory === category.id
-                ? 'bg-gradient-to-r from-red-magic to-blue-magic text-white font-medium'
+                ? 'bg-gradient-to-r from-sky-400 to-blue-500 text-white font-medium shadow-[0_0_15px_rgba(56,189,248,0.3)]'
                 : 'bg-white/10 text-white/70 hover:bg-white/20'
             }`}
           >

@@ -195,7 +195,10 @@ const GameCarouselNew = () => {
 
 
   const badgeClass = (badge) => {
-    // Screenshot #2 uses blue pill badges for all
+    // HOT badge is red, others are blue
+    if (badge === "HOT") {
+      return "bg-red-500 text-white";
+    }
     return "bg-[#00A3FF] text-white";
   };
 
@@ -224,11 +227,11 @@ const GameCarouselNew = () => {
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]" />
 
 
-            <div className="relative p-4">
-              {/* Top badge row (NO Live chip in new UI) */}
-              <div className="flex items-center justify-between">
+            <div className="relative p-5">
+              {/* Badge - Top Left */}
+              <div className="absolute top-5 left-5 z-20">
                 <span
-                  className={`inline-flex items-center rounded-lg px-3 py-1 text-[11px] font-semibold tracking-wide ${badgeClass(
+                  className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold tracking-wide uppercase ${badgeClass(
                     game.badge
                   )}`}
                 >
@@ -236,14 +239,9 @@ const GameCarouselNew = () => {
                 </span>
               </div>
 
-
-              {/* Big top image tile */}
-              <div className="mt-4 rounded-2xl overflow-hidden border border-white/10 bg-[#0B1324]">
+              {/* Game Image */}
+              <div className="mt-2 rounded-xl overflow-hidden border border-white/10 bg-[#0B1324]">
                 <div className="relative w-full aspect-[4/3]">
-                  {/* subtle icon watermark like screenshot feel */}
-                  <Icon className="absolute right-4 bottom-4 text-7xl text-sky-300/10 z-10" />
-
-
                   <Image
                     src={game.image}
                     fill
@@ -253,37 +251,42 @@ const GameCarouselNew = () => {
                     alt={`${game.title} preview`}
                     className="object-cover"
                   />
-                  {/* dark gloss */}
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 to-black/35" />
+                  {/* Subtle overlay */}
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20" />
                 </div>
               </div>
 
-
-              {/* Title + players (NO description in new UI) */}
-              <div className="mt-4 text-center">
-                <h3 className="text-3xl font-display font-bold text-white leading-tight">
+              {/* Title */}
+              <div className="mt-5">
+                <h3 className="text-2xl md:text-3xl font-display font-bold text-white text-center">
                   {game.title}
                 </h3>
-
-
-                <div className="mt-2 flex items-center justify-center gap-2 text-sm">
-                  <FaUsers className="text-sky-400" />
-                  <span className="text-sky-400 font-semibold">
-                    {game.players}
-                  </span>
-                  <span className="text-white/60">players online</span>
-                </div>
               </div>
 
+              {/* Players Online */}
+              <div className="mt-3 flex items-center justify-center gap-2">
+                <FaUsers className="text-sky-400 text-sm" />
+                <span className="text-white font-medium">
+                  {game.players}
+                </span>
+                <span className="text-white/60 text-sm">players online</span>
+              </div>
 
-              {/* Solid blue pill CTA like screenshot #2 */}
-              <div className="mt-4">
-                <Link href={game.path} className="block">
+              {/* Play Now Button */}
+              <div className="mt-5">
+                <Link href={game.path} className="block group">
                   <button
-                    className="w-full rounded-full py-3 font-semibold text-white bg-[#00A3FF] hover:bg-[#0088DD] transition-all shadow-[0_0_22px_rgba(0,163,255,0.25)]"
+                    className="w-full rounded-full py-4 font-bold text-white bg-gradient-to-r from-[#00A3FF] via-[#0066FF] to-[#00A3FF] bg-size-200 bg-pos-0 hover:bg-pos-100 transition-all duration-300 shadow-[0_0_25px_rgba(0,163,255,0.4)] hover:shadow-[0_0_35px_rgba(0,163,255,0.6),0_0_50px_rgba(0,163,255,0.3)] transform hover:scale-[1.03] active:scale-[0.98] relative overflow-hidden"
                     aria-label={`Play ${game.title}`}
                   >
-                    Play Now
+                    {/* Animated shine effect */}
+                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
+                    <span className="relative z-10 flex items-center justify-center gap-2">
+                      Play Now
+                      <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </span>
                   </button>
                 </Link>
               </div>
@@ -297,35 +300,34 @@ const GameCarouselNew = () => {
 
 
   return (
-    <div className="bg-sharp-black pt-12 pb-6 container mx-auto px-4 relative overflow-visible">
-      {/* Tech-ish background (NO image file, pure gradients/lines) */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-55"
-      />
+    <div className="bg-black pt-16 pb-12 container mx-auto px-4 relative overflow-visible">
 
-      <div className="relative z-10 mb-6 pb-4 border-b border-gray-500/50">
-        <div className="text-center md:text-left md:max-w-3xl">
-          <h2 className="text-3xl md:text-4xl font-semibold text-[#E6F2FF] mb-3">Featured Games</h2>
-          <p className="text-sm md:text-base text-white/60 whitespace-nowrap">
+      <div className="relative z-10 mb-8">
+        {/* Header Section */}
+        <div className="text-center mb-6">
+          <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-3">
+            Featured Games
+          </h2>
+          <p className="text-lg md:text-xl text-white/70 max-w-3xl mx-auto">
             Experience our premium selection of games with the highest payout rates and player counts
           </p>
         </div>
 
-        {/* Inline stats row (matches screenshot #2) */}
-        <div className="mt-4 pt-4 border-t border-gray-500/50 hidden md:flex flex-wrap items-center gap-3 text-sm md:text-base">
+        {/* Stats Row - Desktop Only */}
+        <div className="hidden md:flex flex-wrap items-center justify-center gap-4 md:gap-6 text-base md:text-lg mb-8">
           {INLINE_STATS.map((s, i) => (
-            <div key={s.label} className="flex items-center">
-              <span className="text-white/60">{s.label}:</span>
-              <span className="ml-2 text-[#4DA6FF] font-semibold">{s.value}</span>
+            <div key={s.label} className="flex items-center gap-2">
+              <span className="text-white/70 font-medium">{s.label}:</span>
+              <span className="text-sky-400 font-bold">{s.value}</span>
               {i !== INLINE_STATS.length - 1 && (
-                <span className="mx-4 text-[#4DA6FF]">•</span>
+                <span className="mx-2 text-sky-400/50 text-xl">•</span>
               )}
             </div>
           ))}
         </div>
 
-        {/* Keep GameStats import USED (mobile only) */}
-        <div className="mt-6 md:hidden">
+        {/* Mobile Stats - Mobile Only */}
+        <div className="md:hidden mb-8">
           <GameStats />
         </div>
       </div>
