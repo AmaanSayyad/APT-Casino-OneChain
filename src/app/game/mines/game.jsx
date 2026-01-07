@@ -37,7 +37,7 @@ const SOUNDS = {
   bet: "/sounds/bet.mp3",
 };
 
-const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
+const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete, onGameStart }) => {
   // Redux integration
   const dispatch = useDispatch();
   const { userBalance } = useSelector((state) => state.balance);
@@ -73,6 +73,7 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
   const [betAmount, setBetAmount] = useState(parseFloat(settings.betAmount));
   const [autoRevealInProgress, setAutoRevealInProgress] = useState(false);
   const [isStartingGame, setIsStartingGame] = useState(false);
+  const [currentGameId, setCurrentGameId] = useState(null);
   
   // Audio refs
   const audioRefs = {
@@ -350,18 +351,16 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
           dispatch(setBalance(newBalance));
           
           console.log('=== STARTING MINES BET WITH REDUX BALANCE ===');
-          console.log('Bet amount (ETH):', settings.betAmount);
+          console.log('Bet amount (OCT):', settings.betAmount);
           console.log('Current balance (OCT):', currentBalance);
           console.log('Mines count:', settings.mines);
-          console.log('balance OCT');
           
-          // Start the game immediately
+          // Start the game IMMEDIATELY - don't wait for OneChain logging
           setIsPlaying(true);
           setHasPlacedBet(true);
           playSound('bet');
           
           toast.success(`Bet placed! ${parseFloat(settings.betAmount).toFixed(5)} OCT deducted from balance`);
-          toast.info(`Game starting...`);
           
           // Special message if AI-assisted auto betting
           if (settings.isAutoBetting && settings.aiAssist) {
@@ -380,6 +379,25 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
             setTimeout(() => {
               autoRevealTiles(tilesToReveal);
             }, 100); // Reduced to 100ms for faster response
+          }
+          
+          // Log to OneChain in the background (non-blocking)
+          if (onGameStart) {
+            // Run OneChain logging asynchronously without blocking the game
+            onGameStart(settings.betAmount, settings.mines)
+              .then((onechainStartResult) => {
+                if (onechainStartResult?.onechainTxHash) {
+                  console.log('✅ ONE CHAIN: Game start logged, transaction:', onechainStartResult.onechainTxHash);
+                  setCurrentGameId(onechainStartResult.onechainTxHash);
+                  toast.success(`OneChain transaction: ${onechainStartResult.onechainTxHash.slice(0, 8)}...`, {
+                    delay: 2000 // Show after 2 seconds so it doesn't interfere with game start
+                  });
+                }
+              })
+              .catch((error) => {
+                console.error('❌ ONE CHAIN: Failed to log game start:', error);
+                // Don't block the game if OneChain logging fails
+              });
           }
         } catch (error) {
           console.error('Error placing bet:', error);
@@ -449,7 +467,7 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
               multiplier: 0,
               isMine: true,
               tileIndex: row * gridSize + col,
-              gameId: `mines_${Date.now()}`
+              gameId: currentGameId || `mines_${Date.now()}`
             });
           }
         };
@@ -508,7 +526,7 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
                   isMine: false,
                   tileIndex: -1, // All tiles revealed
                   tilesRevealed: safeTiles,
-                  gameId: `mines_${Date.now()}`
+                  gameId: currentGameId || `mines_${Date.now()}`
                 });
               }
             };
@@ -652,6 +670,7 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
     setAutoRevealInProgress(false);
     setShowConfetti(false);
     setIsStartingGame(false);
+    setCurrentGameId(null); // Reset game ID
     
     // Reset hasPlacedBet to allow user to go back to the form
     setHasPlacedBet(false);
@@ -725,7 +744,7 @@ const Game = ({ betSettings = {}, onGameStatusChange, onGameComplete }) => {
             payout: payout.toFixed(5),
             multiplier: multiplier.toFixed(2),
             tilesRevealed: revealedCount,
-            gameId: `mines_${Date.now()}`
+            gameId: currentGameId || `mines_${Date.now()}`
           });
         }
       };

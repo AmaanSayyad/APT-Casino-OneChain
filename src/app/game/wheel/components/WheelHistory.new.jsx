@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, TextField, InputAdornment, Select, MenuItem, FormControl, Chip, Pagination, Divider, Fade } from "@mui/material";
 import { FaHistory, FaFilter, FaDownload, FaSearch, FaTrophy, FaChartLine, FaExternalLinkAlt, FaCheck } from "react-icons/fa";
 import Image from "next/image";
+import OneChainLogo from '@/assets/frontend_resources/logos/One.png';
 // Using Next.js public asset reference instead of import
 
 const WheelHistory = ({ gameHistory = [] }) => {
@@ -168,7 +169,7 @@ const WheelHistory = ({ gameHistory = [] }) => {
                   justifyContent: 'center' 
                 }}
               >
-                <Image src="/coin.png" width={20} height={20} alt="coin" />
+                <Image src={OneChainLogo} width={20} height={20} alt="One Chain" />
               </Box>
             </Box>
           </Box>
@@ -515,7 +516,7 @@ const WheelHistory = ({ gameHistory = [] }) => {
                       >
                         {item.betAmount} OCT
                       </Typography>
-                      <Image src="/coin.png" width={16} height={16} alt="coin" />
+                      <Image src={OneChainLogo} width={16} height={16} alt="One Chain" />
                     </Box>
                   </TableCell>
                   <TableCell 
@@ -546,7 +547,7 @@ const WheelHistory = ({ gameHistory = [] }) => {
                       >
                         {item.payout} OCT
                       </Typography>
-                      <Image src="/coin.png" width={16} height={16} alt="coin" />
+                      <Image src={OneChainLogo} width={16} height={16} alt="One Chain" />
                     </Box>
                   </TableCell>
                   <TableCell 

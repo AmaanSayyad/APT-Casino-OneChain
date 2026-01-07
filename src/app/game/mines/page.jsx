@@ -140,6 +140,60 @@ export default function Mines() {
     setActiveTab("Manual"); // Switch to manual tab to show the game
   };
 
+  // Handle game start (when bet is placed)
+  const handleGameStart = async (betAmount, minesCount) => {
+    if (!address || !logMinesStart) {
+      console.warn('⚠️ ONE CHAIN: Cannot log game start - missing address or function', {
+        hasAddress: !!address,
+        hasFunction: !!logMinesStart
+      });
+      return null;
+    }
+
+    try {
+      console.log('🔮 PYTH ENTROPY: Generating randomness for Mines game start...');
+      const entropyResult = await pythEntropyService.generateRandom('MINES', {
+        purpose: 'mines_game_start',
+        gameType: 'MINES',
+        betAmount: betAmount,
+        mines: minesCount
+      });
+
+      const entropyProof = {
+        requestId: entropyResult.entropyProof?.requestId,
+        sequenceNumber: entropyResult.entropyProof?.sequenceNumber,
+        randomValue: entropyResult.randomValue,
+        transactionHash: entropyResult.entropyProof?.transactionHash,
+        explorerUrl: entropyResult.entropyProof?.explorerUrl,
+        timestamp: entropyResult.entropyProof?.timestamp,
+        source: 'Pyth Entropy'
+      };
+
+      console.log('✅ PYTH ENTROPY: Mines randomness generated for game start:', entropyProof);
+
+      // Log to OneChain
+      console.log('🎲 ONE CHAIN: Calling startMinesGame');
+      const onechainTxHash = await logMinesStart(
+        betAmount.toString(),
+        minesCount,
+        entropyResult.randomValue,
+        entropyResult.entropyProof?.transactionHash || ''
+      );
+
+      console.log('✅ ONE CHAIN: Mines game started successfully');
+      console.log('📋 ONE CHAIN Transaction Hash:', onechainTxHash);
+      console.log('🔗 ONE CHAIN Explorer:', onechainTxHash ? `https://explorer-testnet.onelabs.cc/tx/${onechainTxHash}` : 'N/A');
+
+      return {
+        onechainTxHash,
+        entropyProof
+      };
+    } catch (error) {
+      console.error('❌ ONE CHAIN: Error starting Mines game:', error);
+      return null;
+    }
+  };
+
   // Handle AI settings save
   const handleAISettingsSave = (newSettings) => {
     setAISettings(newSettings);
@@ -505,7 +559,12 @@ export default function Mines() {
           transition={{ duration: 0.3 }}
           className="relative z-10"
         >
-          <Game betSettings={betSettings} onGameStatusChange={setGameStatus} onGameComplete={handleGameComplete} />
+          <Game 
+            betSettings={betSettings} 
+            onGameStatusChange={setGameStatus} 
+            onGameComplete={handleGameComplete}
+            onGameStart={handleGameStart}
+          />
         </motion.div>
       </motion.div>
     </div>

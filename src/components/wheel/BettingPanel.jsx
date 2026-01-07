@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { cn } from "../../lib/utils";
 import Image from "next/image";
+import OneChainLogo from '@/assets/frontend_resources/logos/One.png';
 // Using Next.js public asset reference instead of import
 import useWalletStatus from '@/hooks/useWalletStatus';
 import { Shield } from "lucide-react";
@@ -160,10 +161,10 @@ const BettingPanel = ({
               min="0.001"
             />
             <Image
-                  src="/coin.png"
+                  src={OneChainLogo}
                   width={20}
                   height={20}
-                  alt="coin"
+                  alt="One Chain"
                   className=""
             />  
           </div>
@@ -273,10 +274,10 @@ const BettingPanel = ({
             <div className="flex items-center bg-[#120521] p-2 py-3 rounded-sm">
               <input type="number" className="bg-transparent outline-none border-none text-white w-full" value={stopProfit} onChange={(e) => setStopProfit(e.target.value)} />
               <Image
-                  src="/coin.png"
+                  src={OneChainLogo}
                   width={20}
                   height={20}
-                  alt="coin"
+                  alt="One Chain"
                   className=""
                 />  
             </div>
@@ -290,10 +291,10 @@ const BettingPanel = ({
             <div className="flex items-center bg-[#120521] p-2 py-3 rounded-sm">
               <input type="number" className="bg-transparent outline-none border-none text-white w-full" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} />
               <Image
-                  src="/coin.png"
+                  src={OneChainLogo}
                   width={20}
                   height={20}
-                  alt="coin"
+                  alt="One Chain"
                   className=""
                 />  
             </div>

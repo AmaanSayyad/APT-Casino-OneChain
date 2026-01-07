@@ -35,6 +35,14 @@ const PartnersSection = () => {
         { id: 13, name: 'PeckShield', logo: '/images/partners/peckshield.svg' },
         { id: 14, name: 'Hacken', logo: '/images/partners/hacken.svg' },
       ]
+    },
+    {
+      category: 'Streaming & Infrastructure',
+      items: [
+        { id: 15, name: 'Livepeer', logo: '/icons/livepeer.png', isImage: true },
+        { id: 16, name: 'OBS Studio', logo: '/icons/obs.png', isImage: true },
+        { id: 17, name: 'YouTube', logo: '/icons/youtube.png', isImage: true },
+      ]
     }
   ];
   

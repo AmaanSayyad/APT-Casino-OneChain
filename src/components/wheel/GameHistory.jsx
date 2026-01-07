@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import OneChainLogo from '@/assets/frontend_resources/logos/One.png';
 // Using Next.js public asset reference instead of import
 import { FaExternalLinkAlt } from "react-icons/fa";
 
@@ -106,10 +107,10 @@ const GameHistory = ({ gameHistory }) => {
                       <span className="flex items-center">
                         {item.betAmount.toFixed(10)}
                         <Image
-                          src="/coin.png"
+                          src={OneChainLogo}
                           width={20}
                           height={20}
-                          alt="coin"
+                          alt="One Chain"
                           className=""
                         />  
                       </span>
@@ -119,10 +120,10 @@ const GameHistory = ({ gameHistory }) => {
                       <span className="flex items-center">
                         {item.payout.toFixed(10)}
                         <Image
-                          src="/coin.png"
+                          src={OneChainLogo}
                           width={20}
                           height={20}
-                          alt="coin"
+                          alt="One Chain"
                           className=""
                         />  
                       </span>

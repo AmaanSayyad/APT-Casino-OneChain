@@ -6,6 +6,7 @@ import BettingPanel from "../../../components/wheel/BettingPanel";
 import GameHistory from "../../../components/wheel/GameHistory";
 import { calculateResult } from "../../../lib/gameLogic";
 import Image from "next/image";
+import OneChainLogo from '@/assets/frontend_resources/logos/One.png';
 // Using Next.js public asset reference instead of import
 import { motion } from "framer-motion";
 import { FaHistory, FaTrophy, FaInfoCircle, FaChartLine, FaCoins, FaChevronDown, FaPercentage, FaBalanceScale } from "react-icons/fa";
@@ -166,7 +167,7 @@ export default function Home() {
                 randomValue: entropyResult.randomValue,
                 randomNumber: entropyResult.randomValue,
                 transactionHash: entropyResult.entropyProof?.transactionHash,
-                monadExplorerUrl: entropyResult.entropyProof?.monadExplorerUrl,
+                onechainExplorerUrl: entropyResult.entropyProof?.explorerUrl,
                 explorerUrl: entropyResult.entropyProof?.explorerUrl,
                 timestamp: entropyResult.entropyProof?.timestamp,
                 source: 'Pyth Entropy'
@@ -252,7 +253,7 @@ export default function Home() {
             randomValue: Math.floor(Math.random() * 1000000),
             randomNumber: Math.floor(Math.random() * 1000000),
             transactionHash: 'generating...',
-            monadExplorerUrl: 'https://testnet.onescan.com/',
+            onechainExplorerUrl: 'https://explorer-testnet.onelabs.cc/',
             explorerUrl: 'https://entropy-explorer.pyth.network/?chain=onechain-testnet',
             timestamp: Date.now(),
             source: 'Generating...'

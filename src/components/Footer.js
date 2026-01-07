@@ -104,7 +104,7 @@ export default function Footer() {
               Experience transparent, fair, and secure on-chain gaming where you truly own your assets.
             </p>
 
-            <div className="mt-8 flex items-center gap-6">
+            <div className="mt-8 flex items-center gap-6 flex-wrap">
               <a
                 href="https://twitter.com"
                 target="_blank"
@@ -140,6 +140,15 @@ export default function Footer() {
                 className="text-[#2F7BFF] hover:text-[#6AA6FF] transition-colors"
               >
                 <FaGithub size={22} />
+              </a>
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+                className="hover:opacity-80 transition-opacity"
+              >
+                <Image src="/icons/youtube.png" alt="YouTube" width={22} height={22} />
               </a>
             </div>
           </div>

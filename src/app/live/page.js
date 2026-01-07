@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import * as Player from "@livepeer/react/player";
 import { PauseIcon, PlayIcon } from "@livepeer/react/assets";
 import { getSrc } from "@livepeer/react/external";
@@ -232,13 +233,17 @@ export default function LivePage() {
               
               <div className="flex items-center justify-between mb-3 relative z-10">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="relative flex h-2.5 w-2.5 mr-0.5">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-[#00A3FF] opacity-75 animate-ping"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00A3FF]"></span>
-                  </span>
-                  <div className="text-white/80 text-xs md:text-sm truncate" title={playbackId}>
-                    {/(youtube\.com|youtu\.be)\//i.test(playbackId) ? "YouTube Live" : "Livepeer Live"}
-                  </div>
+                  {/(youtube\.com|youtu\.be)\//i.test(playbackId) ? (
+                    <div className="flex items-center gap-1.5">
+                      <Image src="/icons/youtube.png" alt="YouTube" width={16} height={16} className="inline-block" />
+                      <span className="text-white/80 text-xs md:text-sm truncate" title={playbackId}>YouTube Live</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      <Image src="/icons/livepeer.png" alt="Livepeer" width={16} height={16} className="inline-block" />
+                      <span className="text-white/80 text-xs md:text-sm truncate" title={playbackId}>Livepeer Live</span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -364,34 +369,93 @@ export default function LivePage() {
                 >Close</button>
               </div>
             </div>
-            <div className="bg-[#0A0F17] text-white/90 p-6 md:p-7 relative z-10">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="rounded-xl border border-sky-400/20 bg-[#0B1324] p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
-                    <h4 className="text-white font-medium">Option 1 — Livepeer</h4>
+            <div className="bg-[#0A0F17] text-white/90 p-6 md:p-8 relative z-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Option 1 - Livepeer */}
+                <div className="group rounded-xl border border-sky-400/30 bg-gradient-to-br from-[#0B1324] to-[#0A0F17] p-5 hover:border-sky-400/50 transition-all duration-300 hover:shadow-[0_0_20px_rgba(56,189,248,0.15)] relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/5 rounded-full blur-2xl -z-0"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 rounded-lg bg-sky-500/10 border border-sky-400/20">
+                        <Image src="/icons/livepeer.png" alt="Livepeer" width={24} height={24} className="inline-block" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/30">Option 1</span>
+                          <h4 className="text-white font-semibold text-lg">Livepeer</h4>
+                        </div>
+                      </div>
+                    </div>
+                    <ol className="space-y-3 text-white/80 text-sm">
+                      <li className="flex items-start gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-300 font-semibold text-xs mt-0.5">1</span>
+                        <span>Create an API key and a stream in Livepeer Studio. <a href="https://docs.livepeer.org/developers/quick-start" className="text-sky-400 hover:text-sky-300 underline font-medium" target="_blank" rel="noreferrer">Docs</a></span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-300 font-semibold text-xs mt-0.5">2</span>
+                        <span className="flex items-center gap-2">Configure <Image src="/icons/obs.png" alt="OBS" width={18} height={18} className="inline-block" /> OBS with Ingest URL + Stream Key and start streaming.</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-300 font-semibold text-xs mt-0.5">3</span>
+                        <span>Copy the Playback ID from the stream.</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-300 font-semibold text-xs mt-0.5">4</span>
+                        <span>Paste the Playback ID into the input above and click <span className="text-sky-400 font-semibold">Add</span>.</span>
+                      </li>
+                    </ol>
                   </div>
-                  <ol className="list-decimal list-inside space-y-2 text-white/80 text-sm">
-                    <li>Create an API key and a stream in Livepeer Studio. <a href="https://docs.livepeer.org/developers/quick-start" className="underline" target="_blank" rel="noreferrer">Docs</a></li>
-                    <li>Configure OBS with Ingest URL + Stream Key and start streaming.</li>
-                    <li>Copy the Playback ID from the stream.</li>
-                    <li>Paste the Playback ID into the input above and click <span className="text-white">Add</span>.</li>
-                  </ol>
                 </div>
-                <div className="rounded-xl border border-sky-400/20 bg-[#0B1324] p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="inline-flex h-2.5 w-2.5 rounded-full bg-rose-400"></span>
-                    <h4 className="text-white font-medium">Option 2 — YouTube Live</h4>
+
+                {/* Option 2 - YouTube */}
+                <div className="group rounded-xl border border-sky-400/30 bg-gradient-to-br from-[#0B1324] to-[#0A0F17] p-5 hover:border-sky-400/50 transition-all duration-300 hover:shadow-[0_0_20px_rgba(56,189,248,0.15)] relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl -z-0"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-400/20">
+                        <Image src="/icons/youtube.png" alt="YouTube" width={24} height={24} className="inline-block" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30">Option 2</span>
+                          <h4 className="text-white font-semibold text-lg">YouTube Live</h4>
+                        </div>
+                      </div>
+                    </div>
+                    <ol className="space-y-3 text-white/80 text-sm">
+                      <li className="flex items-start gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 font-semibold text-xs mt-0.5">1</span>
+                        <span>Go live from YouTube Studio.</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 font-semibold text-xs mt-0.5">2</span>
+                        <span>Copy the live URL (watch/share, e.g. <span className="text-blue-400 font-mono text-xs">https://youtu.be/...</span>).</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 font-semibold text-xs mt-0.5">3</span>
+                        <span>Paste the URL into the input above and click <span className="text-blue-400 font-semibold">Add</span>.</span>
+                      </li>
+                    </ol>
                   </div>
-                  <ol className="list-decimal list-inside space-y-2 text-white/80 text-sm">
-                    <li>Go live from YouTube Studio.</li>
-                    <li>Copy the live URL (watch/share, e.g. https://youtu.be/...).</li>
-                    <li>Paste the URL into the input above and click <span className="text-white">Add</span>.</li>
-                  </ol>
                 </div>
               </div>
-              <div className="mt-5 rounded-xl border border-sky-400/20 bg-[#0B1324] p-4 text-xs text-white/70">
-                Tip: You can add multiple streams. Livepeer cards show metrics; YouTube cards show title and channel.
+              
+              {/* Tip Section */}
+              <div className="mt-6 rounded-xl border border-sky-400/30 bg-gradient-to-r from-sky-500/10 to-blue-500/10 p-4 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-sky-500/5 rounded-full blur-xl -z-0"></div>
+                <div className="relative z-10 flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-sky-500/20 border border-sky-400/30 flex-shrink-0">
+                    <svg className="w-5 h-5 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-white/90 font-medium text-sm mb-1">💡 Pro Tip</p>
+                    <p className="text-white/70 text-sm leading-relaxed">
+                      You can add multiple streams simultaneously. Livepeer cards display real-time metrics (viewers, bitrate), while YouTube cards show title and channel information.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

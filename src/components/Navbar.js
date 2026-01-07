@@ -683,7 +683,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="backdrop-blur-md bg-gradient-to-r from-[#020617]/95 via-[#020617]/95 to-[#020617]/95 fixed w-full z-20 transition-all duration-300 shadow-lg">
+      <nav className="backdrop-blur-md bg-black/95 fixed w-full z-20 transition-all duration-300 shadow-lg">
         <div className="flex w-full items-center justify-between py-3 sm:py-4 md:py-6 px-4 sm:px-6 md:px-10 lg:px-20 xl:px-36">
           <div className="flex items-center gap-2 sm:gap-4 md:gap-6">
             <a href="/" className="logo">
