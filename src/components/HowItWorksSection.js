@@ -58,12 +58,12 @@ const HowItWorksSection = () => {
   return (
     <section className="py-16 px-4 md:px-8 lg:px-12 relative overflow-hidden">
       {/* Background elements */}
-      <div className="absolute -bottom-40 -right-40 w-80 h-80 rounded-full bg-blue-magic/5 blur-[120px] z-0"></div>
-      <div className="absolute top-20 -left-40 w-80 h-80 rounded-full bg-red-magic/5 blur-[120px] z-0"></div>
+      <div className="absolute -bottom-40 -right-40 w-80 h-80 rounded-full bg-blue-500/5 blur-[120px] z-0"></div>
+      <div className="absolute top-20 -left-40 w-80 h-80 rounded-full bg-sky-500/5 blur-[120px] z-0"></div>
       
-      {/* Floating orbs background */}
-      <div className="absolute top-10 right-10 w-6 h-6 rounded-full bg-red-magic/20 animate-float"></div>
-      <div className="absolute top-40 left-1/4 w-4 h-4 rounded-full bg-blue-magic/20 animate-float-delay"></div>
+      {/* Floating orbs background - Hidden on mobile */}
+      <div className="hidden md:block absolute top-10 right-10 w-6 h-6 rounded-full bg-sky-400/20 animate-float"></div>
+      <div className="hidden md:block absolute top-40 left-1/4 w-4 h-4 rounded-full bg-blue-500/20 animate-float-delay"></div>
       
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="flex flex-col items-center mb-10 text-center">
