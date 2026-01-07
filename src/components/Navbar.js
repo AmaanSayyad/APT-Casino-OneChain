@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
+import Logo from "../assets/frontend_resources/logos/onearcade-logo-horizontal.png";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -682,21 +683,23 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="backdrop-blur-md bg-[#070005]/90 fixed w-full z-20 transition-all duration-300 shadow-lg">
-        <div className="flex w-full items-center justify-between py-6 px-4 sm:px-10 md:px-20 lg:px-36">
-          <div className="flex items-center">
-            <a href="/" className="logo mr-6">
-            <Image
-              src="/PowerPlay.png"
-              alt="powerplay image"
-              width={172}
-              height={15}
+      <nav className="backdrop-blur-md bg-gradient-to-r from-[#020617]/95 via-[#020617]/95 to-[#020617]/95 fixed w-full z-20 transition-all duration-300 shadow-lg">
+        <div className="flex w-full items-center justify-between py-3 sm:py-4 md:py-6 px-4 sm:px-6 md:px-10 lg:px-20 xl:px-36">
+          <div className="flex items-center gap-2 sm:gap-4 md:gap-6">
+            <a href="/" className="logo">
+              <Image
+                src={Logo}
+                alt="OneArcade logo"
+                width={180}
+                height={50}
+                className="w-[140px] sm:w-[160px] md:w-[180px] lg:w-[220px] h-auto"
+                priority
               />
             </a>
             
             {/* Mobile menu button */}
             <button 
-              className="md:hidden text-white p-1 rounded-lg hover:bg-purple-500/20 transition-colors"
+              className="md:hidden text-white p-2 rounded-lg hover:bg-sky-500/20 transition-colors"
               onClick={() => setShowMobileMenu(!showMobileMenu)}
               aria-label="Toggle mobile menu"
             >
@@ -719,32 +722,50 @@ export default function Navbar() {
           
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex font-display gap-8 lg:gap-12 items-center">
-            {navLinks.map(({ name, path, classes }, index) => (
-              <div key={index} className="relative group">
-              <Link
-                  className={`${path === pathname ? (name === "Home" ? "text-white font-semibold" : "text-transparent bg-clip-text bg-gradient-to-r from-red-magic to-blue-magic font-semibold") : (name === "Home" || name === "Game" || name === "Bank" ? "text-white" : classes)} flex items-center gap-1 text-lg font-medium transition-all duration-200 hover:scale-105`}
-                href={path}
-              >
-                {name}
-              </Link>
-              </div>
-            ))}
+            {navLinks.map(({ name, path, classes }, index) => {
+              const isActive = path === pathname;
+              const baseTextClasses =
+                name === "Home" || name === "Game" || name === "Bank"
+                  ? "text-white"
+                  : classes;
+              const activeTextClasses =
+                "text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-500 font-semibold";
+
+              return (
+                <div key={index} className="relative group px-2">
+                  {/* Hover / active glow behind label */}
+                  <div
+                    className={`pointer-events-none absolute -bottom-3 left-1/2 h-6 w-20 -translate-x-1/2 rounded-full bg-cyan-400/35 blur-xl transition-opacity duration-300 ${
+                      isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    }`}
+                  />
+                  <Link
+                    className={`relative flex items-center gap-1 text-lg font-medium transition-all duration-200 hover:scale-105 ${
+                      isActive ? activeTextClasses : baseTextClasses
+                    }`}
+                    href={path}
+                  >
+                    {name}
+                  </Link>
+                </div>
+              );
+            })}
           </div>
           
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
           
-            {/* User Balance Display */}
+            {/* User Balance Display - Hidden on very small screens */}
             {isWalletReady && (
-              <div className="flex items-center space-x-3">
-                <div className="bg-gradient-to-r from-green-900/20 to-green-800/10 rounded-lg border border-green-800/30 px-3 py-2">
-                  <div className="flex items-center space-x-2">
+              <div className="hidden sm:flex items-center space-x-2 md:space-x-3">
+                <div className="bg-gradient-to-r from-sky-900/20 to-blue-800/10 rounded-lg border border-sky-800/30 px-2 py-1.5 md:px-3 md:py-2">
+                  <div className="flex items-center space-x-1 md:space-x-2">
                     <span className="text-xs text-gray-300">Balance:</span>
-                    <span className="text-sm text-green-300 font-medium">
+                    <span className="text-xs md:text-sm text-sky-300 font-medium">
                       {isLoadingBalance ? 'Loading...' : `${parseFloat(userBalance || '0').toFixed(5)} OCT`}
                     </span>
                     <button
                       onClick={() => setShowBalanceModal(true)}
-                      className="ml-2 text-xs bg-green-600/30 hover:bg-green-500/30 text-green-300 px-2 py-1 rounded transition-colors"
+                      className="ml-1 md:ml-2 text-xs bg-sky-600/30 hover:bg-sky-500/30 text-sky-300 px-1.5 md:px-2 py-0.5 md:py-1 rounded transition-colors"
                     >
                       Manage
                     </button>
@@ -754,12 +775,14 @@ export default function Navbar() {
             )}
             
             {/* One Chain Wallet Button */}
-            <OneChainWalletButton />
+            <div className="hidden sm:block">
+              <OneChainWalletButton />
+            </div>
             
-            {/* Live Chat Button */}
+            {/* Live Chat Button - Hidden on small screens */}
             <button
               onClick={() => setShowLiveChat(true)}
-              className="px-4 py-2 border border-[#00A3FF] hover:border-[#00A3FF] hover:bg-[#00A3FF] text-[#00A3FF] hover:text-white font-medium rounded-[30px] transition-all duration-200 flex items-center gap-2 bg-transparent"
+              className="hidden md:flex px-3 md:px-4 py-1.5 md:py-2 border border-[#00A3FF] hover:border-[#00A3FF] hover:bg-[#00A3FF] text-[#00A3FF] hover:text-white font-medium rounded-[30px] transition-all duration-200 items-center gap-2 bg-transparent text-sm md:text-base"
             >
               {/* <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -772,12 +795,12 @@ export default function Navbar() {
         
         {/* Mobile Navigation Menu */}
         {showMobileMenu && (
-          <div className="md:hidden bg-[#0A0008]/95 backdrop-blur-md p-4 border-t border-purple-500/20 animate-slideDown">
+          <div className="md:hidden bg-[#0A0F17]/95 backdrop-blur-md p-4 border-t border-sky-400/20 animate-slideDown">
             <div className="flex flex-col space-y-3">
               {navLinks.map(({ name, path, classes }, index) => (
                 <div key={index}>
                   <Link
-                    className={`${path === pathname ? (name === "Home" ? 'text-white font-semibold' : 'text-white font-semibold') : (name === "Home" || name === "Game" || name === "Bank" ? 'text-white' : 'text-white/80')} py-2 px-3 rounded-md hover:bg-purple-500/10 flex items-center w-full text-lg`}
+                    className={`${path === pathname ? 'text-sky-400 font-semibold' : 'text-white/80'} py-2 px-3 rounded-md hover:bg-sky-500/10 flex items-center w-full text-base sm:text-lg transition-colors`}
                     href={path}
                     onClick={() => setShowMobileMenu(false)}
                   >
@@ -787,10 +810,10 @@ export default function Navbar() {
               ))}
               {/* Switch to Testnet button removed */}
               <div className="flex justify-between items-center py-2 px-3">
-                <span className="text-white/70">Dark Mode</span>
+                <span className="text-white/70 text-sm sm:text-base">Dark Mode</span>
                 <button 
                   onClick={toggleDarkMode}
-                  className="p-2 text-white/70 hover:text-white bg-purple-500/10 rounded-full flex items-center justify-center h-8 w-8"
+                  className="p-2 text-white/70 hover:text-white bg-sky-500/10 rounded-full flex items-center justify-center h-8 w-8 transition-colors"
                 >
                   {isDarkMode ? (
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -814,11 +837,11 @@ export default function Navbar() {
               
               {/* User Balance in Mobile Menu */}
               {isWalletReady && (
-                <div className="pt-2 mt-2 border-t border-purple-500/10">
-                  <div className="p-3 bg-gradient-to-r from-green-900/20 to-green-800/10 rounded-lg border border-green-800/30">
+                <div className="pt-2 mt-2 border-t border-sky-400/10">
+                  <div className="p-3 bg-gradient-to-r from-sky-900/20 to-blue-800/10 rounded-lg border border-sky-800/30">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-gray-300">House Balance:</span>
-                      <span className="text-sm text-green-300 font-medium">
+                      <span className="text-xs sm:text-sm text-gray-300">House Balance:</span>
+                      <span className="text-xs sm:text-sm text-sky-300 font-medium">
                       {isLoadingBalance ? 'Loading...' : `${parseFloat(userBalance || '0').toFixed(5)} OCT`}
                     </span>
                     </div>
@@ -827,7 +850,7 @@ export default function Navbar() {
                         setShowBalanceModal(true);
                         setShowMobileMenu(false);
                       }}
-                      className="w-full text-xs bg-green-600/30 hover:bg-green-500/30 text-green-300 px-3 py-2 rounded transition-colors"
+                      className="w-full text-xs bg-sky-600/30 hover:bg-sky-500/30 text-sky-300 px-3 py-2 rounded transition-colors"
                     >
                       Manage Balance
                     </button>
@@ -835,10 +858,10 @@ export default function Navbar() {
                 </div>
               )}
               
-              <div className="pt-2 mt-2 border-t border-purple-500/10">
+              <div className="pt-2 mt-2 border-t border-sky-400/10">
                 <a 
                   href="#support" 
-                  className="block py-2 px-3 text-white/80 hover:text-white hover:bg-purple-500/10 rounded-md"
+                  className="block py-2 px-3 text-white/80 hover:text-white hover:bg-sky-500/10 rounded-md text-sm sm:text-base transition-colors"
                   onClick={() => setShowMobileMenu(false)}
                 >
                   Support
@@ -855,7 +878,7 @@ export default function Navbar() {
             onClick={() => setShowBalanceModal(false)}
           >
             <div
-              className="bg-[#0A0008] border border-purple-500/20 rounded-lg p-6 w-full max-w-md mx-4 shadow-xl"
+              className="bg-[#0A0F17] border border-sky-400/20 rounded-lg p-6 w-full max-w-md mx-4 shadow-xl"
               onClick={(e) => e.stopPropagation()}
               role="dialog"
               aria-modal="true"
@@ -876,9 +899,9 @@ export default function Navbar() {
               {/* Smart Account Info */}
               <SmartAccountInfo />
               
-              <div className="mb-4 p-3 bg-gradient-to-r from-green-900/20 to-green-800/10 rounded-lg border border-green-800/30">
+              <div className="mb-4 p-3 bg-gradient-to-r from-sky-900/20 to-blue-800/10 rounded-lg border border-sky-800/30">
                 <span className="text-sm text-gray-300">Current Balance:</span>
-                <div className="text-lg text-green-300 font-bold">
+                <div className="text-lg text-sky-300 font-bold">
                   {isLoadingBalance ? 'Loading...' : `${parseFloat(userBalance || '0').toFixed(5)} OCT`}
                 </div>
               </div>
@@ -889,7 +912,7 @@ export default function Navbar() {
                 <div className="text-xs text-gray-400 mb-3 space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500">Network:</span>
-                    <span className="text-purple-400 font-medium">{TREASURY_CONFIG.NETWORK.CHAIN_NAME}</span>
+                    <span className="text-sky-400 font-medium">{TREASURY_CONFIG.NETWORK.CHAIN_NAME}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500">Treasury:</span>
@@ -899,7 +922,7 @@ export default function Navbar() {
                         navigator.clipboard.writeText(TREASURY_CONFIG.ADDRESS);
                         notification.success('Treasury address copied!');
                       }}
-                      className="text-purple-400 hover:text-purple-300 transition-colors"
+                      className="text-sky-400 hover:text-blue-400 transition-colors"
                       title="Copy address"
                     >
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -914,7 +937,7 @@ export default function Navbar() {
                     value={depositAmount}
                     onChange={(e) => setDepositAmount(e.target.value)}
                     placeholder="Enter OCT amount"
-                    className="flex-1 px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded text-white placeholder-gray-400 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/25"
+                    className="flex-1 px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded text-white placeholder-gray-400 focus:outline-none focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/25"
                     min="0"
                     step="0.00000001"
                     disabled={isDepositing}
@@ -922,7 +945,7 @@ export default function Navbar() {
                   <button
                     onClick={handleDeposit}
                     disabled={!isConnected || !depositAmount || parseFloat(depositAmount) <= 0 || isDepositing}
-                    className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded font-medium transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded font-medium transition-colors flex items-center gap-2"
                   >
                     {isDepositing ? (
                       <>
@@ -964,7 +987,7 @@ export default function Navbar() {
                 <button
                   onClick={handleWithdraw}
                   disabled={!isConnected || parseFloat(userBalance || '0') <= 0 || isWithdrawing}
-                  className="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded font-medium transition-colors flex items-center justify-center gap-2"
+                  className="w-full px-4 py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   {isWithdrawing ? (
                     <>
@@ -1000,7 +1023,7 @@ export default function Navbar() {
                       console.log('No saved balance in localStorage');
                     }
                   }}
-                  className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded font-medium transition-colors"
+                  className="w-full px-4 py-2 bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white rounded font-medium transition-colors"
                 >
                   Refresh Balance
                 </button>
@@ -1010,7 +1033,7 @@ export default function Navbar() {
           document.body
         )}
         
-        <div className="w-full h-[2px] magic-gradient overflow-hidden"></div>
+        <div className="w-full h-[2px] bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-400 overflow-hidden"></div>
       </nav>
       
       {/* Pyth Entropy handles randomness generation */}
