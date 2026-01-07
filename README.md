@@ -1,4 +1,4 @@
-# APT Casino
+# OneArcade
 
 A decentralized casino platform built on One Chain Testnet with Pyth Entropy for provably fair gaming and MetaMask Smart Accounts integration.
 
@@ -9,7 +9,7 @@ When I started playing, I discovered I could only bet $1 per game and couldn't i
 
 In a desperate attempt to recover my funds, I played different games all night - roulette, mines, spin wheel... and lost everything.
 
-This frustrating experience inspired APT Casino: a combination of GameFi, AI, and DeFi where users can gamble casino games in a safe, secure, and 100% transparent environment where every bet is verifiably fair by the user itself and no centralized authority manipulates game outcomes.
+This frustrating experience inspired OneArcade: a combination of GameFi, AI, and DeFi where users can gamble casino games in a safe, secure, and 100% transparent environment where every bet is verifiably fair by the user itself and no centralized authority manipulates game outcomes.
 
 
 ## 🎯 The Problem
@@ -26,7 +26,7 @@ The traditional online gambling industry suffers from several issues:
 
 ## 💡 Our Solution
 
-APT Casino addresses these problems by offering:
+OneArcade addresses these problems by offering:
 
 - **Provably Fair Gaming**: Powered by Pyth Entropy
 

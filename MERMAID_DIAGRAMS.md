@@ -1,4 +1,4 @@
-# APT Casino Monad - Mermaid Architecture Diagrams
+# OneArcade Monad - Mermaid Architecture Diagrams
 
 ## 🏗️ System Architecture Overview
 
