@@ -7,6 +7,7 @@ import BorrowCard from "@/components/BorrowCard";
 import LendingTable from "@/components/LendingTable";
 import Image from "next/image";
 import { FaChartLine, FaHistory, FaInfoCircle, FaExchangeAlt, FaCoins, FaWallet, FaLock, FaUnlock } from "react-icons/fa";
+import OneChainLogo from "@/assets/frontend_resources/logos/One.png";
 
   // Assets for borrowing on Ethereum testnet only
 const BORROW_ASSETS = {
@@ -76,7 +77,7 @@ export default function Bank() {
         },
         {
           symbol: "APTC",
-          name: "APT Casino Token",
+          name: "OneArcade Token",
           iconColor: "#34C759",
           address: "0x...",
           apr: "8.2%",
@@ -120,7 +121,7 @@ export default function Bank() {
           },
           {
             symbol: "APTC",
-            name: "APT Casino Token",
+            name: "OneArcade Token",
             iconColor: "#34C759",
             address: "0x...",
             apr: "8.2%",
@@ -189,8 +190,18 @@ export default function Bank() {
         {/* Network banner moved inside the container and positioned after the navbar */}
         {showNetworkBanner && (
           <div className="bg-gradient-to-r from-[#0066FF]/80 to-[#00A3FF]/80 py-2 px-4 text-center relative mb-8 rounded-lg">
-            <p className="text-white text-sm">
-              Connected to One Chain Network Testnet. 
+            <p className="text-white text-sm flex items-center justify-center gap-2">
+              Connected to{' '}
+              <span className="inline-flex items-center gap-1.5">
+                <Image 
+                  src={OneChainLogo} 
+                  alt="One Chain Network" 
+                  width={18} 
+                  height={18} 
+                  className="inline-block"
+                />
+                One Chain Network Testnet
+              </span>.
               <button className="underline ml-2">Switch Network</button>
             </p>
             <button 
@@ -204,8 +215,8 @@ export default function Bank() {
         
         <div className="mb-10 text-center">
           <HeaderText
-            header="APT Casino Bank" 
-            description="Manage your assets, deposit collateral, and borrow tokens to play your favorite casino games"
+            header="OneArcade Bank" 
+            description="Manage your assets, deposit collateral, and borrow tokens to play your favorite games"
           />
         </div>
         
@@ -247,8 +258,19 @@ export default function Bank() {
                 <div className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)]">
                   {/* Ethereum Testnet Only - No Uniswap Integration */}
         <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 p-6 text-center">
-          <h3 className="text-xl font-semibold text-white mb-2">One Chain Network Testnet Only</h3>
-          <p className="text-gray-400">This application works exclusively with One Chain Network Testnet</p>
+          <h3 className="text-xl font-semibold text-white mb-2 flex items-center justify-center gap-2">
+            <Image 
+              src={OneChainLogo} 
+              alt="One Chain Network" 
+              width={24} 
+              height={24} 
+              className="inline-block"
+            />
+            One Chain Network Testnet Only
+          </h3>
+          <p className="text-gray-400 flex items-center justify-center gap-2">
+            This application works exclusively with One Chain Network Testnet
+          </p>
         </div>
                 </div>
               </div>
@@ -346,7 +368,7 @@ export default function Bank() {
           
           {activeTab === 'history' && (
             <div>
-              <p className="text-white/70 mb-6">Your transaction history in the APT Casino Bank. All transactions are recorded on the blockchain for transparency.</p>
+              <p className="text-white/70 mb-6">Your transaction history in the OneArcade Bank. All transactions are recorded on the blockchain for transparency.</p>
               
               {transactions.length > 0 ? (
                 <div className="overflow-x-auto">
@@ -415,7 +437,7 @@ export default function Bank() {
                 <h3 className="text-lg font-medium">Earn Interest</h3>
               </div>
               <p className="text-white/70 mb-4 relative z-10">
-                Deposit your tokens to earn competitive interest rates. APT Casino Bank offers some of the highest APYs in DeFi.
+                Deposit your tokens to earn competitive interest rates. OneArcade Bank offers some of the highest APYs in DeFi.
               </p>
               <ul className="space-y-2 mb-4 relative z-10">
                 <li className="flex justify-between">
