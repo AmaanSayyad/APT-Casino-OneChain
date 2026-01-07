@@ -39,19 +39,19 @@ export default function FeatureSection() {
   return (
     <section className="py-16 px-4 md:px-8 lg:px-16 relative overflow-hidden">
       {/* Background glows */}
-      <div className="absolute -top-40 left-20 w-80 h-80 rounded-full bg-red-magic/5 blur-[120px] z-0"></div>
-      <div className="absolute bottom-0 right-10 w-80 h-80 rounded-full bg-blue-magic/5 blur-[120px] z-0"></div>
+      <div className="absolute -top-40 left-20 w-80 h-80 rounded-full bg-sky-500/5 blur-[120px] z-0"></div>
+      <div className="absolute bottom-0 right-10 w-80 h-80 rounded-full bg-blue-500/5 blur-[120px] z-0"></div>
 
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="flex items-center mb-12 justify-center">
           <div className="w-1 h-6 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full mr-3"></div>
-          <h2 className="text-2xl font-display font-bold text-white">Key Features of APT-Casino</h2>
+          <h2 className="text-2xl font-display font-bold text-white">Key Features of OneArcade</h2>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center mb-16">
           {/* Casino Image */}
           <div className="lg:col-span-5 flex justify-center lg:justify-start">
-            <div className="relative w-full max-w-md h-[350px] rounded-xl overflow-hidden bg-gradient-to-br from-purple-800 to-blue-900">
+            <div className="relative w-full max-w-md h-[350px] rounded-xl overflow-hidden bg-gradient-to-br from-sky-800 to-blue-900">
               {!imageError ? (
                 <Image
                   src="/images/casino-players.png"
@@ -74,122 +74,86 @@ export default function FeatureSection() {
             </div>
           </div>
 
-          {/* Comparison section */}
+          {/* Comparison section – OneArcade vs traditional casinos */}
           <div className="lg:col-span-7">
-            {/* Outer background (dark + subtle tech glow) */}
-            <div className="relative overflow-hidden rounded-2xl bg-[#0B0F16] px-5 py-8 md:px-10 md:py-10">
-              {/* soft vignette + cyan glow */}
-              <div className="pointer-events-none absolute inset-0">
-                <div className="absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(0,209,255,0.18)_0%,rgba(0,209,255,0.00)_60%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(255,255,255,0.06)_0%,rgba(0,0,0,0)_55%)]" />
-                <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(to_right,rgba(0,209,255,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,209,255,0.08)_1px,transparent_1px)] [background-size:64px_64px]" />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-transparent to-black/55" />
-              </div>
-
-              {/* Left side fade blend */}
-              <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-sharp-black to-transparent z-[1]" />
-              
-              {/* Right side fade blend */}
-              <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-sharp-black to-transparent z-[1]" />
-              
-              {/* Top side fade blend */}
-              <div className="pointer-events-none absolute left-0 right-0 top-0 h-32 bg-gradient-to-b from-sharp-black to-transparent z-[1]" />
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#050816] via-[#020617] to-[#020617] border border-sky-500/40 px-6 py-8 md:px-10 md:py-10 shadow-[0_0_40px_rgba(56,189,248,0.35)]">
+              {/* soft vignette */}
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(125,211,252,0.18)_0%,rgba(0,0,0,0)_60%)]" />
 
               {/* Title */}
-              <div className="relative z-30 text-center">
-                <h2 className="text-white text-[30px] md:text-[36px] font-extrabold uppercase tracking-wider">
-                  TRADITIONAL VS ONEARCADE
-                </h2>
-                <h4 className="mt-1 text-white/85 text-xl md:text-2xl font-semibold">
+              <div className="relative z-10 mb-6">
+                <p className="text-sm tracking-[0.25em] uppercase text-sky-300/80 mb-2">
+                  Traditional vs OneArcade
+                </p>
+                <h3 className="text-2xl md:text-3xl font-display font-semibold text-white">
                   A New Era of Fair Gaming
-                </h4>
+                </h3>
               </div>
 
-              {/* HUD Table Frame */}
-              <div className="relative z-30 mx-auto mt-7 max-w-4xl">
-                {/* frame glow */}
-                <div className="absolute -inset-[10px] rounded-[22px] bg-[radial-gradient(circle,rgba(0,209,255,0.22)_0%,rgba(0,209,255,0)_62%)] blur-[2px]" />
+              {/* Comparison table – single HUD card like reference image */}
+              <div className="relative z-10 mx-auto mt-4 max-w-3xl md:max-w-4xl">
+                {/* outer glow */}
+                <div className="absolute -inset-[8px] rounded-[22px] bg-[radial-gradient(circle,rgba(56,189,248,0.35)_0%,rgba(15,23,42,0)_65%)] blur-sm" />
 
-                <div className="relative rounded-[22px] border border-[#00A3FF] bg-[#0B1220]/55 shadow-[0_0_26px_rgba(0,209,255,0.22)]">
-                  {/* Corner accents (HUD brackets) */}
-                  <span className="pointer-events-none absolute -left-[2px] -top-[2px] h-8 w-12 rounded-tl-[22px] border-l-2 border-t-2 border-[#00A3FF]" />
-                  <span className="pointer-events-none absolute -right-[2px] -top-[2px] h-8 w-12 rounded-tr-[22px] border-r-2 border-t-2 border-[#00A3FF]" />
-                  <span className="pointer-events-none absolute -left-[2px] -bottom-[2px] h-8 w-12 rounded-bl-[22px] border-l-2 border-b-2 border-[#00A3FF]" />
-                  <span className="pointer-events-none absolute -right-[2px] -bottom-[2px] h-8 w-12 rounded-br-[22px] border-r-2 border-b-2 border-[#00A3FF]" />
-
-                  {/* Table */}
-                  <div className="grid grid-cols-2">
-                    {/* Header row */}
-                    <div className="col-span-2 grid grid-cols-2">
-                      <div className="px-6 py-5 md:px-8 md:py-6 bg-[#6f6f6f] text-[22px] md:text-[26px] font-semibold text-white/45 rounded-tl-[20px]">
-                        Traditional Casinos
-                      </div>
-                      <div className="px-6 py-5 md:px-8 md:py-6 bg-black/25 text-[22px] md:text-[26px] font-semibold text-[#00A3FF]">
-                        OneArcade
-                      </div>
+                <div className="relative rounded-[22px] border border-cyan-400/70 bg-[#050816]/90 shadow-[0_0_40px_rgba(8,145,178,0.6)] overflow-hidden">
+                  {/* header row */}
+                  <div className="grid grid-cols-2 text-center text-base md:text-xl font-semibold">
+                    <div className="px-6 py-4 md:px-8 md:py-5 bg-gradient-to-br from-slate-600/95 via-slate-700/90 to-slate-800/95 text-white/80">
+                      Traditional Casinos
                     </div>
+                    <div className="px-6 py-4 md:px-8 md:py-5 bg-gradient-to-br from-sky-600 via-sky-500 to-cyan-500 text-white">
+                      OneArcade
+                    </div>
+                  </div>
 
-                    {/* Divider line (vertical center) */}
-                    <div className="pointer-events-none absolute left-1/2 top-0 h-full w-[1px] -translate-x-1/2 bg-cyan-300/55 shadow-[0_0_18px_rgba(0,209,255,0.45)]" />
+                  {/* vertical divider */}
+                  <div className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-cyan-300/60 shadow-[0_0_18px_rgba(34,211,238,0.7)]" />
 
-                    {/* Rows wrapper (so we can glow the horizontal lines) */}
-                    <div className="col-span-2">
-                      {[
-                        {
-                          left: "Hidden RNG algorithms",
-                          right: "Verifiable on-chain randomness",
-                        },
-                        {
-                          left: "Restrictive withdrawal policies",
-                          right: "Stake and earn while playing",
-                        },
-                        {
-                          left: "Unclear bonus terms",
-                          right: "Transparent bonus system",
-                        },
-                        {
-                          left: "Centralized control of funds",
-                          right: "Self-custody of assets",
-                        },
-                      ].map((r, i) => (
-                        <div
-                          key={i}
-                          className="relative grid grid-cols-2"
-                        >
-                          {/* horizontal separator */}
-                          <div className="pointer-events-none absolute left-0 top-0 h-[1px] w-full bg-cyan-300/45 shadow-[0_0_14px_rgba(0,209,255,0.35)]" />
+                  {/* rows */}
+                  <div className="relative grid grid-cols-2 text-sm md:text-base">
+                    {[
+                      {
+                        left: "Hidden RNG algorithms",
+                        right: "Verifiable on-chain RNG",
+                      },
+                      {
+                        left: "Restrictive withdrawal policies",
+                        right: "Stake and earn while playing",
+                      },
+                      {
+                        left: "Unclear bonus terms",
+                        right: "Transparent bonus system",
+                      },
+                      {
+                        left: "Centralized control of funds",
+                        right: "Self-custody of assets",
+                      },
+                    ].map((row, idx) => (
+                      <React.Fragment key={row.left}>
+                        {/* horizontal separator */}
+                        <div className="col-span-2 h-px bg-cyan-400/40 shadow-[0_0_14px_rgba(34,211,238,0.65)]" />
 
-                          <div className="px-6 py-4 md:px-8 md:py-5">
-                            <div className="flex items-center gap-3">
-                              <span className="text-red-magic text-lg leading-none">✕</span>
-                              <span className="text-[15px] md:text-[16px] text-red-magic">
-                                {r.left}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="px-6 py-4 md:px-8 md:py-5 text-[#00A3FF]">
-                            <div className="flex items-center gap-3">
-                              <span className="text-[#00A3FF] text-lg leading-none">✓</span>
-                              <span className="text-[15px] md:text-[16px]">
-                                {r.right}
-                              </span>
-                            </div>
-                          </div>
+                        {/* left cell */}
+                        <div className="px-6 py-3.5 md:px-8 md:py-4 flex items-center gap-3 bg-black/40">
+                          <span className="text-red-400 text-base leading-none">✕</span>
+                          <span className="text-white/85">{row.left}</span>
                         </div>
-                      ))}
 
-                      {/* bottom border line */}
-                      <div className="pointer-events-none h-[1px] w-full bg-cyan-300/45 shadow-[0_0_14px_rgba(0,209,255,0.35)]" />
-                    </div>
+                        {/* right cell */}
+                        <div className="px-6 py-3.5 md:px-8 md:py-4 flex items-center gap-3 bg-black/20">
+                          <span className="text-cyan-300 text-base leading-none">✓</span>
+                          <span className="text-cyan-100">{row.right}</span>
+                        </div>
+                      </React.Fragment>
+                    ))}
                   </div>
                 </div>
               </div>
 
               {/* Footer note */}
-              <p className="relative z-30 mx-auto mt-6 max-w-3xl text-center text-white/80 text-sm md:text-base">
-                OneArcade leverages One Chain Network Blockchain to provide a transparent, provably fair gaming
-                experience with DeFi integration.
+              <p className="relative z-10 mt-6 text-sm md:text-base text-white/80 max-w-xl">
+                OneArcade leverages One Chain Network Blockchain to provide a transparent, provably fair
+                gaming experience with DeFi integration.
               </p>
             </div>
           </div>
