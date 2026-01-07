@@ -952,7 +952,7 @@ export default function Mines() {
   // We don't need this function anymore as we've added IDs directly to the components
 
   return (
-    <div className="min-h-screen bg-[#070005] bg-gradient-to-b from-[#070005] to-[#0e0512] pb-20 text-white mines-bg custom-scrollbar">
+    <div className="min-h-screen bg-sharp-black pb-20 text-white mines-bg custom-scrollbar">
       <div className="pt-16">
         {renderHeader()}
         {renderMainContent()}

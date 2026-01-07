@@ -78,7 +78,7 @@ const UpcomingTournaments = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center">
-            <div className="w-1 h-6 bg-gradient-to-r from-red-magic to-blue-magic rounded-full mr-3"></div>
+            <div className="w-1 h-6 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full mr-3"></div>
             <h2 className="text-2xl font-display font-bold text-white">Upcoming Tournaments</h2>
           </div>
           
@@ -94,22 +94,25 @@ const UpcomingTournaments = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tournaments.map((tournament) => (
-            <div key={tournament.id} className="p-[1px] bg-gradient-to-r from-red-magic to-blue-magic rounded-xl">
-              <div className="bg-[#1A0015] rounded-xl h-full">
+            <div key={tournament.id} className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] hover:shadow-[0_0_30px_rgba(0,163,255,0.6),0_0_30px_rgba(0,163,255,0.3)] transition-all duration-300">
+              <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden h-full">
+                {/* inner glow */}
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
+                
                 <div className="p-4 relative h-32 overflow-hidden rounded-t-xl">
                   {/* This would be replaced with actual images in production */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#250020] to-[#1A0015]"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#0B1324] to-[#0A0F17]"></div>
                   
                   {/* Tournament name and game banner */}
                   <div className="relative z-10">
-                    <span className="inline-block bg-red-magic/80 text-white text-xs py-1 px-2 rounded">
+                    <span className="inline-block bg-[#00A3FF] text-white text-xs py-1 px-2 rounded font-semibold">
                       {tournament.game}
                     </span>
                     <h3 className="text-white text-xl font-medium mt-2">{tournament.name}</h3>
                   </div>
                 </div>
                 
-                <div className="p-4 border-t border-white/5">
+                <div className="p-4 border-t border-sky-400/10 relative z-10">
                   {/* Tournament details */}
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <div>
@@ -136,9 +139,9 @@ const UpcomingTournaments = () => {
                   
                   {/* Progress bar */}
                   <div className="mb-4">
-                    <div className="w-full h-2 bg-[#250020] rounded-full overflow-hidden">
+                    <div className="w-full h-2 bg-[#0B1324] rounded-full overflow-hidden">
                       <div 
-                        className="h-full magic-gradient"
+                        className="h-full bg-gradient-to-r from-[#00A3FF] to-blue-500 rounded-full"
                         style={{ width: `${(tournament.participants / tournament.maxParticipants) * 100}%` }}
                       ></div>
                     </div>
@@ -148,9 +151,9 @@ const UpcomingTournaments = () => {
                   </div>
                   
                   {/* Register button */}
-                  <GradientBorderButton classes="w-full">
-                    <div className="w-full text-center">Register Now</div>
-                  </GradientBorderButton>
+                  <button className="w-full rounded-full py-3 font-semibold text-white bg-[#00A3FF] hover:bg-[#0088DD] transition-all shadow-[0_0_22px_rgba(0,163,255,0.25)]">
+                    Register Now
+                  </button>
                 </div>
               </div>
             </div>

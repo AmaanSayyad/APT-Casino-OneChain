@@ -10,13 +10,15 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import UpcomingTournaments from "@/components/UpcomingTournaments";
 import NewsUpdates from "@/components/NewsUpdates";
 import ProvablyFairSection from "@/components/ProvablyFairSection";
+import GameCarouselNew from "@/components/GameCarouselNew";
 
 export default function Home() {
   return (
-    <div className="bg-[#070005] overflow-x-hidden w-full">
+    <div className="bg-sharp-black overflow-x-hidden w-full">
       <HeroSection />
       <FeatureSection />
-      <GameCarousel />
+      {/* <GameCarousel /> */}
+      <GameCarouselNew />
       <HowItWorksSection />
       <UpcomingTournaments />
       <TestimonialsSection />

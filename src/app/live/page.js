@@ -185,31 +185,36 @@ export default function LivePage() {
 
   return (
     <>
-    <div className="min-h-screen pt-36 md:pt-44 pb-16 px-4 md:px-10 lg:px-24 xl:px-36 bg-[#070005]">
-      <div className="bg-[#070005]/90 border border-purple-500/20 rounded-2xl p-4 md:p-6 shadow-xl backdrop-blur mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="text-2xl md:text-3xl font-display font-semibold text-white">Live</h1>
-          <button
-            onClick={() => setGuideOpen(true)}
-            className="px-3 py-2 rounded-md bg-white/5 hover:bg-white/10 text-white/80 text-sm"
-          >How to Stream</button>
-        </div>
-        <div className="flex flex-col md:flex-row gap-3 items-start md:items-end">
-          <div className="flex-1 w-full">
-            <label className="block text-xs uppercase tracking-wide text-white/60 mb-1">Add a stream (Playback ID, HLS URL, or YouTube URL)</label>
-            <input
-              value={newPlaybackId}
-              onChange={(e) => setNewPlaybackId(e.target.value)}
-              placeholder="e.g. f5eese9wwl88k4g8 or https://...m3u8 or https://youtu.be/..."
-              className="w-full px-3 py-2 rounded-md bg-[#1a001a] border border-purple-500/30 text-white placeholder-white/30 focus:outline-none focus:border-purple-400"
-            />
+    <div className="min-h-screen pt-36 md:pt-44 pb-16 px-4 md:px-10 lg:px-24 xl:px-36 bg-sharp-black">
+      <div className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] mb-6">
+        <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden p-4 md:p-6 backdrop-blur">
+          {/* inner glow */}
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
+          
+          <div className="flex items-center justify-between mb-3 relative z-10">
+            <h1 className="text-2xl md:text-3xl font-display font-semibold text-white">Live</h1>
+            <button
+              onClick={() => setGuideOpen(true)}
+              className="px-3 py-2 rounded-md bg-[#0B1324] border border-sky-400/20 hover:bg-[#0B1324]/80 text-white/80 hover:text-white text-sm transition-all"
+            >How to Stream</button>
           </div>
-          <button
-            onClick={addStream}
-            className="px-5 py-2.5 rounded-md bg-gradient-to-r from-red-magic to-blue-magic text-white font-medium hover:opacity-90 transition"
-          >
-            Add
-          </button>
+          <div className="flex flex-col md:flex-row gap-3 items-start md:items-end relative z-10">
+            <div className="flex-1 w-full">
+              <label className="block text-xs uppercase tracking-wide text-white/60 mb-1">Add a stream (Playback ID, HLS URL, or YouTube URL)</label>
+              <input
+                value={newPlaybackId}
+                onChange={(e) => setNewPlaybackId(e.target.value)}
+                placeholder="e.g. f5eese9wwl88k4g8 or https://...m3u8 or https://youtu.be/..."
+                className="w-full px-3 py-2 rounded-md bg-[#0B1324] border border-sky-400/20 text-white placeholder-white/30 focus:outline-none focus:border-[#00A3FF] focus:ring-1 focus:ring-[#00A3FF]/50 transition-all"
+              />
+            </div>
+            <button
+              onClick={addStream}
+              className="bg-gradient-to-r from-[#0066FF] to-[#00A3FF] text-white font-medium px-5 py-2.5 rounded-[30px] hover:from-[#0066FF] hover:to-[#00A3FF] hover:shadow-[0_0_20px_rgba(0,163,255,0.8),0_0_40px_rgba(0,163,255,0.4)] transition-all"
+            >
+              Add
+            </button>
+          </div>
         </div>
       </div>
 
@@ -220,26 +225,30 @@ export default function LivePage() {
         )}
 
         {streams.map(({ playbackId }, idx) => (
-          <div key={playbackId} className={`bg-[#0e0010]/70 border border-purple-500/20 rounded-2xl p-3 shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-2xl fade-in-up`} style={{ animationDelay: `${idx * 80}ms` }}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="relative flex h-2.5 w-2.5 mr-0.5">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-ping"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-                </span>
-                <div className="text-white/80 text-xs md:text-sm truncate" title={playbackId}>
-                  {/(youtube\.com|youtu\.be)\//i.test(playbackId) ? "YouTube Live" : "Livepeer Live"}
+          <div key={playbackId} className={`relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] hover:shadow-[0_0_30px_rgba(0,163,255,0.6),0_0_30px_rgba(0,163,255,0.3)] transition-all duration-300 fade-in-up`} style={{ animationDelay: `${idx * 80}ms` }}>
+            <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden p-3">
+              {/* inner glow */}
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
+              
+              <div className="flex items-center justify-between mb-3 relative z-10">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="relative flex h-2.5 w-2.5 mr-0.5">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-[#00A3FF] opacity-75 animate-ping"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00A3FF]"></span>
+                  </span>
+                  <div className="text-white/80 text-xs md:text-sm truncate" title={playbackId}>
+                    {/(youtube\.com|youtu\.be)\//i.test(playbackId) ? "YouTube Live" : "Livepeer Live"}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => navigator.clipboard.writeText(playbackId)}
+                    className="px-2 py-1 rounded bg-[#0B1324] border border-sky-400/20 hover:bg-[#0B1324]/80 text-white/80 hover:text-white text-xs transition-all"
+                  >Copy</button>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => navigator.clipboard.writeText(playbackId)}
-                  className="px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-white/80 text-xs border border-white/10"
-                >Copy</button>
-              </div>
-            </div>
 
-            <div className="relative rounded-xl overflow-hidden ring-1 ring-purple-500/30 bg-gradient-to-b from-black to-[#130013]">
+              <div className="relative rounded-xl overflow-hidden ring-1 ring-sky-400/30 bg-gradient-to-b from-black to-[#0A0F17] relative z-10">
               {(() => {
                 if (/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(playbackId)) {
                   const embed = getYouTubeEmbedUrl(playbackId.startsWith("http") ? playbackId : `https://${playbackId}`);
@@ -277,45 +286,46 @@ export default function LivePage() {
               })()}
             </div>
 
-            <div className="mt-3 flex items-center justify-between text-white/70 text-xs">
-              <a
-                href={/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(playbackId)
-                  ? (playbackId.startsWith("http") ? playbackId : `https://${playbackId}`)
-                  : `https://livepeercdn.com/hls/${playbackId}/index.m3u8`}
-                target="_blank"
-                rel="noreferrer"
-                className="underline hover:no-underline text-white/80 hover:text-white"
-              >Open HLS</a>
-              <div className="text-white/50">
-                {(() => {
-                  const m = metrics[playbackId];
-                  const viewers = m?.viewers ?? "—";
-                  const bitrate = m?.bitrate ? `${m.bitrate} kbps` : "—";
-                  return `Viewers ${viewers} • Bitrate ${bitrate}`;
-                })()}
-              </div>
-            </div>
-            {(() => {
-              const meta = getDemoInfo(playbackId);
-              const yt = ytMeta[playbackId];
-              if (!meta && !yt) return null;
-              return (
-                <div className="mt-2 text-white/45 text-[11px] leading-snug">
-                  {meta && (
-                    <>
-                      <div>Demo: {meta.title}</div>
-                      <div>Source: {meta.source}</div>
-                    </>
-                  )}
-                  {yt && (
-                    <>
-                      <div>Title: {yt.title}</div>
-                      <div>Channel: {yt.author_name}</div>
-                    </>
-                  )}
+              <div className="mt-3 flex items-center justify-between text-white/70 text-xs relative z-10">
+                <a
+                  href={/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(playbackId)
+                    ? (playbackId.startsWith("http") ? playbackId : `https://${playbackId}`)
+                    : `https://livepeercdn.com/hls/${playbackId}/index.m3u8`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline hover:no-underline text-white/80 hover:text-white"
+                >Open HLS</a>
+                <div className="text-white/50">
+                  {(() => {
+                    const m = metrics[playbackId];
+                    const viewers = m?.viewers ?? "—";
+                    const bitrate = m?.bitrate ? `${m.bitrate} kbps` : "—";
+                    return `Viewers ${viewers} • Bitrate ${bitrate}`;
+                  })()}
                 </div>
-              );
-            })()}
+              </div>
+              {(() => {
+                const meta = getDemoInfo(playbackId);
+                const yt = ytMeta[playbackId];
+                if (!meta && !yt) return null;
+                return (
+                  <div className="mt-2 text-white/45 text-[11px] leading-snug relative z-10">
+                    {meta && (
+                      <>
+                        <div>Demo: {meta.title}</div>
+                        <div>Source: {meta.source}</div>
+                      </>
+                    )}
+                    {yt && (
+                      <>
+                        <div>Title: {yt.title}</div>
+                        <div>Channel: {yt.author_name}</div>
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
           </div>
         ))}
       </div>
@@ -340,44 +350,49 @@ export default function LivePage() {
     {guideOpen && (
       <div className="fixed inset-0 z-50 flex items-center justify-center">
         <div className="absolute inset-0 bg-black/70" onClick={() => setGuideOpen(false)} />
-        <div className="relative w-[96%] max-w-3xl rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30">
-          <div className="bg-gradient-to-r from-red-magic/70 to-blue-magic/70 p-5">
-            <div className="flex items-center justify-between">
-              <h3 className="text-white text-xl md:text-2xl font-display font-semibold">How to Stream</h3>
-              <button
-                className="px-3 py-1.5 rounded-md bg-white/15 hover:bg-white/25 text-white/90 text-sm"
-                onClick={() => setGuideOpen(false)}
-              >Close</button>
-            </div>
-          </div>
-          <div className="bg-[#0e0010] text-white/90 p-6 md:p-7">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="rounded-xl border border-purple-500/20 bg-white/5 p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
-                  <h4 className="text-white font-medium">Option 1 — Livepeer</h4>
-                </div>
-                <ol className="list-decimal list-inside space-y-2 text-white/80 text-sm">
-                  <li>Create an API key and a stream in Livepeer Studio. <a href="https://docs.livepeer.org/developers/quick-start" className="underline" target="_blank" rel="noreferrer">Docs</a></li>
-                  <li>Configure OBS with Ingest URL + Stream Key and start streaming.</li>
-                  <li>Copy the Playback ID from the stream.</li>
-                  <li>Paste the Playback ID into the input above and click <span className="text-white">Add</span>.</li>
-                </ol>
-              </div>
-              <div className="rounded-xl border border-purple-500/20 bg-white/5 p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="inline-flex h-2.5 w-2.5 rounded-full bg-rose-400"></span>
-                  <h4 className="text-white font-medium">Option 2 — YouTube Live</h4>
-                </div>
-                <ol className="list-decimal list-inside space-y-2 text-white/80 text-sm">
-                  <li>Go live from YouTube Studio.</li>
-                  <li>Copy the live URL (watch/share, e.g. https://youtu.be/...).</li>
-                  <li>Paste the URL into the input above and click <span className="text-white">Add</span>.</li>
-                </ol>
+        <div className="relative w-[96%] max-w-3xl rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] overflow-hidden">
+          <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden">
+            {/* inner glow */}
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
+            
+            <div className="bg-gradient-to-r from-[#0066FF]/70 to-[#00A3FF]/70 p-5 relative z-10">
+              <div className="flex items-center justify-between">
+                <h3 className="text-white text-xl md:text-2xl font-display font-semibold">How to Stream</h3>
+                <button
+                  className="px-3 py-1.5 rounded-md bg-white/15 hover:bg-white/25 text-white/90 text-sm transition-all"
+                  onClick={() => setGuideOpen(false)}
+                >Close</button>
               </div>
             </div>
-            <div className="mt-5 rounded-xl border border-purple-500/20 bg-white/5 p-4 text-xs text-white/70">
-              Tip: You can add multiple streams. Livepeer cards show metrics; YouTube cards show title and channel.
+            <div className="bg-[#0A0F17] text-white/90 p-6 md:p-7 relative z-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="rounded-xl border border-sky-400/20 bg-[#0B1324] p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+                    <h4 className="text-white font-medium">Option 1 — Livepeer</h4>
+                  </div>
+                  <ol className="list-decimal list-inside space-y-2 text-white/80 text-sm">
+                    <li>Create an API key and a stream in Livepeer Studio. <a href="https://docs.livepeer.org/developers/quick-start" className="underline" target="_blank" rel="noreferrer">Docs</a></li>
+                    <li>Configure OBS with Ingest URL + Stream Key and start streaming.</li>
+                    <li>Copy the Playback ID from the stream.</li>
+                    <li>Paste the Playback ID into the input above and click <span className="text-white">Add</span>.</li>
+                  </ol>
+                </div>
+                <div className="rounded-xl border border-sky-400/20 bg-[#0B1324] p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="inline-flex h-2.5 w-2.5 rounded-full bg-rose-400"></span>
+                    <h4 className="text-white font-medium">Option 2 — YouTube Live</h4>
+                  </div>
+                  <ol className="list-decimal list-inside space-y-2 text-white/80 text-sm">
+                    <li>Go live from YouTube Studio.</li>
+                    <li>Copy the live URL (watch/share, e.g. https://youtu.be/...).</li>
+                    <li>Paste the URL into the input above and click <span className="text-white">Add</span>.</li>
+                  </ol>
+                </div>
+              </div>
+              <div className="mt-5 rounded-xl border border-sky-400/20 bg-[#0B1324] p-4 text-xs text-white/70">
+                Tip: You can add multiple streams. Livepeer cards show metrics; YouTube cards show title and channel.
+              </div>
             </div>
           </div>
         </div>

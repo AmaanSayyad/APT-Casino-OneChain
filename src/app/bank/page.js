@@ -184,11 +184,11 @@ export default function Bank() {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sharp-black to-[#150012] text-white">
+    <div className="min-h-screen bg-sharp-black text-white">
       <div className="container mx-auto px-4 lg:px-8 pt-32 pb-16">
         {/* Network banner moved inside the container and positioned after the navbar */}
         {showNetworkBanner && (
-          <div className="bg-gradient-to-r from-red-magic/80 to-blue-magic/80 py-2 px-4 text-center relative mb-8 rounded-lg">
+          <div className="bg-gradient-to-r from-[#0066FF]/80 to-[#00A3FF]/80 py-2 px-4 text-center relative mb-8 rounded-lg">
             <p className="text-white text-sm">
               Connected to One Chain Network Testnet. 
               <button className="underline ml-2">Switch Network</button>
@@ -213,25 +213,25 @@ export default function Bank() {
         <div className="mb-8">
           <div className="flex border-b border-white/10 overflow-x-auto custom-scrollbar">
             <button 
-              className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${activeTab === 'swap' ? 'text-white border-b-2 border-blue-magic' : 'text-white/50 hover:text-white/80'}`}
+              className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${activeTab === 'swap' ? 'text-white border-b-2 border-[#00A3FF]' : 'text-white/50 hover:text-white/80'}`}
               onClick={() => setActiveTab('swap')}
             >
               <FaExchangeAlt /> Swap
             </button>
             <button 
-              className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${activeTab === 'borrow' ? 'text-white border-b-2 border-blue-magic' : 'text-white/50 hover:text-white/80'}`}
+              className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${activeTab === 'borrow' ? 'text-white border-b-2 border-[#00A3FF]' : 'text-white/50 hover:text-white/80'}`}
               onClick={() => setActiveTab('borrow')}
             >
               <FaUnlock /> Borrow
             </button>
             <button 
-              className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${activeTab === 'lend' ? 'text-white border-b-2 border-blue-magic' : 'text-white/50 hover:text-white/80'}`}
+              className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${activeTab === 'lend' ? 'text-white border-b-2 border-[#00A3FF]' : 'text-white/50 hover:text-white/80'}`}
               onClick={() => setActiveTab('lend')}
             >
               <FaLock /> Lend
             </button>
             <button 
-              className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${activeTab === 'history' ? 'text-white border-b-2 border-blue-magic' : 'text-white/50 hover:text-white/80'}`}
+              className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${activeTab === 'history' ? 'text-white border-b-2 border-[#00A3FF]' : 'text-white/50 hover:text-white/80'}`}
               onClick={() => setActiveTab('history')}
             >
               <FaHistory /> History
@@ -244,9 +244,9 @@ export default function Bank() {
           {activeTab === 'swap' && (
             <>
               <div className="max-w-2xl mx-auto mb-12">
-                <div className="bg-gradient-to-r p-[1px] from-red-magic to-blue-magic rounded-xl">
+                <div className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)]">
                   {/* Ethereum Testnet Only - No Uniswap Integration */}
-        <div className="bg-gray-800 rounded-lg p-6 text-center">
+        <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 p-6 text-center">
           <h3 className="text-xl font-semibold text-white mb-2">One Chain Network Testnet Only</h3>
           <p className="text-gray-400">This application works exclusively with One Chain Network Testnet</p>
         </div>
@@ -254,21 +254,24 @@ export default function Bank() {
               </div>
               
               {/* Market Trends - Only shown in swap tab */}
-              <div className="mb-12 p-[1px] bg-gradient-to-r from-red-magic/50 to-blue-magic/50 rounded-xl">
-                <div className="bg-[#1A0015] rounded-xl p-6">
-                  <div className="flex items-center mb-4">
-                    <FaChartLine className="text-blue-magic mr-2" />
+              <div className="mb-12 relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)]">
+                <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden p-6">
+                  {/* inner glow */}
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
+                  
+                  <div className="flex items-center mb-4 relative z-10">
+                    <FaChartLine className="text-[#00A3FF] mr-2" />
                     <h2 className="text-xl font-display font-medium">Market Trends</h2>
                   </div>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-[#250020] p-4 rounded-lg hover:bg-[#350030] transition-colors">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
+                    <div className="bg-[#0B1324] border border-sky-400/20 p-4 rounded-lg hover:bg-[#0B1324]/80 transition-colors">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-white/70 text-sm">OCT Price</span>
                         <div className="flex items-center">
-                          <div className="h-2 w-16 bg-[#120010] rounded-full overflow-hidden">
+                          <div className="h-2 w-16 bg-[#0A0F17] rounded-full overflow-hidden">
                             <div 
-                              className="h-full bg-gradient-to-r from-red-magic to-blue-magic"
+                              className="h-full bg-gradient-to-r from-sky-400 to-blue-500"
                               style={{ width: `${Math.min(Math.abs(marketTrends.og24hChange), 100)}%` }}
                             ></div>
                           </div>
@@ -284,7 +287,7 @@ export default function Bank() {
                       </div>
                     </div>
                     
-                    <div className="bg-[#250020] p-4 rounded-lg hover:bg-[#350030] transition-colors">
+                    <div className="bg-[#0B1324] border border-sky-400/20 p-4 rounded-lg hover:bg-[#0B1324]/80 transition-colors">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-white/70 text-sm">Market Cap</span>
                         <FaInfoCircle className="text-white/40 hover:text-white/70 transition-colors cursor-help" />
@@ -294,7 +297,7 @@ export default function Bank() {
                       </div>
                     </div>
                     
-                    <div className="bg-[#250020] p-4 rounded-lg hover:bg-[#350030] transition-colors">
+                    <div className="bg-[#0B1324] border border-sky-400/20 p-4 rounded-lg hover:bg-[#0B1324]/80 transition-colors">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-white/70 text-sm">Total Value Locked</span>
                         <FaInfoCircle className="text-white/40 hover:text-white/70 transition-colors cursor-help" />
@@ -304,7 +307,7 @@ export default function Bank() {
                       </div>
                     </div>
                     
-                    <div className="bg-[#250020] p-4 rounded-lg hover:bg-[#350030] transition-colors">
+                    <div className="bg-[#0B1324] border border-sky-400/20 p-4 rounded-lg hover:bg-[#0B1324]/80 transition-colors">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-white/70 text-sm">APY Range</span>
                         <FaInfoCircle className="text-white/40 hover:text-white/70 transition-colors cursor-help" />
@@ -363,7 +366,7 @@ export default function Bank() {
                             <div className="flex items-center gap-2">
                               {tx.type === 'deposit' && <FaWallet className="text-green-500" />}
                               {tx.type === 'borrow' && <FaUnlock className="text-yellow-500" />}
-                              {tx.type === 'swap' && <FaExchangeAlt className="text-blue-magic" />}
+                              {tx.type === 'swap' && <FaExchangeAlt className="text-[#00A3FF]" />}
                               <span className="capitalize">{tx.type}</span>
                             </div>
                           </td>
@@ -400,18 +403,21 @@ export default function Bank() {
         
         {/* Information Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          <div className="p-[1px] bg-gradient-to-r from-red-magic/30 to-blue-magic/30 rounded-xl hover:from-red-magic hover:to-blue-magic transition-all duration-300">
-            <div className="bg-[#1A0015] rounded-xl p-6 h-full">
-              <div className="flex items-center mb-4">
-                <div className="w-10 h-10 rounded-full bg-[#250020] flex items-center justify-center mr-3">
-                  <FaCoins className="text-yellow-500" />
+          <div className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] hover:shadow-[0_0_30px_rgba(0,163,255,0.6),0_0_30px_rgba(0,163,255,0.3)] transition-all duration-300">
+            <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden p-6 h-full">
+              {/* inner glow */}
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
+              
+              <div className="flex items-center mb-4 relative z-10">
+                <div className="w-10 h-10 rounded-full bg-[#00A3FF] flex items-center justify-center mr-3 shadow-[0_0_15px_rgba(0,163,255,0.5)]">
+                  <FaCoins className="text-white" />
                 </div>
                 <h3 className="text-lg font-medium">Earn Interest</h3>
               </div>
-              <p className="text-white/70 mb-4">
+              <p className="text-white/70 mb-4 relative z-10">
                 Deposit your tokens to earn competitive interest rates. APT Casino Bank offers some of the highest APYs in DeFi.
               </p>
-              <ul className="space-y-2 mb-4">
+              <ul className="space-y-2 mb-4 relative z-10">
                 <li className="flex justify-between">
                   <span className="text-white/60">OCT</span>
                   <span className="text-green-500">12.5% APY</span>
@@ -427,25 +433,28 @@ export default function Bank() {
               </ul>
               <button 
                 onClick={() => setActiveTab('lend')}
-                className="text-sm bg-[#250020] hover:bg-[#350030] transition-colors py-2 px-4 rounded-lg flex items-center gap-2"
+                className="relative z-10 bg-gradient-to-r from-[#0066FF] to-[#00A3FF] text-white font-medium px-4 py-2 rounded-[30px] hover:from-[#0066FF] hover:to-[#00A3FF] hover:shadow-[0_0_20px_rgba(0,163,255,0.8),0_0_40px_rgba(0,163,255,0.4)] transition-all text-sm flex items-center gap-2"
               >
                 <FaLock /> Deposit Now
               </button>
             </div>
           </div>
           
-          <div className="p-[1px] bg-gradient-to-r from-red-magic/30 to-blue-magic/30 rounded-xl hover:from-red-magic hover:to-blue-magic transition-all duration-300">
-            <div className="bg-[#1A0015] rounded-xl p-6 h-full">
-              <div className="flex items-center mb-4">
-                <div className="w-10 h-10 rounded-full bg-[#250020] flex items-center justify-center mr-3">
-                  <FaWallet className="text-blue-magic" />
+          <div className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] hover:shadow-[0_0_30px_rgba(0,163,255,0.6),0_0_30px_rgba(0,163,255,0.3)] transition-all duration-300">
+            <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden p-6 h-full">
+              {/* inner glow */}
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
+              
+              <div className="flex items-center mb-4 relative z-10">
+                <div className="w-10 h-10 rounded-full bg-[#00A3FF] flex items-center justify-center mr-3 shadow-[0_0_15px_rgba(0,163,255,0.5)]">
+                  <FaWallet className="text-white" />
                 </div>
                 <h3 className="text-lg font-medium">How It Works</h3>
               </div>
-              <ol className="space-y-4 mb-6">
+              <ol className="space-y-4 mb-6 relative z-10">
                 <li className="flex gap-3">
-                  <div className="w-6 h-6 rounded-full bg-[#250020] flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="text-sm">1</span>
+                  <div className="w-6 h-6 rounded-full bg-[#00A3FF] flex items-center justify-center shrink-0 mt-0.5 shadow-[0_0_10px_rgba(0,163,255,0.4)]">
+                    <span className="text-sm text-white">1</span>
                   </div>
                   <div>
                     <h4 className="font-medium mb-1">Deposit Collateral</h4>
@@ -453,8 +462,8 @@ export default function Bank() {
                   </div>
                 </li>
                 <li className="flex gap-3">
-                  <div className="w-6 h-6 rounded-full bg-[#250020] flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="text-sm">2</span>
+                  <div className="w-6 h-6 rounded-full bg-[#00A3FF] flex items-center justify-center shrink-0 mt-0.5 shadow-[0_0_10px_rgba(0,163,255,0.4)]">
+                    <span className="text-sm text-white">2</span>
                   </div>
                   <div>
                     <h4 className="font-medium mb-1">Borrow Tokens</h4>
@@ -462,8 +471,8 @@ export default function Bank() {
                   </div>
                 </li>
                 <li className="flex gap-3">
-                  <div className="w-6 h-6 rounded-full bg-[#250020] flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="text-sm">3</span>
+                  <div className="w-6 h-6 rounded-full bg-[#00A3FF] flex items-center justify-center shrink-0 mt-0.5 shadow-[0_0_10px_rgba(0,163,255,0.4)]">
+                    <span className="text-sm text-white">3</span>
                   </div>
                   <div>
                     <h4 className="font-medium mb-1">Play & Win</h4>
@@ -471,8 +480,8 @@ export default function Bank() {
                   </div>
                 </li>
               </ol>
-              <div className="text-center">
-                <button className="bg-gradient-to-r from-red-magic to-blue-magic hover:from-blue-magic hover:to-red-magic transition-all text-white px-4 py-2 rounded-lg font-medium text-sm">
+              <div className="text-center relative z-10">
+                <button className="bg-gradient-to-r from-[#0066FF] to-[#00A3FF] text-white font-medium px-4 py-2 rounded-[30px] hover:from-[#0066FF] hover:to-[#00A3FF] hover:shadow-[0_0_20px_rgba(0,163,255,0.8),0_0_40px_rgba(0,163,255,0.4)] transition-all text-sm">
                   Learn More
                 </button>
               </div>

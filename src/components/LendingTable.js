@@ -1,7 +1,5 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import GradientBorderButton from './GradientBorderButton';
-import GradientBgButton from './GradientBgButton';
 
 const AssetRow = ({ asset, onDeposit, onWithdraw, depositData, isConnected }) => {
   const [depositAmount, setDepositAmount] = useState('');
@@ -29,7 +27,7 @@ const AssetRow = ({ asset, onDeposit, onWithdraw, depositData, isConnected }) =>
   };
   
   return (
-    <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+    <tr className="border-b border-sky-400/10 hover:bg-[#0B1324]/50 transition-colors">
       <td className="py-5 px-4">
         <div className="flex items-center">
           <div 
@@ -56,47 +54,60 @@ const AssetRow = ({ asset, onDeposit, onWithdraw, depositData, isConnected }) =>
       </td>
       <td className="py-5 px-4">
         <div className="flex gap-2 justify-end">
-          <GradientBorderButton 
+          <button 
             onClick={() => setIsWithdrawModalOpen(true)}
             disabled={!isConnected || !depositData || parseFloat(depositData?.amount || 0) <= 0}
+            className="px-4 py-2 border border-red-500/50 text-white font-medium rounded-[30px] hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm"
           >
             Withdraw
-          </GradientBorderButton>
-          <GradientBgButton 
+          </button>
+          <button 
             onClick={() => setIsDepositModalOpen(true)}
             disabled={!isConnected}
+            className="bg-gradient-to-r from-[#0066FF] to-[#00A3FF] text-white font-medium px-4 py-2 rounded-[30px] hover:from-[#0066FF] hover:to-[#00A3FF] hover:shadow-[0_0_20px_rgba(0,163,255,0.8),0_0_40px_rgba(0,163,255,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
             Deposit
-          </GradientBgButton>
+          </button>
         </div>
         
         {/* Deposit Modal */}
         {isDepositModalOpen && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <div className="bg-[#1A0015] rounded-xl p-6 max-w-md w-full">
-              <h3 className="text-xl font-medium mb-4">Deposit {asset.symbol}</h3>
-              <div className="mb-4">
-                <label className="block text-sm text-white/70 mb-2">Amount to Deposit</label>
-                <div className="p-[1px] rounded-md bg-gradient-to-r from-red-magic to-blue-magic">
-                  <div className="flex bg-[#250020] rounded-md overflow-hidden">
-                    <input
-                      type="text"
-                      placeholder="0.00"
-                      value={depositAmount}
-                      onChange={(e) => setDepositAmount(e.target.value)}
-                      className="bg-transparent flex-1 p-3 focus:outline-none text-white"
-                    />
-                    <button className="bg-[#1A0015] px-4 text-sm font-medium">MAX</button>
+            <div className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] max-w-md w-full">
+              <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden p-6">
+                {/* inner glow */}
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
+                
+                <h3 className="text-xl font-medium mb-4 relative z-10">Deposit {asset.symbol}</h3>
+                <div className="mb-4 relative z-10">
+                  <label className="block text-sm text-white/70 mb-2">Amount to Deposit</label>
+                  <div className="relative rounded-md p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent">
+                    <div className="flex bg-[#0B1324] border border-sky-400/20 rounded-md overflow-hidden">
+                      <input
+                        type="text"
+                        placeholder="0.00"
+                        value={depositAmount}
+                        onChange={(e) => setDepositAmount(e.target.value)}
+                        className="bg-transparent flex-1 p-3 focus:outline-none text-white"
+                      />
+                      <button className="bg-[#0A0F17] border-l border-sky-400/20 px-4 text-sm font-medium text-[#00A3FF] hover:bg-[#0B1324] transition-colors">MAX</button>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex gap-3 justify-end mt-6">
-                <GradientBorderButton onClick={() => setIsDepositModalOpen(false)}>
-                  Cancel
-                </GradientBorderButton>
-                <GradientBgButton onClick={handleDeposit}>
-                  Confirm
-                </GradientBgButton>
+                <div className="flex gap-3 justify-end mt-6 relative z-10">
+                  <button 
+                    onClick={() => setIsDepositModalOpen(false)}
+                    className="px-4 py-2 border border-red-500/50 text-white font-medium rounded-[30px] hover:bg-red-500/10 transition-all text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleDeposit}
+                    className="bg-gradient-to-r from-[#0066FF] to-[#00A3FF] text-white font-medium px-4 py-2 rounded-[30px] hover:from-[#0066FF] hover:to-[#00A3FF] hover:shadow-[0_0_20px_rgba(0,163,255,0.8),0_0_40px_rgba(0,163,255,0.4)] transition-all text-sm"
+                  >
+                    Confirm
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -105,23 +116,34 @@ const AssetRow = ({ asset, onDeposit, onWithdraw, depositData, isConnected }) =>
         {/* Withdraw Modal */}
         {isWithdrawModalOpen && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <div className="bg-[#1A0015] rounded-xl p-6 max-w-md w-full">
-              <h3 className="text-xl font-medium mb-4">Withdraw {asset.symbol}</h3>
-              <div className="mb-4">
-                <p className="text-white/70 mb-2">
-                  Available to withdraw: <span className="font-medium">{depositData?.amount || 0} {asset.symbol}</span>
-                </p>
-                <p className="text-sm text-white/50 mb-4">
-                  Withdrawing will reduce your position and stop earning APY on this amount.
-                </p>
-              </div>
-              <div className="flex gap-3 justify-end mt-6">
-                <GradientBorderButton onClick={() => setIsWithdrawModalOpen(false)}>
-                  Cancel
-                </GradientBorderButton>
-                <GradientBgButton onClick={handleWithdraw}>
-                  Withdraw All
-                </GradientBgButton>
+            <div className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] max-w-md w-full">
+              <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden p-6">
+                {/* inner glow */}
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
+                
+                <h3 className="text-xl font-medium mb-4 relative z-10">Withdraw {asset.symbol}</h3>
+                <div className="mb-4 relative z-10">
+                  <p className="text-white/70 mb-2">
+                    Available to withdraw: <span className="font-medium">{depositData?.amount || 0} {asset.symbol}</span>
+                  </p>
+                  <p className="text-sm text-white/50 mb-4">
+                    Withdrawing will reduce your position and stop earning APY on this amount.
+                  </p>
+                </div>
+                <div className="flex gap-3 justify-end mt-6 relative z-10">
+                  <button 
+                    onClick={() => setIsWithdrawModalOpen(false)}
+                    className="px-4 py-2 border border-red-500/50 text-white font-medium rounded-[30px] hover:bg-red-500/10 transition-all text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleWithdraw}
+                    className="bg-gradient-to-r from-[#0066FF] to-[#00A3FF] text-white font-medium px-4 py-2 rounded-[30px] hover:from-[#0066FF] hover:to-[#00A3FF] hover:shadow-[0_0_20px_rgba(0,163,255,0.8),0_0_40px_rgba(0,163,255,0.4)] transition-all text-sm"
+                  >
+                    Withdraw All
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -269,10 +291,11 @@ const LendingTable = ({ assets = [], isLoading = false }) => {
   // Loading state
   if (isLoading || !isClient) {
     return (
-      <div className="bg-gradient-to-r p-[1px] from-red-magic to-blue-magic rounded-xl overflow-hidden">
-        <div className="bg-[#1A0015] rounded-xl p-6 overflow-x-auto">
-          <div className="flex justify-center py-8">
-            <div className="animate-spin w-8 h-8 border-4 border-white/20 rounded-full border-t-[#E04C95]"></div>
+      <div className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] overflow-hidden">
+        <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden p-6 overflow-x-auto">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
+          <div className="flex justify-center py-8 relative z-10">
+            <div className="animate-spin w-8 h-8 border-4 border-white/20 rounded-full border-t-[#00A3FF]"></div>
           </div>
         </div>
       </div>
@@ -280,11 +303,15 @@ const LendingTable = ({ assets = [], isLoading = false }) => {
   }
   
   return (
-    <div className="bg-gradient-to-r p-[1px] from-red-magic to-blue-magic rounded-xl overflow-hidden">
-      <div className="bg-[#1A0015] rounded-xl p-4 overflow-x-auto">
+    <div className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] overflow-hidden">
+      <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden p-4 overflow-x-auto">
+        {/* inner glow */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
+        
+        <div className="relative z-10">
         <table className="w-full min-w-[800px]">
           <thead>
-            <tr className="border-b border-white/10">
+            <tr className="border-b border-sky-400/20">
               <th className="text-left py-4 px-4 font-display text-sm text-white/70">ASSET</th>
               <th className="text-left py-4 px-4 font-display text-sm text-white/70">APY</th>
               <th className="text-left py-4 px-4 font-display text-sm text-white/70">YOUR DEPOSIT</th>
@@ -316,21 +343,24 @@ const LendingTable = ({ assets = [], isLoading = false }) => {
         
         {/* Connection prompt */}
         {!isConnected && !isDev && (
-          <div className="mt-4 p-4 bg-[#250020] rounded-lg">
+          <div className="mt-4 p-4 bg-[#0B1324] border border-sky-400/20 rounded-lg relative z-10">
             <p className="text-center text-white/70 mb-2">Connect your wallet to see your deposits and start earning</p>
             <div className="flex justify-center">
-              <GradientBgButton onClick={() => {
-                // Show Ethereum wallet connection message
-                alert("Please connect your Ethereum wallet to continue");
-              }}>
+              <button 
+                onClick={() => {
+                  // Show Ethereum wallet connection message
+                  alert("Please connect your Ethereum wallet to continue");
+                }}
+                className="bg-gradient-to-r from-[#0066FF] to-[#00A3FF] text-white font-medium px-6 py-2 rounded-[30px] hover:from-[#0066FF] hover:to-[#00A3FF] hover:shadow-[0_0_20px_rgba(0,163,255,0.8),0_0_40px_rgba(0,163,255,0.4)] transition-all"
+              >
                 Connect Ethereum Wallet
-              </GradientBgButton>
+              </button>
             </div>
           </div>
         )}
         
         {isDev && (
-          <div className="mt-4 p-4 bg-[#250020] rounded-lg border border-yellow-600/30">
+          <div className="mt-4 p-4 bg-[#0B1324] border border-yellow-600/30 rounded-lg relative z-10">
             <p className="text-center text-white/70">
               <span className="bg-yellow-600/80 text-white text-xs px-2 py-1 rounded-md mr-2">
                 Dev Mode
@@ -339,6 +369,7 @@ const LendingTable = ({ assets = [], isLoading = false }) => {
             </p>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

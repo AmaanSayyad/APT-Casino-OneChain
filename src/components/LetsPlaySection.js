@@ -6,8 +6,8 @@ import { FaUsers, FaTrophy, FaCoins } from "react-icons/fa";
 export default function LetsPlaySection() {
   // Stats with animation
   const [stats, setStats] = useState([
-    { icon: <FaUsers className="text-red-magic" />, value: 0, target: 12000, label: "Players" },
-    { icon: <FaTrophy className="text-blue-magic" />, value: 0, target: 25000, label: "Winners" },
+    { icon: <FaUsers className="text-sky-400" />, value: 0, target: 12000, label: "Players" },
+    { icon: <FaTrophy className="text-blue-500" />, value: 0, target: 25000, label: "Winners" },
     { icon: <FaCoins className="text-yellow-400" />, value: 0, target: 1000000, label: "OCT Wagered" }
   ]);
   
@@ -29,15 +29,15 @@ export default function LetsPlaySection() {
     <section id="letsplay" className="relative py-24 md:py-32 px-4 sm:px-8 md:px-16 lg:px-24 xl:px-36 bg-hotline overflow-hidden">
       {/* Animated background patterns */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-red-magic/30 to-blue-magic/30"></div>
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-red-magic/20 animate-pulse"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-96 h-96 rounded-full bg-blue-magic/20 animate-pulse" style={{animationDelay: "1s"}}></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-sky-400/30 to-blue-500/30"></div>
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-sky-400/20 animate-pulse"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-96 h-96 rounded-full bg-blue-500/20 animate-pulse" style={{animationDelay: "1s"}}></div>
       </div>
       
       <div className="relative z-10 max-w-7xl mx-auto">
         <div className="font-display flex text-white flex-col text-center items-center gap-6 md:gap-8">
           {/* Main heading with gradient text */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-magic to-blue-magic">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-blue-500">
             APT-Casino
           </h1>
           
@@ -49,7 +49,7 @@ export default function LetsPlaySection() {
           </h2>
           
           {/* Stats section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-3xl my-8 bg-black/20 p-6 rounded-xl backdrop-blur-sm">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-3xl my-8 bg-[#0A0F17]/80 p-6 rounded-xl backdrop-blur-sm border border-sky-400/25">
             {stats.map((stat, index) => (
               <div key={index} className="flex flex-col items-center">
                 <div className="mb-2 text-2xl">{stat.icon}</div>

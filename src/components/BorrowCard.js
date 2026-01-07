@@ -1,7 +1,5 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import GradientBorderButton from './GradientBorderButton';
-import GradientBgButton from './GradientBgButton';
 import { useNotification } from './NotificationSystem';
 
 const BorrowCard = ({ asset }) => {
@@ -225,9 +223,10 @@ const BorrowCard = ({ asset }) => {
   
   if (!isClient) {
     return (
-      <div className="bg-gradient-to-r p-[1px] from-red-magic to-blue-magic rounded-xl">
-        <div className="bg-[#1A0015] rounded-xl p-6 h-full">
-          <div className="animate-pulse">
+      <div className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)]">
+        <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden p-6 h-full">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
+          <div className="animate-pulse relative z-10">
             <div className="h-6 w-32 bg-white/10 rounded mb-6"></div>
             <div className="h-10 w-full bg-white/10 rounded mb-6"></div>
             <div className="h-20 w-full bg-white/10 rounded mb-6"></div>
@@ -241,8 +240,12 @@ const BorrowCard = ({ asset }) => {
   }
   
   return (
-    <div className="bg-gradient-to-r p-[1px] from-red-magic to-blue-magic rounded-xl">
-      <div className="bg-[#1A0015] rounded-xl p-6 h-full">
+    <div className="relative rounded-2xl p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent shadow-[0_0_30px_rgba(30,123,255,0.22)] hover:shadow-[0_0_30px_rgba(0,163,255,0.6),0_0_30px_rgba(0,163,255,0.3)] transition-all duration-300">
+      <div className="relative bg-[#0A0F17] rounded-2xl border border-sky-400/25 overflow-hidden p-6 h-full">
+        {/* inner glow */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.12),transparent_60%)]"></div>
+        
+        <div className="relative z-10">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center">
             <div 
@@ -278,7 +281,7 @@ const BorrowCard = ({ asset }) => {
         
         {/* Borrowed amount (if any) */}
         {existingBorrow && (
-          <div className="mb-6 p-3 bg-[#250020] rounded-lg">
+          <div className="mb-6 p-3 bg-[#0B1324] border border-sky-400/20 rounded-lg">
             <p className="text-sm text-white/70 mb-1">Borrowed Amount</p>
             <div className="flex items-baseline">
               <span className="text-xl font-medium">{existingBorrow.amount}</span>
@@ -292,8 +295,8 @@ const BorrowCard = ({ asset }) => {
         
         <div className="mb-6">
           <label className="block text-sm text-white/70 mb-2">Amount to Borrow</label>
-          <div className="p-[1px] rounded-md bg-gradient-to-r from-red-magic to-blue-magic">
-            <div className="flex bg-[#250020] rounded-md overflow-hidden">
+          <div className="relative rounded-md p-[2px] bg-gradient-to-b from-sky-400/70 via-blue-500/30 to-transparent">
+            <div className="flex bg-[#0B1324] border border-sky-400/20 rounded-md overflow-hidden">
               <input
                 type="text"
                 placeholder="0.00"
@@ -303,7 +306,7 @@ const BorrowCard = ({ asset }) => {
                 disabled={!isConnected || isPending}
               />
               <button 
-                className="bg-[#1A0015] px-4 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-[#0A0F17] border-l border-sky-400/20 px-4 text-sm font-medium text-[#00A3FF] hover:bg-[#0B1324] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 onClick={handleMaxClick}
                 disabled={!isConnected || isPending || maxBorrowable <= 0}
               >
@@ -333,9 +336,10 @@ const BorrowCard = ({ asset }) => {
         </div>
         
         <div className="flex gap-3 justify-end mt-6">
-          <GradientBorderButton 
+          <button 
             onClick={handleRepay}
             disabled={!isConnected || !existingBorrow || isPending}
+            className="px-6 py-2 border border-red-500/50 text-white font-medium rounded-[30px] hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {isPending && existingBorrow ? (
               <span className="flex items-center">
@@ -345,11 +349,12 @@ const BorrowCard = ({ asset }) => {
             ) : (
               'Repay'
             )}
-          </GradientBorderButton>
+          </button>
           {isConnected ? (
-            <GradientBgButton 
+            <button 
               onClick={handleBorrow}
               disabled={!borrowAmount || parseFloat(borrowAmount) <= 0 || isPending}
+              className="bg-gradient-to-r from-[#0066FF] to-[#00A3FF] text-white font-medium px-6 py-2 rounded-[30px] hover:from-[#0066FF] hover:to-[#00A3FF] hover:shadow-[0_0_20px_rgba(0,163,255,0.8),0_0_40px_rgba(0,163,255,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isPending && !existingBorrow ? (
                 <span className="flex items-center">
@@ -359,11 +364,14 @@ const BorrowCard = ({ asset }) => {
               ) : (
                 'Borrow'
               )}
-            </GradientBgButton>
+            </button>
           ) : (
-            <GradientBgButton onClick={handleConnectWallet}>
+            <button 
+              onClick={handleConnectWallet}
+              className="bg-gradient-to-r from-[#0066FF] to-[#00A3FF] text-white font-medium px-6 py-2 rounded-[30px] hover:from-[#0066FF] hover:to-[#00A3FF] hover:shadow-[0_0_20px_rgba(0,163,255,0.8),0_0_40px_rgba(0,163,255,0.4)] transition-all"
+            >
               Connect Wallet
-            </GradientBgButton>
+            </button>
           )}
         </div>
         
@@ -399,6 +407,7 @@ const BorrowCard = ({ asset }) => {
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
