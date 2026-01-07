@@ -362,7 +362,7 @@ sequenceDiagram
 
 ## 🔗 Links
 
-- **Live Demo**: https://apt-casino-onechain.vercel.app
+- **Live Demo**: https://apt-casino-one-chain.vercel.app/
 - **Youtube Demo Link**: https://youtu.be/hVWe3uzHcOA
 - **Github Link**: https://github.com/AmaanSayyad/APT-Casino-OneChain 
 - **PitchDeck Link:** https://www.figma.com/deck/OXOSAPIzG0CJlKFDSepWZ8/APT-Casino-OneChain?node-id=1-1812&p=f&t=PPd57Zulv2qJt1bZ-1&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1 
