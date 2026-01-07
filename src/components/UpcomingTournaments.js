@@ -151,7 +151,7 @@ const UpcomingTournaments = () => {
                   </div>
                   
                   {/* Register button */}
-                  <button className="w-full rounded-full py-3 font-semibold text-white bg-[#00A3FF] hover:bg-[#0088DD] transition-all shadow-[0_0_22px_rgba(0,163,255,0.25)]">
+                  <button className="w-full rounded-full py-3 font-semibold text-white bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 transition-all shadow-[0_0_20px_rgba(56,189,248,0.3)] hover:shadow-[0_0_30px_rgba(56,189,248,0.5)]">
                     Register Now
                   </button>
                 </div>
