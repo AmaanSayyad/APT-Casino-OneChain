@@ -27,16 +27,16 @@ export const useSmartAccount = () => {
       setError(null);
 
       try {
-        // For Sui/One Chain, all accounts are regular accounts (not smart contracts)
+        // For One Chain, all accounts are regular accounts (not smart contracts)
         const accountInfo = {
           address,
-          type: 'Sui Account',
+          type: 'One Chain Account',
           isSmartAccount: false,
           features: {}
         };
         setSmartAccountInfo(accountInfo);
         setIsSmartAccount(false);
-        setCapabilities({ isSupported: false, capabilities: {}, provider: 'Sui' });
+        setCapabilities({ isSupported: false, capabilities: {}, provider: 'One Chain' });
 
         console.log('Account Info:', accountInfo);
       } catch (err) {
@@ -51,8 +51,8 @@ export const useSmartAccount = () => {
   }, [isConnected, address]);
 
   const enableSmartAccountFeatures = async () => {
-    // Not applicable for Sui accounts
-    console.log('Smart account features not available on Sui/One Chain');
+    // Not applicable for One Chain accounts
+    console.log('Smart account features not available on One Chain');
     return false;
   };
 

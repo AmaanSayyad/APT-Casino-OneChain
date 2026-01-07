@@ -15,11 +15,11 @@ const SmartAccountInfo = () => {
       if (!isConnected || !address) return;
 
       try {
-        // For Sui/One Chain, all accounts are regular accounts (not smart contracts)
+        // For One Chain, all accounts are regular accounts (not smart contracts)
         setIsSmartAccount(false);
         setSmartAccountInfo({
           address,
-          type: 'Sui Account',
+          type: 'One Chain Account',
           hasCode: false
         });
       } catch (error) {
@@ -42,7 +42,7 @@ const SmartAccountInfo = () => {
         </div>
         <div className="flex justify-between">
           <span className="text-gray-400">Type:</span>
-          <span className={`font-medium ${isSmartAccount ? 'text-blue-400' : 'text-green-400'}`}>
+          <span className={`font-medium ${isSmartAccount ? 'text-blue-400' : 'text-sky-400'}`}>
             {smartAccountInfo.type}
           </span>
         </div>
