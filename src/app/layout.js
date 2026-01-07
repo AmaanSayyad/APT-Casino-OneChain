@@ -10,14 +10,17 @@ import NetworkSwitcher from "@/components/NetworkSwitcher";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "APT Casino",
-  description: "APT Casino",
+  title: "OneArcade",
+  description: "OneArcade - On-chain provably fair gaming on One Chain Network",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
+        <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
         <link
           rel="preload"
           href="/fonts/ClashDisplay-Variable.woff2"
