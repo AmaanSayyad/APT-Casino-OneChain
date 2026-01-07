@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 import Logo from '../assets/frontend_resources/logos/onearcade-logo-horizontal.png';
 import OneChainLogo from '../assets/frontend_resources/logos/One.png';
 
-import { FaTwitter, FaDiscord, FaTelegramPlane, FaGithub, FaLock, FaShieldAlt } from 'react-icons/fa';
+import { FaLock, FaShieldAlt } from 'react-icons/fa';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -109,37 +109,37 @@ export default function Footer() {
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Twitter"
-                className="text-[#2F7BFF] hover:text-[#6AA6FF] transition-colors"
+                aria-label="X (Twitter)"
+                className="hover:opacity-80 transition-opacity"
               >
-                <FaTwitter size={22} />
+                <Image src="/icons/x.png" alt="X (Twitter)" width={22} height={22} />
               </a>
               <a
                 href="https://discord.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Discord"
-                className="text-[#2F7BFF] hover:text-[#6AA6FF] transition-colors"
+                className="hover:opacity-80 transition-opacity"
               >
-                <FaDiscord size={22} />
+                <Image src="/icons/discord.png" alt="Discord" width={22} height={22} />
               </a>
               <a
                 href="https://telegram.org"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Telegram"
-                className="text-[#2F7BFF] hover:text-[#6AA6FF] transition-colors"
+                className="hover:opacity-80 transition-opacity"
               >
-                <FaTelegramPlane size={22} />
+                <Image src="/icons/telegram.png" alt="Telegram" width={22} height={22} />
               </a>
               <a
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub"
-                className="text-[#2F7BFF] hover:text-[#6AA6FF] transition-colors"
+                className="hover:opacity-80 transition-opacity"
               >
-                <FaGithub size={22} />
+                <Image src="/icons/github.png" alt="GitHub" width={22} height={22} />
               </a>
               <a
                 href="https://youtube.com"

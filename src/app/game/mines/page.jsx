@@ -12,7 +12,7 @@ import MinesLeaderboard from "./components/MinesLeaderboard.jsx";
 import MinesStrategyGuide from "./components/MinesStrategyGuide.jsx";
 import { gameData, bettingTableData, gameStatistics, winProbabilities } from "./config/gameDetail.jsx";
 import { manualFormConfig, autoFormConfig } from "./config/formConfig.jsx";
-import { FaCrown, FaHistory, FaTrophy, FaInfoCircle, FaChartLine, FaBomb, FaDiscord, FaTelegram, FaTwitter, FaDice, FaCoins, FaChevronDown } from "react-icons/fa";
+import { FaCrown, FaHistory, FaTrophy, FaInfoCircle, FaChartLine, FaBomb, FaDice, FaCoins, FaChevronDown } from "react-icons/fa";
 import { GiMining, GiDiamonds, GiCardRandom, GiMineExplosion, GiCrystalGrowth, GiChestArmor, GiGoldBar } from "react-icons/gi";
 import { HiLightningBolt, HiOutlineTrendingUp, HiOutlineChartBar } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
