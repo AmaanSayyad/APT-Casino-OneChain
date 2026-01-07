@@ -12,7 +12,8 @@
   }
 
   .bg-hotline {
-    background: url("/images/HotlineMiami.png");
+    /* Background image removed per design update */
+    background: transparent;
   }
 
   .smooth-gradient {
@@ -29,4 +30,78 @@
   .smooth-gradient:hover {
     box-shadow: 0 0px 0px 0 rgba(49, 196, 190, 0.75);
   }
+}
+
+/* OneArcade ConnectButton Dropdown Styling */
+/* Target @mysten/dapp-kit ConnectButton dropdown */
+[data-radix-popper-content-wrapper] > div,
+[data-radix-portal] > div > div,
+div[class*="ConnectButton"] > div[class*="Content"],
+div[class*="wallet-kit"] {
+  background-color: #0A0F17 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.2) !important;
+  padding: 0.5rem !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* Dropdown menu items */
+[data-radix-popper-content-wrapper] button,
+[data-radix-popper-content-wrapper] [role="menuitem"],
+[data-radix-portal] button,
+div[class*="ConnectButton"] button,
+div[class*="wallet-kit"] button {
+  color: white !important;
+  background-color: transparent !important;
+  border-radius: 0.5rem !important;
+  padding: 0.75rem 1rem !important;
+  transition: all 0.2s ease !important;
+  border: none !important;
+}
+
+[data-radix-popper-content-wrapper] button:hover,
+[data-radix-popper-content-wrapper] [role="menuitem"]:hover,
+[data-radix-portal] button:hover,
+div[class*="ConnectButton"] button:hover,
+div[class*="wallet-kit"] button:hover {
+  background-color: rgba(56, 189, 248, 0.1) !important;
+  color: #38bdf8 !important;
+}
+
+/* Selected/active item */
+[data-radix-popper-content-wrapper] button[aria-checked="true"],
+[data-radix-popper-content-wrapper] [role="menuitem"][aria-checked="true"],
+[data-radix-portal] button[aria-checked="true"] {
+  background-color: rgba(56, 189, 248, 0.15) !important;
+  color: #38bdf8 !important;
+}
+
+/* Disconnect button - target last item or button containing "Disconnect" */
+[data-radix-popper-content-wrapper] button:last-child,
+[data-radix-popper-content-wrapper] [role="menuitem"]:last-child,
+[data-radix-portal] button:last-child {
+  border-top: 1px solid rgba(56, 189, 248, 0.2) !important;
+  margin-top: 0.5rem !important;
+  padding-top: 0.75rem !important;
+}
+
+/* Wallet address display in dropdown */
+[data-radix-popper-content-wrapper] [class*="address"],
+[data-radix-popper-content-wrapper] [class*="wallet"],
+[data-radix-portal] [class*="address"],
+div[class*="ConnectButton"] [class*="address"] {
+  color: #cbd5e1 !important;
+  font-family: monospace !important;
+}
+
+/* Text content in dropdown */
+[data-radix-popper-content-wrapper] *,
+[data-radix-portal] * {
+  color: white !important;
+}
+
+[data-radix-popper-content-wrapper] button *,
+[data-radix-portal] button * {
+  color: inherit !important;
 }
