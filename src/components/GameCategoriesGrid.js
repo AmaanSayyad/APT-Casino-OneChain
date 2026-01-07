@@ -45,7 +45,7 @@ const GameCategoriesGrid = () => {
     <section className="py-16 px-4 md:px-8 lg:px-16">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center mb-8">
-          <div className="w-1 h-6 bg-gradient-to-r from-red-magic to-blue-magic rounded-full mr-3"></div>
+          <div className="w-1 h-6 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full mr-3"></div>
           <h2 className="text-2xl font-display font-bold text-white">Game Categories</h2>
         </div>
         
@@ -53,13 +53,13 @@ const GameCategoriesGrid = () => {
           {categories.map((category) => (
             <Link href={`/game/${category.name.toLowerCase().replace(/\s+/g, '-')}`} key={category.id}>
               <div 
-                className="p-[1px] bg-gradient-to-r from-red-magic to-blue-magic rounded-xl h-full cursor-pointer transform transition-all duration-300 hover:scale-[1.02]"
+                className="p-[1px] bg-gradient-to-r from-sky-400 to-blue-500 rounded-xl h-full cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(56,189,248,0.3)]"
                 onMouseEnter={() => setHoveredId(category.id)}
                 onMouseLeave={() => setHoveredId(null)}
               >
-                <div className="bg-[#1A0015] rounded-xl h-full overflow-hidden relative">
+                <div className="bg-[#0A0F17] rounded-xl h-full overflow-hidden relative border border-sky-400/10">
                   {/* Placeholder for background image */}
-                  <div className="absolute inset-0 bg-[#300030] opacity-40"></div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-sky-900/20 to-blue-900/20 opacity-40"></div>
                   
                   {/* Category content */}
                   <div className="relative p-6 h-full flex flex-col justify-between">
@@ -70,14 +70,14 @@ const GameCategoriesGrid = () => {
                       </div>
                       
                       {/* Placeholder for category icon */}
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-red-magic/80 to-blue-magic/80 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-sky-400/80 to-blue-500/80 flex items-center justify-center shadow-[0_0_15px_rgba(56,189,248,0.3)]">
                         <span className="text-white font-medium">{category.name.charAt(0)}</span>
                       </div>
                     </div>
                     
                     <div className="mt-6 flex justify-between items-center">
                       <span className="text-white/60 text-sm">{category.gameCount} Games</span>
-                      <span className={`text-white/90 flex items-center transform transition-all duration-300 ${
+                      <span className={`text-sky-400 flex items-center transform transition-all duration-300 font-medium ${
                         hoveredId === category.id ? 'translate-x-1' : ''
                       }`}>
                         Play Now 
@@ -96,8 +96,8 @@ const GameCategoriesGrid = () => {
         <div className="mt-10 text-center">
           <Link href="/game">
             <div className="inline-block">
-              <div className="p-[1px] bg-gradient-to-r from-red-magic to-blue-magic rounded-md inline-block">
-                <button className="bg-[#1A0015] hover:bg-[#250020] transition-colors text-white font-display px-8 py-3 rounded-md flex items-center">
+              <div className="p-[1px] bg-gradient-to-r from-sky-400 to-blue-500 rounded-md inline-block">
+                <button className="bg-[#0A0F17] hover:bg-[#0B1324] transition-colors text-white font-display px-8 py-3 rounded-md flex items-center border border-sky-400/10">
                   View All Games
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />

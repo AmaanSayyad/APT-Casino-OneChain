@@ -8,7 +8,7 @@ const NewsUpdates = () => {
     {
       id: 1,
       title: 'New Token Bridge Partnership with One Chain Network',
-      excerpt: 'APT Casino partners with One Chain Network to provide seamless cross-chain token transfers with lower fees.',
+      excerpt: 'OneArcade partners with One Chain Network to provide seamless cross-chain token transfers with lower fees.',
       date: '2025-05-08',
       category: 'Partnership',
       image: '/images/news/partnership.png',
@@ -35,7 +35,7 @@ const NewsUpdates = () => {
     {
       id: 4,
       title: 'Security Audit Completed by Certik',
-      excerpt: 'APT Casino\'s smart contracts have passed rigorous security auditing by Certik with high scores.',
+      excerpt: 'OneArcade\'s smart contracts have passed rigorous security auditing by Certik with high scores.',
       date: '2025-05-02',
       category: 'Security',
       image: '/images/news/security.png',

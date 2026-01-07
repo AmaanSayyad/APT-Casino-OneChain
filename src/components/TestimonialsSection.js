@@ -10,7 +10,7 @@ const TestimonialsSection = () => {
       name: 'Michael T.',
       avatar: '/images/avatars/avatar1.png',
       rating: 5,
-              text: 'APT Casino offers the most transparent gaming experience I\'ve found on One Chain Network. The provably fair system gives me confidence that games are legitimate, and I\'ve already won over 500 OCT tokens!',
+      text: 'OneArcade offers the most transparent gaming experience I\'ve found on One Chain Network. The provably fair system gives me confidence that games are legitimate, and I\'ve already won over 500 OCT tokens!',
       game: 'Roulette',
       amount: 520
     },
