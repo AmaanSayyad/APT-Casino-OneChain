@@ -183,24 +183,25 @@ const MostPlayed = () => {
   const currentFeaturedGame = featuredGames[featuredGameIndex];
   
   return (
-    <section className="container mx-auto px-4 pt-4 pb-16 relative">
-      {/* Background accents */}
-      <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-blue-magic/5 blur-[100px] z-0"></div>
-      <div className="absolute top-1/3 left-1/4 w-60 h-60 rounded-full bg-red-magic/5 blur-[80px] z-0"></div>
+    <section className="relative">
+      {/* Background accents - Subtle */}
+      <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-sky-500/3 blur-[120px] z-0 pointer-events-none"></div>
+      <div className="absolute top-1/3 left-1/4 w-72 h-72 rounded-full bg-blue-500/3 blur-[100px] z-0 pointer-events-none"></div>
       
-      <div className="mb-12 text-center max-w-3xl mx-auto">
+      <div className="relative z-10 mb-10 md:mb-14 text-center max-w-3xl mx-auto">
         <HeaderText
-          header="Popular Casino Games"
-          description="Experience our most played games with the highest win rates and biggest payouts"
+          header="All Games"
+          description="Browse our complete collection of provably fair games"
         />
       </div>
       
       {/* Featured Game Spotlight */}
       {currentFeaturedGame && (
-        <div className="mb-16 overflow-hidden">
-          <div className="p-[1px] bg-gradient-to-r from-red-magic to-blue-magic rounded-xl">
-            <div className="bg-black/80 rounded-xl p-4 md:p-6">
-              <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center">
+        <div className="relative z-10 mb-12 md:mb-16 overflow-hidden">
+          <div className="relative rounded-2xl overflow-hidden border border-sky-400/20 bg-black/40 backdrop-blur-sm">
+            <div className="absolute inset-0 bg-gradient-to-r from-sky-400/5 via-transparent to-blue-500/5"></div>
+            <div className="relative p-6 md:p-8">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-8 lg:gap-10 items-center">
                 <div className="md:w-1/3 relative">
                   <MagicBorder>
                     <div className="aspect-[4/3] w-full relative overflow-hidden rounded-lg">
@@ -212,7 +213,7 @@ const MostPlayed = () => {
                         className="rounded-lg object-cover"
                         style={{ objectFit: 'cover' }}
                       />
-                      <div className="absolute top-2 right-2 bg-gradient-to-r from-red-magic to-blue-magic text-white text-xs font-bold py-1 px-2 rounded-full flex items-center gap-1">
+                      <div className="absolute top-2 right-2 bg-gradient-to-r from-sky-400 to-blue-500 text-white text-xs font-bold py-1 px-2 rounded-full flex items-center gap-1">
                         <FaFire className="text-yellow-300" /> TOP PICK
                       </div>
                     </div>
@@ -220,37 +221,37 @@ const MostPlayed = () => {
                 </div>
                 
                 <div className="md:w-2/3 text-center md:text-left">
-                  <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
-                    <h3 className="font-display text-2xl md:text-3xl font-bold text-white">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
+                    <h3 className="font-display text-3xl md:text-4xl font-bold text-white">
                       {currentFeaturedGame.name}
                     </h3>
                     {/* Live indicator for specific games */}
                     {(currentFeaturedGame.name === 'Roulette' || currentFeaturedGame.name === 'Plinko' || currentFeaturedGame.name === 'Mines' || currentFeaturedGame.name === 'Spin Wheel') && (
-                      <div className="flex items-center gap-1.5 bg-green-900/30 border border-green-500/30 px-2 py-0.5 rounded-full">
+                      <div className="flex items-center gap-1.5 bg-green-900/30 border border-green-500/30 px-3 py-1 rounded-full">
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                         <span className="text-green-400 text-xs font-medium">LIVE</span>
                       </div>
                     )}
                   </div>
                   
-                  <div className="flex flex-wrap justify-center md:justify-start gap-4 mb-4">
-                    <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full text-sm">
-                      <FaUsers className="text-green-400" />
-                      <span>{currentFeaturedGame.players} Players</span>
+                  <div className="flex flex-wrap justify-center md:justify-start gap-3 mb-5">
+                    <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-lg text-sm">
+                      <FaUsers className="text-sky-400" />
+                      <span className="font-medium">{currentFeaturedGame.players} Players</span>
                     </div>
-                    <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full text-sm">
+                    <div className="flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-lg text-sm">
                       <FaTrophy className="text-yellow-400" />
-                      <span>{currentFeaturedGame.winRate} Win Rate</span>
+                      <span className="font-medium">{currentFeaturedGame.winRate} Win Rate</span>
                     </div>
                   </div>
                   
-                  <p className="text-white/80 mb-6 max-w-2xl">
+                  <p className="text-white/70 mb-6 max-w-2xl text-base leading-relaxed">
                     Experience the thrill of {currentFeaturedGame.name} - one of our most popular games. 
                     Join hundreds of players who are winning big with provably fair gameplay.
                   </p>
                   
                   <Link href={typeof currentFeaturedGame.link === 'string' ? currentFeaturedGame.link : `/game/${currentFeaturedGame.name.toLowerCase().replace(/\s+/g, '-')}`}>
-                    <button className="bg-gradient-to-r from-red-magic to-blue-magic hover:from-blue-magic hover:to-red-magic transition-all duration-300 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2">
+                    <button className="bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 transition-all duration-300 text-white px-8 py-3.5 rounded-full font-semibold flex items-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.4)] hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] transform hover:scale-105">
                       Play {currentFeaturedGame.name} Now <FaChevronRight />
                     </button>
                   </Link>
@@ -262,15 +263,15 @@ const MostPlayed = () => {
       )}
       
       {/* Game Filters */}
-      <div className="flex flex-wrap justify-center gap-2 mb-8">
+      <div className="relative z-10 flex flex-wrap justify-center gap-2 md:gap-3 mb-8 md:mb-10">
         {filters.map(filter => (
           <button
             key={filter.id}
             onClick={() => setActiveFilter(filter.id)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
               activeFilter === filter.id
-                ? 'bg-gradient-to-r from-red-magic to-blue-magic text-white'
-                : 'bg-white/10 text-white/70 hover:bg-white/20'
+                ? 'bg-gradient-to-r from-sky-400 to-blue-500 text-white shadow-[0_0_20px_rgba(56,189,248,0.4)] scale-105'
+                : 'bg-white/5 backdrop-blur-sm border border-white/10 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/20'
             }`}
           >
             {filter.label}
@@ -279,8 +280,8 @@ const MostPlayed = () => {
       </div>
 
       {/* Games Grid with Loading State */}
-      <div className={`transition-opacity duration-300 ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 lg:gap-6">
+      <div className={`relative z-10 transition-opacity duration-300 ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5 lg:gap-6">
           {visibleGames.map((game, i) => (
             <div 
               key={i} 
@@ -300,23 +301,23 @@ const MostPlayed = () => {
                     />
                     
                     {/* Game metrics floating indicators */}
-                    <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm text-xs py-1 px-2 rounded-full flex items-center gap-1.5">
-                      <FaUsers className="text-green-400" />
-                      <span>{game.players}</span>
+                    <div className="absolute top-2 left-2 bg-black/80 backdrop-blur-sm border border-white/10 text-xs py-1.5 px-2.5 rounded-full flex items-center gap-1.5">
+                      <FaUsers className="text-sky-400" />
+                      <span className="text-white font-medium">{game.players}</span>
                     </div>
                     
                     {game.isHot && (
-                      <div className="absolute top-2 right-2 bg-gradient-to-r from-red-600 to-orange-500 text-white text-xs py-1 px-2 rounded-full flex items-center gap-1.5">
+                      <div className="absolute top-2 right-2 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs py-1 px-2 rounded-full flex items-center gap-1.5">
                         <FaFire className="text-yellow-300" /> HOT
                       </div>
                     )}
                     
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center">
-                        <span className="text-xs bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center gap-2">
+                        <span className="text-xs bg-white/10 backdrop-blur-sm border border-white/20 px-2.5 py-1 rounded-full font-medium">
                           {game.winRate} RTP
                         </span>
-                        <span className="bg-gradient-to-r from-red-magic to-blue-magic px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5">
+                        <span className="bg-gradient-to-r from-sky-400 to-blue-500 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-[0_0_15px_rgba(56,189,248,0.4)]">
                           <FaBolt /> PLAY
                         </span>
                       </div>
@@ -342,7 +343,7 @@ const MostPlayed = () => {
                       <FaStar key={i} className="text-yellow-400 text-[10px]" />
                     ))}
                   </div>
-                  <span className="mt-2 inline-block py-1 px-2 text-xs rounded-full bg-gradient-to-r from-red-magic to-blue-magic text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <span className="mt-2 inline-block py-1 px-2 text-xs rounded-full bg-gradient-to-r from-sky-400 to-blue-500 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     Play Now
                   </span>
                 </div>
@@ -360,7 +361,7 @@ const MostPlayed = () => {
           <p className="text-white/70 mb-4">Try selecting a different category</p>
           <button
             onClick={() => setActiveFilter("all")}
-            className="bg-gradient-to-r from-red-magic to-blue-magic text-white px-4 py-2 rounded-full text-sm"
+            className="bg-gradient-to-r from-sky-400 to-blue-500 text-white px-4 py-2 rounded-full text-sm shadow-[0_0_15px_rgba(56,189,248,0.3)]"
           >
             View All Games
           </button>
